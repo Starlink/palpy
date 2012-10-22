@@ -29,10 +29,10 @@ returns a simple dict that can be searched using standard python.
 The keys to the dict are the short names and the values are another
 dict with keys name, long, lat and height.
 
-See `test_pal.py` for detailed examples of all functions.
+See ``test_pal.py`` for detailed examples of all functions.
 
 Further Work
-------------
+----------
 
 Currently a handful of PAL routines are missing from the python interface.
 They can trivially be added when time is available and there is a demand.
