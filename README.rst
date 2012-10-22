@@ -5,7 +5,7 @@ PALpy is a python interface to the PAL positional astronomy library
 (<https://github.com/Starlink/pal>). All source code is included with
 the distribution via git submodules.
 
-To build the python interface from the git repository:
+To build the python interface from the git repository::
 
     git submodule init
     git submodule update
@@ -13,10 +13,10 @@ To build the python interface from the git repository:
     python setup.py install
     python test_pal.py
 
-Requires that cython and numpy are installed.
+Requires that Cython and numpy are installed.
 
 The interface uses the same names as the C interface with the pal
-prefix missing:
+prefix missing::
 
     import palpy as pal
 
