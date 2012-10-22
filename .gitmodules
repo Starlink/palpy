@@ -1,0 +1,6 @@
+[submodule "cextern/pal"]
+	path = cextern/pal
+	url = ../pal.git
+[submodule "cextern/sofa"]
+	path = cextern/sofa
+	url = ../sofa.git
