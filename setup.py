@@ -70,7 +70,7 @@ pal_c = (
 )
 
 # Build up source file list
-sources = [ "pal.pyx" ]
+sources = [ "cpal.pxd", "pal.pyx" ]
 
 # Sort out path to the C files
 for cfile in sofa_c:
@@ -85,6 +85,7 @@ setup(
     version = "1.0",
     author = "Tim Jenness",
     author_email = "tim.jenness@gmail.com",
+    url='https://github.com/Starlink/palpy',
     description = "PAL -- A Positional Astronomy Library",
     cmdclass = { 'build_ext': build_ext },
     ext_modules = [ Extension(
@@ -92,6 +93,17 @@ setup(
         sources=sources,
         include_dirs=['cextern/sofa/src', 'cextern/pal', numpy.get_include() ],
         language="c")
-    ]
+    ],
+    requires=[
+        'numpy',
+        'Cython'
+        ],
+    classifiers=[
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)'
+        'Programming Language :: Python',
+        'Programming Language :: C',
+        'Topic :: Scientific/Engineering :: Astronomy'
+        ]
 )
 
