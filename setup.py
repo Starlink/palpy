@@ -100,7 +100,7 @@ setup(
         ],
     classifiers=[
         'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)'
+        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
         'Programming Language :: Python',
         'Programming Language :: C',
         'Topic :: Scientific/Engineering :: Astronomy'
