@@ -1,2 +1,2 @@
-include README.md test_*.py
+include README.rst test_*.py
 recursive-include cextern *.c *.h
