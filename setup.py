@@ -79,6 +79,9 @@ for cfile in sofa_c:
 for cfile in pal_c:
     sources.append( os.path.join( 'cextern', 'pal', cfile ) )
 
+# Description
+with open('README.rst') as file:
+    long_description = file.read()
 
 setup(
     name = "palpy",
@@ -87,6 +90,7 @@ setup(
     author_email = "tim.jenness@gmail.com",
     url='https://github.com/Starlink/palpy',
     description = "PAL -- A Positional Astronomy Library",
+    long_description = long_description,
     cmdclass = { 'build_ext': build_ext },
     ext_modules = [ Extension(
         name="palpy",
