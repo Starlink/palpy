@@ -77,6 +77,21 @@ def aoppa(double date, double dut, double elongm, double phim,
           aoprms[i] = caoprms[i]
      return aoprms
 
+def aopqk(double rap, double dap, np.ndarray[double, ndim=1] aoprms not None):
+    cdef double aob
+    cdef double zob
+    cdef double hob
+    cdef double dob
+    cdef double rob
+    
+    cdef double caoprms[14]
+    for i in range(14):
+        caoprms[i]=aoprms[i]
+    
+    cpal.palAopqk(rap,dap,caoprms,&aob,&zob,&hob,&dob,&rob)
+    
+    return (aob,zob,hob,dob,rob)
+    
 def aoppat( double date, np.ndarray[double, ndim=1] aoprms not None ):
      # We can either copy the array or modify in place.
      # For now we return a new copy
@@ -703,6 +718,15 @@ def preces( sys, double ep0, double ep1, double ra, double dc ):
      cpal.palPreces( csys, ep0, ep1, &ra, &dc )
      return (ra, dc)
 
+def prenut( double epoch, double date):
+    cdef double crmatpn[3][3]
+    cpal.palPrenut( epoch, date, crmatpn )
+    cdef np.ndarray rmatpn = np.zeros( [3,3], dtype=np.float64 )
+    for i in range(3):
+        for j in range(3):
+            rmatpn[i,j]=crmatpn[i][j]
+    return rmatpn
+
 def pvobs( double p, double h, double stl ):
      cdef double cpv[6]
      cpal.palPvobs( p, h, stl, cpv )
@@ -711,6 +735,17 @@ def pvobs( double p, double h, double stl ):
           pv[i] = cpv[i]
      return pv
 
+def refco( double hm, double tdk, double pmb, double rh, double wl, double phi, double tlr, double eps):
+    cdef double refa
+    cdef double refb
+    cpal.palRefco(hm,tdk,pmb,rh,wl,phi,tlr,eps,&refa,&refb)
+    return (refa,refb)
+
+def refz( double zu, double refa, double refb ):
+    cdef double zr
+    cpal.palRefz(zu,refa,refb,&zr)
+    return zr
+    
 def rverot( double phi, double ra, double da, double st ):
      return cpal.palRverot( phi, ra, da, st )
 
