@@ -461,7 +461,28 @@ def ecmat( double date ):
                rmat[i,j] = crmat[i][j]
      return rmat
 
-# el2ue goes here
+def el2ue( double date, int jform, double epoch, double orbinc,
+            double anode, double perih, double aorq,  double e,
+            double aorl, double dm ):
+    cdef int jstat
+    cdef double cu[13]
+    cpal.palEl2ue( date, jform, epoch, orbinc, anode, perih, aorq,
+                    e, aorl, dm, cu, &jstat )
+    if jstat == -1:
+        raise ValueError( "Illegal jform" )
+    elif jstat == -2:
+        raise ValueError( "Illegal e" )
+    elif jstat == -3:
+        raise ValueError( "Illegal aorq" )
+    elif jstat == -4:
+        raise ValueError( "Illegal dm" )
+    elif jstat == -5:
+        raise ArithmeticError( "Numerical error" )
+
+    cdef np.ndarray u = np.zeros( [13], dtype=np.float64 )
+    for i in range(13):
+        u[i] = cu[i]
+    return u
 
 def epb( double date ):
      return cpal.palEpb(date)
@@ -713,17 +734,126 @@ def obs():
 def pa( double ha, double dec, double phi):
      return cpal.palPa( ha, dec, phi )
 
-# pertel goes here
+def pertel(int jform, double date0, double date1,
+            double epoch0, double orbi0, double anode0,
+            double perih0, double aorq0, double e0, double am0):
+    cdef double epoch1
+    cdef double orbi1
+    cdef double anode1
+    cdef double perih1
+    cdef double aorq1
+    cdef double e1
+    cdef double am1
+    cdef int jstat
 
-# pertue goes here
+    cpal.palPertel( jform, date0, date1,
+                    epoch0, orbi0, anode0, perih0, aorq0, e0, am0,
+                    &epoch1, &orbi1, &anode1, &perih1, &aorq1, &e1, &am1,
+                    &jstat )
+    if jstat == -1:
+        raise ValueError( "Illegal jform" )
+    elif jstat == -2:
+        raise ValueError( "Illegal e0" )
+    elif jstat == -3:
+        raise ValueError( "Illegal aorq0" )
+    elif jstat == -4:
+        raise ArithmeticError( "Internal error" )
+    elif jstat == -5:
+        raise ArithmeticError( "Numerical error" )
 
-# planel goes here
+    return ( epoch1, orbi1, anode1, perih1, aorq1, e1, am1 )
 
-# planet goes here
+def pertue( double date, np.ndarray[double, ndim=1] u not None ):
+    cdef double cu[13]
+    cdef int jstat
 
-# plante goes here
+    for i in range(13):
+        cu[i] = u[i]
 
-# plantu goes here
+    cpal.palPertue( date, cu, &jstat )
+
+    if jstat == -1:
+        raise ArithmeticError( "Numberical error" )
+
+    # We return the modified U and do not change in place
+    cdef np.ndarray u2 = np.zeros( [13], dtype=np.float64)
+    for i in range(13):
+        u2[i] = cu[i]
+    return u2
+
+def planel( double date, int jform, double epoch, double orbinc,
+            double anode, double perih, double aorq,  double e,
+            double aorl, double dm ):
+    cdef int jstat
+    cdef double cpv[6]
+    cpal.palPlanel( date, jform, epoch, orbinc, anode, perih, aorq,
+                    e, aorl, dm, cpv, &jstat )
+    if jstat == -1:
+        raise ValueError( "Illegal jform" )
+    elif jstat == -2:
+        raise ValueError( "Illegal e" )
+    elif jstat == -3:
+        raise ValueError( "Illegal aorq" )
+    elif jstat == -4:
+        raise ValueError( "Illegal dm" )
+    elif jstat == -5:
+        raise ArithmeticError( "Numerical error" )
+
+    cdef np.ndarray pv = np.zeros( [6], dtype=np.float64 )
+    for i in range(6):
+        pv[i] = cpv[i]
+    return pv
+
+def planet( double date, int planetnum ):
+    cdef int jstat
+    cdef double cpv[6]
+    cpal.palPlanet( date, planetnum, cpv, &jstat )
+    if jstat == -2:
+        raise ArithmeticError( "Solution didn't converge" )
+    elif jstat == -1:
+        raise ValueError( "Illegal planet number "+str(planetnum)+", must be in range (1-8)" )
+
+    cdef np.ndarray pv = np.zeros( [6], dtype=np.float64 )
+    for i in range(6):
+        pv[i] = cpv[i]
+    return pv
+
+def plante( double date, double elong, double phi, int jform,
+            double epoch, double orbinc, double anode, double perih,
+            double aorq, double e, double aorl, double dm ):
+    cdef double ra
+    cdef double dec
+    cdef double r
+    cdef int jstat
+
+    cpal.palPlante(date, elong, phi, jform, epoch, orbinc, anode, perih, aorq,e, aorl, dm, &ra, &dec, &r, &jstat)
+    if jstat == -1:
+        raise ValueError( "Illegal jform" )
+    elif jstat == -2:
+        raise ValueError( "Illegal e" )
+    elif jstat == -3:
+        raise ValueError( "Illegal aorq" )
+    elif jstat == -4:
+        raise ValueError( "Illegal dm" )
+    elif jstat == -5:
+        raise ArithmeticError( "Numerical error" )
+    return (ra, dec, r)
+
+def plantu( double date, double elong, double phi, np.ndarray[double, ndim=1] u not None):
+    cdef double ra
+    cdef double dec
+    cdef double r
+    cdef int jstat
+    cdef double cu[13]
+
+    for i in range(13):
+        cu[i] = u[i]
+    cpal.palPlantu( date, elong, phi, cu, &ra, &dec, &r, &jstat )
+    if jstat == -1:
+        raise ValueError( "Radius vector zero" )
+    elif jstat == -2:
+        raise ArithmeticError( "Failed to converge" )
+    return (ra, dec, r )
 
 def pm( double r0, double d0, double pr, double pd,
         double px, double rv, double ep0, double ep1 ):
@@ -765,9 +895,50 @@ def prenut( double epoch, double date):
             rmatpn[i,j]=crmatpn[i][j]
     return rmatpn
 
-# pv2el goes here
+def pv2el(np.ndarray[double, ndim=1] pv not None, double date, double pmass, int jformr):
+    cdef int jform
+    cdef double epoch
+    cdef double orbinc
+    cdef double anode
+    cdef double perih
+    cdef double aorq
+    cdef double e
+    cdef double aorl
+    cdef double dm
+    cdef int jstat
+    cdef double cpv[6]
 
-# pv2ue goes here
+    for i in range(6):
+        cpv[i] = pv[i]
+    cpal.palPv2el( cpv, date, pmass, jformr, &jform, &epoch, &orbinc, &anode, &perih,
+                   &aorq, &e, &aorl, &dm, &jstat )
+    if jstat == -1:
+        raise ValueError( "Illegal PMASS" )
+    elif jstat == -2:
+        raise ValueError( "Illegal JFORMR" )
+    elif jstat == -3:
+        raise ValueError( "Position/velocity out of range" )
+    return (jform, epoch, orbinc, anode, perih, aorq, e, aorl, dm)
+
+def pv2ue( np.ndarray[double, ndim=1] pv not None, double date, double pmass ):
+    cdef int jstat
+    cdef double cu[13]
+    cdef double cpv[6]
+
+    for i in range(6):
+        cpv[i] = pv[i]
+    cpal.palPv2ue( cpv, date, pmass, cu, &jstat )
+    if jstat == -1:
+        raise ValueError( "Illegal PMASS" )
+    elif jstat == -2:
+        raise ValueError( "Too close to Sun" )
+    elif jstat == -3:
+        raise ValueError( "Too slow" )
+
+    cdef np.ndarray u = np.zeros( [13], dtype=np.float64 )
+    for i in range(13):
+        u[i] = cu[i]
+    return u
 
 def pvobs( double p, double h, double stl ):
      cdef double cpv[6]
@@ -777,7 +948,12 @@ def pvobs( double p, double h, double stl ):
           pv[i] = cpv[i]
      return pv
 
-# rdplan goes here
+def rdplan( double date, int np, double elong, double phi ):
+    cdef double ra
+    cdef double dec
+    cdef double diam
+    cpal.palRdplan( date, np, elong, phi, &ra, &dec, &diam )
+    return (ra, dec, diam)
 
 def refco( double hm, double tdk, double pmb, double rh, double wl, double phi, double tlr, double eps):
     cdef double refa
@@ -840,6 +1016,51 @@ def supgal( double dsl, double dsb ):
      cpal.palSupgal( dsl, dsb, &dl, &db )
      return (dl, db)
 
- # ue2el goes here
+def ue2el(np.ndarray[double, ndim=1] u not None, int jformr ):
+    cdef int jform
+    cdef double epoch
+    cdef double orbinc
+    cdef double anode
+    cdef double perih
+    cdef double aorq
+    cdef double e
+    cdef double aorl
+    cdef double dm
+    cdef int jstat
+    cdef double cu[13]
 
- # ue2pv goes here
+    for i in range(13):
+        cu[i] = u[i]
+    cpal.palUe2el( cu, jformr, &jform, &epoch, &orbinc, &anode, &perih,
+                   &aorq, &e, &aorl, &dm, &jstat )
+    if jstat == -1:
+        raise ValueError( "Illegal combined mass" )
+    elif jstat == -2:
+        raise ValueError( "Illegal jformr" )
+    elif jstat == -3:
+        raise ValueError( "Position/velocity out of range")
+    return (jform, epoch, orbinc, anode, perih, aorq, e, aorl, dm)
+
+#  Note that u is updated and returned
+def ue2pv( double date, np.ndarray[double, ndim=1] u not None ):
+    cdef double cu[13]
+    cdef double cpv[6]
+    cdef int jstat
+
+    for i in range(13):
+        cu[i] = u[i]
+    cpal.palUe2pv( date, cu, cpv, &jstat )
+    if jstat == -1:
+        raise ValueError( "Radius vector zero" )
+    elif jstat == -2:
+        raise ArithmeticError( "Failed to converge" )
+
+    # We need to return a completely new updated U
+    # rather than overwrite in place
+    cdef np.ndarray u2 = np.zeros( [13], dtype=np.float64)
+    cdef np.ndarray pv = np.zeros( [6], dtype=np.float64)
+    for i in range(13):
+        u2[i] = cu[i]
+    for i in range(6):
+        pv[i] = cpv[i]
+    return (u2, pv)

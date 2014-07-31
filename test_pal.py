@@ -516,7 +516,180 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( pal.pa( 0, 0.789, 0.789 ), 0, 12 )
 
     def test_planet(self):
-        pass
+        # palEl2ue
+        u = pal.el2ue( 50000, 1, 49000, 0.1, 2, 0.2,
+                       3, 0.05, 3, 0.003312 )
+        expectedue1 = np.array([1.000878908362435284,  -0.3336263027874777288,  50000.,
+                2.840425801310305210,   0.1264380368035014224, -0.2287711835229143197,
+                -0.01301062595106185195, 0.5657102158104651697,  0.2189745287281794885,
+                2.852427310959998500,  -0.01552349065435120900,
+                50000., 0.0])
+        np.testing.assert_allclose( u, expectedue1, atol=1e-12 )
+
+        # palPertel
+        (epoch, orbinc, anode, perih, aorq, e, aorl) = pal.pertel(2, 43000., 43200., 43000.,
+                                                                  0.2, 3, 4, 5, 0.02, 6)
+        self.assertAlmostEqual( epoch, 43200, 10 )
+        self.assertAlmostEqual( orbinc, 0.1995661466545422381, 7 )
+        self.assertAlmostEqual( anode, 2.998052737821591215, 7 )
+        self.assertAlmostEqual( perih, 4.009516448441143636, 6 )
+        self.assertAlmostEqual( aorq, 5.014216294790922323, 7 )
+        self.assertAlmostEqual( e, 0.02281386258309823607, 7 )
+        self.assertAlmostEqual( aorl, 0.01735248648779583748, 6 )
+
+        # palPertue
+        unew = pal.pertue( 50100, u )
+        expectedue3 = np.array([
+            1.000000000000000,
+            -0.3329769417028020949,
+            50100.,
+            2.638884303608524597,
+            1.070994304747824305,
+            0.1544112080167568589,
+            -0.2188240619161439344,
+            0.5207557453451906385,
+            0.2217782439275216936,
+            2.852118859689216658,
+            0.01452010174371893229,
+            50100., 0. ])
+        np.testing.assert_allclose( unew, expectedue3, atol=1e-12 )
+
+        # palPlanel
+        pv = pal.planel( 50600, 2, 50500, 0.1, 3, 5, 2, 0.3, 4, 0 )
+        expectedpv2 = np.array ([1.947628959288897677,
+            -1.013736058752235271,
+            -0.3536409947732733647,
+            2.742247411571786194e-8,
+            1.170467244079075911e-7,
+            3.709878268217564005e-8])
+        np.testing.assert_allclose( pv, expectedpv2, atol=1e-12 )
+
+        # palPlanet
+        self.assertRaises( ValueError, pal.planet, 1e6, 0 )
+        self.assertRaises( ValueError, pal.planet, 1e6, 9 )
+
+        pv = pal.planet( -320000, 3 )
+        self.assertAlmostEqual( pv[0], 0.9308038666827242603, 11)
+        self.assertAlmostEqual( pv[1], 0.3258319040252137618, 11)
+        self.assertAlmostEqual( pv[2], 0.1422794544477122021, 11)
+        self.assertAlmostEqual( pv[3], -7.441503423889371696e-8, 17)
+        self.assertAlmostEqual( pv[4], 1.699734557528650689e-7, 17)
+        self.assertAlmostEqual( pv[5], 7.415505123001430864e-8, 17)
+
+        pv = pal.planet( 43999.9, 1 )
+        self.assertAlmostEqual( pv[0], 0.2945293959257422246, 11)
+        self.assertAlmostEqual( pv[1], -0.2452204176601052181, 11)
+        self.assertAlmostEqual( pv[2], -0.1615427700571978643, 11)
+        self.assertAlmostEqual( pv[3], 1.636421147459047057e-7, 18)
+        self.assertAlmostEqual( pv[4], 2.252949422574889753e-7, 18)
+        self.assertAlmostEqual( pv[5], 1.033542799062371839e-7, 18)
+
+        # palPlante
+        (ra, dec, r) = pal.plante( 50600., -1.23, 0.456, 2, 50500.,
+                                   0.1, 3., 5., 2., 0.3, 4., 0.0 )
+        self.assertAlmostEqual( ra, 6.222958101333794007, 6 )
+        self.assertAlmostEqual( dec, 0.01142220305739771601, 6 )
+        self.assertAlmostEqual( r, 2.288902494080167624, 8 )
+
+        # palPlantu
+        u = np.array( [1.0005, -0.3, 55000., 2.8, 0.1, -0.2,
+                       -0.01, 0.5, 0.22, 2.8, -0.015, 55001., 0.0] )
+        (ra, dec, r) = pal.plantu( 55001., -1.23, 0.456, u )
+        self.assertAlmostEqual( ra, 0.3531814831241686647, 6 )
+        self.assertAlmostEqual( dec, 0.06940344580567131328, 6 )
+        self.assertAlmostEqual( r, 3.031687170873274464, 8 )
+
+        # palPv2el
+        pv = np.array( [ 0.3, -0.2, 0.1, -0.9e-7, 0.8e-7, -0.7e-7 ] )
+        (jform, epoch, orbinc, anode, perih, aorq, e, aorl, dm ) = pal.pv2el( pv, 50000, 0.00006, 1 )
+        self.assertEqual( jform, 1 )
+        self.assertAlmostEqual( epoch, 50000, 10 )
+        self.assertAlmostEqual( orbinc, 1.52099895268912, 12 )
+        self.assertAlmostEqual( anode, 2.720503180538650, 12 )
+        self.assertAlmostEqual( perih, 2.194081512031836, 12 )
+        self.assertAlmostEqual( aorq, 0.2059371035373771, 12 )
+        self.assertAlmostEqual( e, 0.9866822985810528, 12 )
+        self.assertAlmostEqual( aorl, 0.2012758344836794, 12 )
+        self.assertAlmostEqual( dm, 0.184074050795182, 12 )
+
+        # palPv2ue
+        expectedue2 = np.array( [1.00006, -4.856142884511782, 50000., 0.3, -0.2,
+                                0.1,  -0.4520378601821727,  0.4018114312730424,
+                                -.3515850023639121, 0.3741657386773941,
+                                -0.2511321445456515, 50000., 0.] )
+        u = pal.pv2ue( pv, 50000., 0.00006 )
+        np.testing.assert_allclose( u, expectedue2, atol=1e-12 )
+
+        # Planets
+        (ra, dec, diam) = pal.rdplan( 40999.9, 0, 0.1, -0.9 )
+        self.assertAlmostEqual( ra, 5.772270359389275837, 6 )
+        self.assertAlmostEqual( dec, -0.2089207338795416192, 7 )
+        self.assertAlmostEqual( diam, 9.415338935229717875e-3, 10 )
+
+        (ra, dec, diam) = pal.rdplan( 41999.9, 1, 1.1, -0.9 )
+        self.assertAlmostEqual( ra, 3.866363420052936653, 6 )
+        self.assertAlmostEqual( dec, -0.2594430577550113130, 7 )
+        self.assertAlmostEqual( diam, 4.638468996795023071e-5, 14 )
+
+        (ra, dec, diam) = pal.rdplan( 42999.9, 2, 2.1, 0.9 )
+        self.assertAlmostEqual( ra, 2.695383203184077378, 6 )
+        self.assertAlmostEqual( dec, 0.2124044506294805126, 7 )
+        self.assertAlmostEqual( diam, 4.892222838681000389e-5, 14 )
+
+        (ra, dec, diam) = pal.rdplan( 43999.9, 3, 3.1, 0.9 )
+        self.assertAlmostEqual( ra, 2.908326678461540165, 6 )
+        self.assertAlmostEqual( dec, 0.08729783126905579385, 7 )
+        self.assertAlmostEqual( diam, 8.581305866034962476e-3, 7 )
+
+        (ra, dec, diam) = pal.rdplan( 44999.9, 4, -0.1, 1.1 )
+        self.assertAlmostEqual( ra, 3.429840787472851721, 6 )
+        self.assertAlmostEqual( dec, -0.06979851055261161013, 7 )
+        self.assertAlmostEqual( diam, 4.540536678439300199e-5, 14 )
+
+        (ra, dec, diam) = pal.rdplan( 45999.9, 5, -1.1, 0.1 )
+        self.assertAlmostEqual( ra, 4.864669466449422548, 6 )
+        self.assertAlmostEqual( dec, -0.4077714497908953354, 7 )
+        self.assertAlmostEqual( diam, 1.727945579027815576e-4, 14 )
+
+        (ra, dec, diam) = pal.rdplan( 46999.9, 6, -2.1, -0.1 )
+        self.assertAlmostEqual( ra, 4.432929829176388766, 6 )
+        self.assertAlmostEqual( dec, -0.3682820877854730530, 7 )
+        self.assertAlmostEqual( diam, 8.670829016099083311e-5, 14 )
+
+        (ra, dec, diam) = pal.rdplan( 47999.9, 7, -3.1, -1.1 )
+        self.assertAlmostEqual( ra, 4.894972492286818487, 6 )
+        self.assertAlmostEqual( dec, -0.4084068901053653125, 7 )
+        self.assertAlmostEqual( diam, 1.793916783975974163e-5, 14 )
+
+        (ra, dec, diam) = pal.rdplan( 48999.9, 8, 0, 0 )
+        self.assertAlmostEqual( ra, 5.066050284760144000, 6 )
+        self.assertAlmostEqual( dec, -0.3744690779683850609, 7 )
+        self.assertAlmostEqual( diam, 1.062210086082700563e-5, 14 )
+
+        # palUe2el
+        (jform, epoch, orbinc, anode, perih, aorq, e, aorl, dm ) = pal.ue2el( u, 1 )
+        self.assertEqual( jform, 1 )
+        self.assertAlmostEqual( epoch, 50000.00, 10 )
+        self.assertAlmostEqual( orbinc, 1.520998952689120, 12 )
+        self.assertAlmostEqual( anode, 2.720503180538650, 12 )
+        self.assertAlmostEqual( perih, 2.194081512031836, 12 )
+        self.assertAlmostEqual( aorq, 0.2059371035373771, 12 )
+        self.assertAlmostEqual( e, 0.9866822985810528, 12 )
+        self.assertAlmostEqual( aorl, 0.2012758344836794, 12 )
+
+        # palUe2pv
+        (u2, pv) = pal.ue2pv( 50010., u )
+
+        # Update final two elements of the test UE array
+        expectedue2[11] = 50010.;
+        expectedue2[12] = 0.7194308220038886856;
+        np.testing.assert_allclose( u2, expectedue2, atol=1e-12 )
+
+        expectedpv = np.array( [
+            0.07944764084631667011, -0.04118141077419014775,
+            0.002915180702063625400, -0.6890132370721108608e-6,
+            0.4326690733487621457e-6, -0.1763249096254134306e-6 ] )
+        np.testing.assert_allclose( pv, expectedpv, atol=1e-12 )
 
     def test_pm(self):
         (ra, dec) = pal.pm( 5.43, -0.87, -0.33e-5, 0.77e-5, 0.7,

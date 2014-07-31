@@ -165,12 +165,12 @@ cdef extern from "pal.h":
     void palPreces ( char sys[3], double ep0, double ep1,
                      double *ra, double *dc )
     void palPrenut ( double epoch, double date, double rmatpn[3][3] )
-    #void palPv2el ( const double pv[6], double date, double pmass, int jformr,
-    #            int *jform, double *epoch, double *orbinc,
-    #            double *anode, double *perih, double *aorq, double *e,
-    #            double *aorl, double *dm, int *jstat )
-    #void palPv2ue ( const double pv[6], double date, double pmass,
-    #            double u[13], int *jstat )
+    void palPv2el ( const double pv[6], double date, double pmass, int jformr,
+                int *jform, double *epoch, double *orbinc,
+                double *anode, double *perih, double *aorq, double *e,
+                double *aorl, double *dm, int *jstat )
+    void palPv2ue ( const double pv[6], double date, double pmass,
+                double u[13], int *jstat )
     void palPvobs ( double p, double h, double stl, double pv[6] )
     void palRdplan ( double date, int np, double elong, double phi,
                  double *ra, double *dec, double *diam )
@@ -192,8 +192,8 @@ cdef extern from "pal.h":
     void palSubet ( double rc, double dc, double eq,
                 double *rm, double *dm )
     void palSupgal ( double dsl, double dsb, double *dl, double *db )
-    #void palUe2el ( const double u[13], int jformr,
-    #            int *jform, double *epoch, double *orbinc,
-    #            double *anode, double *perih, double *aorq, double *e,
-    #            double *aorl, double *dm, int *jstat )
+    void palUe2el ( const double u[13], int jformr,
+                int *jform, double *epoch, double *orbinc,
+                double *anode, double *perih, double *aorq, double *e,
+                double *aorl, double *dm, int *jstat )
     void palUe2pv ( double date, double u[13], double pv[], int *jstat )
