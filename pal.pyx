@@ -113,6 +113,13 @@ def aopqk(double rap, double dap, np.ndarray[double, ndim=1] aoprms not None):
 
     return (aob,zob,hob,dob,rob)
 
+def atmdsp(double tdk, double pmb, double rh, double wl1,
+                 double a1, double b1, double wl2):
+    cdef double a2
+    cdef double b2
+    cpal.palAtmdsp(tdk, pmb, rh, wl1, a1, b1, wl2, &a2, &b2)
+    return (a2, b2)
+
 def caldj( int iy, int im, int id ):
      cdef double djm
      cdef int j
@@ -778,11 +785,28 @@ def refco( double hm, double tdk, double pmb, double rh, double wl, double phi, 
     cpal.palRefco(hm,tdk,pmb,rh,wl,phi,tlr,eps,&refa,&refb)
     return (refa,refb)
 
-# refcoq goes here
+def refcoq( double tdk, double pmb, double rh, double wl):
+    cdef double refa
+    cdef double refb
+    cpal.palRefcoq( tdk, pmb, rh, wl, &refa, &refb )
+    return (refa, refb)
 
-# refro goes here
+def refro( double zobs, double hm, double tdk, double pmb,
+           double rh, double wl, double phi, double tlr, double eps):
+    cdef double ref
+    cpal.palRefro(zobs, hm, tdk, pmb, rh, wl, phi, tlr, eps, &ref)
+    return ref
 
-# refv goes here
+def refv( np.ndarray[ double, ndim=1] vu not None, double refa, double refb):
+    cdef double cvr[3]
+    cdef double cvu[3]
+    cdef np.ndarray vr = np.zeros( [3], dtype=np.float64)
+    for i in range(3):
+        cvu[i] = vu[i]
+    cpal.palRefv( cvu, refa, refb, cvr )
+    for i in range(3):
+        vr[i] = cvr[i]
+    return vr
 
 def refz( double zu, double refa, double refb ):
     cdef double zr

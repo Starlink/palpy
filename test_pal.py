@@ -572,6 +572,60 @@ class TestPAL(unittest.TestCase) :
     def test_ranorm(self):
         self.assertAlmostEqual( pal.dranrm( -0.1 ), 6.183185307179587, 12 )
 
+    def test_ref(self):
+        self.assertAlmostEqual( pal.refro(1.4, 3456.7, 280, 678.9, 0.9, 0.55,
+                                -0.3, 0.006, 1e-9 ),
+                                0.00106715763018568, 12 )
+        self.assertAlmostEqual( pal.refro(1.4, 3456.7, 280, 678.9, 0.9, 1000,
+                                -0.3, 0.006, 1e-9),
+                                0.001296416185295403, 12 )
+
+        (refa, refb) = pal.refcoq( 275.9, 709.3, 0.9, 101 )
+        self.assertAlmostEqual( refa, 2.324736903790639e-4, 12 )
+        self.assertAlmostEqual( refb, -2.442884551059e-7, 15 )
+
+        (refa, refb) = pal.refco( 2111.1, 275.9, 709.3, 0.9, 101,
+                                -1.03, 0.0067, 1e-12 )
+        self.assertAlmostEqual( refa, 2.324673985217244e-4, 12 )
+        self.assertAlmostEqual( refb, -2.265040682496e-7, 15 )
+
+        (refa, refb) = pal.refcoq( 275.9, 709.3, 0.9, 0.77 )
+        self.assertAlmostEqual( refa, 2.007406521596588e-4, 12 )
+        self.assertAlmostEqual( refb, -2.264210092590e-7, 15 )
+
+        (refa, refb) = pal.refco( 2111.1, 275.9, 709.3, 0.9, 0.77,
+                                -1.03, 0.0067, 1e-12 )
+        self.assertAlmostEqual( refa, 2.007202720084551e-4, 12 )
+        self.assertAlmostEqual( refb, -2.223037748876e-7, 15 )
+
+        (refa2, refb2) = pal.atmdsp( 275.9, 709.3, 0.9, 0.77,
+                                     refa, refb, 0.5 )
+        self.assertAlmostEqual( refa2, 2.034523658888048e-4, 12 )
+        self.assertAlmostEqual( refb2, -2.250855362179e-7, 15 )
+
+        vu = pal.dcs2c( 0.345, 0.456 )
+        vr = pal.refv( vu, refa, refb )
+        self.assertAlmostEqual( vr[0], 0.8447487047790478, 12 )
+        self.assertAlmostEqual( vr[1], 0.3035794890562339, 12 )
+        self.assertAlmostEqual( vr[2], 0.4407256738589851, 12 )
+
+        vu = pal.dcs2c( 3.7, 0.03 )
+        vr = pal.refv( vu, refa, refb )
+        self.assertAlmostEqual( vr[0], -0.8476187691681673, 12 )
+        self.assertAlmostEqual( vr[1], -0.5295354802804889, 12 )
+        self.assertAlmostEqual( vr[2], 0.0322914582168426, 12 )
+
+        zr = pal.refz( 0.567, refa, refb )
+        self.assertAlmostEqual( zr, 0.566872285910534, 12 )
+
+        zr = pal.refz( 1.55, refa, refb )
+        self.assertAlmostEqual( zr, 1.545697350690958, 12 )
+
+    def test_refc(self): # This is the SOFA test
+        (refa, refb) = pal.refcoq( 10.0+273.15, 800.0, 0.9, 0.4)
+        self.assertAlmostEqual( refa, 0.2264949956241415009e-3, 15 )
+        self.assertAlmostEqual( refb, -0.2598658261729343970e-6, 18 )
+
     def test_rv(self):
         self.assertAlmostEqual( pal.rverot( -0.777, 5.67, -0.3, 3.19 ),
                                  -0.1948098355075913, 6 )

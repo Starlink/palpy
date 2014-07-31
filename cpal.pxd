@@ -32,6 +32,8 @@ cdef extern from "pal.h":
     void palAopqk ( double rap, double dap, double aoprms[14],
                 double *aob, double *zob, double *hob,
                 double *dob, double *rob )
+    void palAtmdsp ( double tdk, double pmb, double rh, double wl1,
+                double a1, double b1, double wl2, double *a2, double *b2 )
     void palCaldj ( int iy, int im, int id, double *djm, int *j )
     void palCldj ( int iy, int im, int id, double *djm, int *j )
     void palDaf2r ( int ideg, int iamin, double asec, double *rad, int *j )
@@ -175,9 +177,12 @@ cdef extern from "pal.h":
     void palRefco ( double hm, double tdk, double pmb, double rh,
                 double wl, double phi, double tlr, double eps,
                 double *refa, double *refb )
+    void palRefcoq ( double tdk, double pmb, double rh, double wl,
+                double *refa, double *refb )
     void palRefro ( double zobs, double hm, double tdk, double pmb,
                 double rh, double wl, double phi, double tlr, double eps,
                 double *ref )
+    void palRefv ( double vu[3], double refa, double refb, double vr[3] )
     void palRefz ( double zu, double refa, double refb, double *zr )
     double palRverot ( double phi, double ra, double da, double st )
     double palRvgalc ( double r2000, double d2000 )
@@ -192,4 +197,3 @@ cdef extern from "pal.h":
     #            double *anode, double *perih, double *aorq, double *e,
     #            double *aorl, double *dm, int *jstat )
     void palUe2pv ( double date, double u[13], double pv[], int *jstat )
-
