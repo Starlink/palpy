@@ -1,8 +1,16 @@
 
 cdef extern from "palmac.h":
+    cdef double PAL__D2PI
+    cdef double PAL__DAS2R
     cdef double PAL__DD2R
-    cdef double PAL__DS2R
+    cdef double PAL__DH2R
     cdef double PAL__DPI
+    cdef double PAL__DPIBY2
+    cdef double PAL__DR2AS
+    cdef double PAL__DR2D
+    cdef double PAL__DR2H
+    cdef double PAL__DR2S
+    cdef double PAL__DS2R
 
 cdef extern from "pal.h":
     void palAddet ( double rm, double dm, double eq, double *rc, double *dc )

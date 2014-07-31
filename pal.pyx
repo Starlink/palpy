@@ -1,5 +1,6 @@
 
 # Copyright (C) 2012 Tim Jenness and Science and Technology
+# Copyright (C) 2014 Tim Jenness
 # Facilities Council.
 
 # This program is free software; you can redistribute it and/or
@@ -24,9 +25,17 @@ from libc.stdlib cimport malloc, free
 cimport numpy as np
 import numpy as np
 
-DS2R = cpal.PAL__DS2R
-DPI = cpal.PAL__DPI
+D2PI = cpal.PAL__D2PI
+DAS2R = cpal.PAL__DAS2R
 DD2R = cpal.PAL__DD2R
+DH2R = cpal.PAL__DH2R
+DPI = cpal.PAL__DPI
+DPIBY2 = cpal.PAL__DPIBY2
+DR2AS = cpal.PAL__DR2AS
+DR2D = cpal.PAL__DR2D
+DR2H = cpal.PAL__DR2H
+DR2S = cpal.PAL__DR2S
+DS2R = cpal.PAL__DS2R
 
 def addet( double rm, double dm, double eq ):
      cdef double rc
