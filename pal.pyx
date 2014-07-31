@@ -86,21 +86,6 @@ def aoppa(double date, double dut, double elongm, double phim,
           aoprms[i] = caoprms[i]
      return aoprms
 
-def aopqk(double rap, double dap, np.ndarray[double, ndim=1] aoprms not None):
-    cdef double aob
-    cdef double zob
-    cdef double hob
-    cdef double dob
-    cdef double rob
-    
-    cdef double caoprms[14]
-    for i in range(14):
-        caoprms[i]=aoprms[i]
-    
-    cpal.palAopqk(rap,dap,caoprms,&aob,&zob,&hob,&dob,&rob)
-    
-    return (aob,zob,hob,dob,rob)
-    
 def aoppat( double date, np.ndarray[double, ndim=1] aoprms not None ):
      # We can either copy the array or modify in place.
      # For now we return a new copy
@@ -112,6 +97,21 @@ def aoppat( double date, np.ndarray[double, ndim=1] aoprms not None ):
      for i in range(14):
           result[i] = caoprms[i]
      return result
+
+def aopqk(double rap, double dap, np.ndarray[double, ndim=1] aoprms not None):
+    cdef double aob
+    cdef double zob
+    cdef double hob
+    cdef double dob
+    cdef double rob
+
+    cdef double caoprms[14]
+    for i in range(14):
+        caoprms[i]=aoprms[i]
+
+    cpal.palAopqk(rap,dap,caoprms,&aob,&zob,&hob,&dob,&rob)
+
+    return (aob,zob,hob,dob,rob)
 
 def caldj( int iy, int im, int id ):
      cdef double djm
@@ -237,6 +237,22 @@ def dd2tf( int ndp, double days ):
      sign = csign.decode('UTF-8')
      return ( sign, ihmsf[0], ihmsf[1], ihmsf[2], ihmsf[3] )
 
+def de2h( double ha, double dec, double phi ):
+     cdef double az
+     cdef double el
+     cpal.palDe2h( ha, dec, phi, &az, &el )
+     return (az, el)
+
+# deuler() goes here
+
+# dfltin() not implemented -- not necessary for python
+
+def dh2e( double az, double el, double phi ):
+     cdef double ha
+     cdef double dec
+     cpal.palDh2e( az, el, phi, &ha, &dec )
+     return (ha, dec)
+
 def djcal( int ndp, double djm ):
      cdef int iymdf[4]
      cdef int j
@@ -313,18 +329,6 @@ def dmat( np.ndarray[double, ndim=2] a not None,
           free(cy)
           raise ArithmeticError( "Matrix is singular" )
 
-def de2h( double ha, double dec, double phi ):
-     cdef double az
-     cdef double el
-     cpal.palDe2h( ha, dec, phi, &az, &el )
-     return (az, el)
-
-def dh2e( double az, double el, double phi ):
-     cdef double ha
-     cdef double dec
-     cpal.palDh2e( az, el, phi, &ha, &dec )
-     return (ha, dec)
-
 def dmoon( double date ):
      cdef double cpv[6]
      cpal.palDmoon( date, cpv )
@@ -383,6 +387,9 @@ def dsepv( np.ndarray[double, ndim=1] v1 not None, np.ndarray[double, ndim=1] v2
      result = cpal.palDsepv( cv1, cv2 )
      return result
 
+def dt( double epoch ):
+     return cpal.palDt( epoch )
+
 def dtf2d( int ihour, int imin, double sec ):
      cdef double days
      cdef int j
@@ -435,9 +442,6 @@ def dtps2c( double xi, double eta, double ra, double dec ):
      else:
           return (raz1, decz1, raz2, decz2 )
 
-def dt( double epoch ):
-     return cpal.palDt( epoch )
-
 def dtt( double dju ):
      return cpal.palDtt( dju )
 
@@ -449,6 +453,8 @@ def ecmat( double date ):
           for j in range(3):
                rmat[i,j] = crmat[i][j]
      return rmat
+
+# el2ue goes here
 
 def epb( double date ):
      return cpal.palEpb(date)
@@ -468,6 +474,8 @@ def epj( double date ):
 
 def epj2d( double epj ):
      return cpal.palEpj2d(epj)
+
+# epv goes here
 
 def eqecl( double dr, double dd, double date ):
      cdef double dl
@@ -492,6 +500,8 @@ def etrms( double ep ):
           ev[i] = cev[i]
      return ev
 
+# evp goes here
+
 def fk45z( double r1950, double d1950, double bepoch ):
      cdef double r2000
      cdef double d2000
@@ -511,12 +521,6 @@ def fk524( double r2000, double d2000, double dr2000,
                     &p1950, &v1950 )
      return (r1950, d1950, dr1950, dd1950, p1950, v1950 )
 
-def fk5hz( double r5, double d5, double epoch):
-     cdef double rh
-     cdef double dh
-     cpal.palFk5hz( r5, d5, epoch, &rh, &dh )
-     return (rh, dh)
-
 def fk54z(double r2000, double d2000, double bepoch):
      cdef double r1950
      cdef double d1950
@@ -525,6 +529,12 @@ def fk54z(double r2000, double d2000, double bepoch):
      cpal.palFk54z( r2000, d2000, bepoch, &r1950, &d1950,
                     &dr1950, &dd1950 )
      return (r1950, d1950, dr1950, dd1950 )
+
+def fk5hz( double r5, double d5, double epoch):
+     cdef double rh
+     cdef double dh
+     cpal.palFk5hz( r5, d5, epoch, &rh, &dh )
+     return (rh, dh)
 
 def galeq( double dl, double db ):
      cdef double dr
@@ -639,6 +649,29 @@ def nutc( double date):
      cpal.palNutc( date, &dpsi, &deps, &eps0 )
      return (dpsi, deps, eps0)
 
+def oap( type, double ob1, double ob2, double date,
+         double dut, double elongm, double phim, double hm,
+         double xp, double yp, double tdk, double pmb,
+         double rh, double wl, double tlr ):
+     cdef double rap
+     cdef double dap
+     byte_string = type.encode('ascii')
+     cdef char * ctype = byte_string
+     cpal.palOap( ctype, ob1, ob2, date, dut, elongm, phim,
+                  hm, xp, yp, tdk, pmb, rh, wl, tlr, &rap, &dap )
+     return ( rap, dap )
+
+def oapqk( type, double ob1, double ob2, np.ndarray[double, ndim=1] aoprms not None ):
+     cdef double rap
+     cdef double dap
+     byte_string = type.encode('ascii')
+     cdef char * ctype = byte_string
+     cdef double caoprms[14]
+     for i in range(14):
+          caoprms[i] = aoprms[i]
+     cpal.palOapqk( ctype, ob1, ob2, caoprms, &rap, &dap )
+     return ( rap, dap )
+
 # Numeric lookup is only useful when scanning through the
 # list of telescopes. The python interface does not need this.
 # Instead obs() returns a dict (which may be a bit less efficient
@@ -670,31 +703,20 @@ def obs():
 
      return result
 
-def oap( type, double ob1, double ob2, double date,
-         double dut, double elongm, double phim, double hm,
-         double xp, double yp, double tdk, double pmb,
-         double rh, double wl, double tlr ):
-     cdef double rap
-     cdef double dap
-     byte_string = type.encode('ascii')
-     cdef char * ctype = byte_string
-     cpal.palOap( ctype, ob1, ob2, date, dut, elongm, phim,
-                  hm, xp, yp, tdk, pmb, rh, wl, tlr, &rap, &dap )
-     return ( rap, dap )
-
-def oapqk( type, double ob1, double ob2, np.ndarray[double, ndim=1] aoprms not None ):
-     cdef double rap
-     cdef double dap
-     byte_string = type.encode('ascii')
-     cdef char * ctype = byte_string
-     cdef double caoprms[14]
-     for i in range(14):
-          caoprms[i] = aoprms[i]
-     cpal.palOapqk( ctype, ob1, ob2, caoprms, &rap, &dap )
-     return ( rap, dap )
-
 def pa( double ha, double dec, double phi):
      return cpal.palPa( ha, dec, phi )
+
+# pertel goes here
+
+# pertue goes here
+
+# planel goes here
+
+# planet goes here
+
+# plante goes here
+
+# plantu goes here
 
 def pm( double r0, double d0, double pr, double pd,
         double px, double rv, double ep0, double ep1 ):
@@ -736,6 +758,10 @@ def prenut( double epoch, double date):
             rmatpn[i,j]=crmatpn[i][j]
     return rmatpn
 
+# pv2el goes here
+
+# pv2ue goes here
+
 def pvobs( double p, double h, double stl ):
      cdef double cpv[6]
      cpal.palPvobs( p, h, stl, cpv )
@@ -744,17 +770,25 @@ def pvobs( double p, double h, double stl ):
           pv[i] = cpv[i]
      return pv
 
+# rdplan goes here
+
 def refco( double hm, double tdk, double pmb, double rh, double wl, double phi, double tlr, double eps):
     cdef double refa
     cdef double refb
     cpal.palRefco(hm,tdk,pmb,rh,wl,phi,tlr,eps,&refa,&refb)
     return (refa,refb)
 
+# refcoq goes here
+
+# refro goes here
+
+# refv goes here
+
 def refz( double zu, double refa, double refb ):
     cdef double zr
     cpal.palRefz(zu,refa,refb,&zr)
     return zr
-    
+
 def rverot( double phi, double ra, double da, double st ):
      return cpal.palRverot( phi, ra, da, st )
 
@@ -770,8 +804,6 @@ def rvlsrd( double r2000, double d2000 ):
 def rvlsrk( double r2000, double d2000 ):
      return cpal.palRvlsrk( r2000, d2000 )
 
-
-
 def subet( double rc, double dc, double eq ):
      cdef double rm
      cdef double dm
@@ -783,3 +815,7 @@ def supgal( double dsl, double dsb ):
      cdef double db
      cpal.palSupgal( dsl, dsb, &dl, &db )
      return (dl, db)
+
+ # ue2el goes here
+
+ # ue2pv goes here
