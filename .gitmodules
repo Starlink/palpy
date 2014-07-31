@@ -1,6 +1,6 @@
 [submodule "cextern/pal"]
 	path = cextern/pal
 	url = ../pal.git
-[submodule "cextern/sofa"]
-	path = cextern/sofa
-	url = ../sofa.git
+[submodule "cextern/erfa"]
+	path = cextern/erfa
+	url = git@github.com:liberfa/erfa.git

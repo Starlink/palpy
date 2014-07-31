@@ -508,7 +508,7 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( mmt["lat"], 0.5530735081550342238, 10 )
         self.assertAlmostEqual( mmt["height"], 2608, 10 )
 
-        self.assertEqual( len(obsdata), 83 )
+        self.assertEqual( len(obsdata), 85 )
 
     def test_pa(self):
         self.assertAlmostEqual( pal.pa( -1.567, 1.5123, 0.987 ),
