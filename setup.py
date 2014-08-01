@@ -92,6 +92,7 @@ setup(
     version = "1.1",
     author = "Tim Jenness",
     author_email = "tim.jenness@gmail.com",
+    license="GPL",
     url='https://github.com/Starlink/palpy',
     description = "PAL -- A Positional Astronomy Library",
     long_description = long_description,
@@ -109,8 +110,12 @@ setup(
     classifiers=[
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+        'Programming Language :: Cython',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Programming Language :: C',
+        'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: Scientific/Engineering :: Astronomy'
         ]
 )
