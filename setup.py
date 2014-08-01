@@ -89,7 +89,7 @@ with open('README.rst') as file:
 
 setup(
     name = "palpy",
-    version = "1.0",
+    version = "1.1",
     author = "Tim Jenness",
     author_email = "tim.jenness@gmail.com",
     url='https://github.com/Starlink/palpy',
