@@ -504,6 +504,23 @@ def epj2d( double epj ):
      return cpal.palEpj2d(epj)
 
 # epv goes here
+def epv( double date ):
+    cdef double cph[3]
+    cdef double cvh[3]
+    cdef double cpb[3]
+    cdef double cvb[3]
+    cpal.palEpv( date, cph, cvh, cpb, cvb )
+
+    cdef np.ndarray ph = np.zeros( [3], dtype=np.float64 )
+    cdef np.ndarray vh = np.zeros( [3], dtype=np.float64 )
+    cdef np.ndarray pb = np.zeros( [3], dtype=np.float64 )
+    cdef np.ndarray vb = np.zeros( [3], dtype=np.float64 )
+    for i in range(3):
+        ph[i] = cph[i]
+        vh[i] = cvh[i]
+        pb[i] = cpb[i]
+        vb[i] = cvb[i]
+    return (ph, vh, pb, vb)
 
 def eqecl( double dr, double dd, double date ):
      cdef double dl
@@ -528,7 +545,23 @@ def etrms( double ep ):
           ev[i] = cev[i]
      return ev
 
-# evp goes here
+def evp(double date, double deqx):
+    cdef double cdvb[3]
+    cdef double cdpb[3]
+    cdef double cdvh[3]
+    cdef double cdph[3]
+    cpal.palEvp( date, deqx, cdvb, cdpb, cdvh, cdph )
+
+    cdef np.ndarray dvb = np.zeros( [3], dtype=np.float64 )
+    cdef np.ndarray dpb = np.zeros( [3], dtype=np.float64 )
+    cdef np.ndarray dvh = np.zeros( [3], dtype=np.float64 )
+    cdef np.ndarray dph = np.zeros( [3], dtype=np.float64 )
+    for i in range(3):
+        dvb[i] = cdvb[i]
+        dpb[i] = cdpb[i]
+        dvh[i] = cdvh[i]
+        dph[i] = cdph[i]
+    return (dvb, dpb, dvh, dph)
 
 def fk45z( double r1950, double d1950, double bepoch ):
      cdef double r2000

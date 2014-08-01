@@ -347,7 +347,43 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( ev[2], -1.435296627515719e-7, 18 )
 
     def test_evp(self):
-        pass
+        vbex = np.array([ 1.6957348127008098514e-07,
+                         -9.1093446116039685966e-08,
+                         -3.9528532243991863036e-08 ])
+        pbex = np.array([-0.49771075259730546136,
+                         -0.80273812396332311359,
+                         -0.34851593942866060383])
+        vhex = np.array([ 1.6964379181455713805e-07,
+                         -9.1147224045727438391e-08,
+                         -3.9553158272334222497e-08])
+        phex = np.array([-0.50169124421419830639,
+                         -0.80650980174901798492,
+                          -0.34997162028527262212])
+
+        vbex2 = np.array([-0.0109187426811683,
+                          -0.0124652546173285,
+                          -0.0054047731809662])
+        pbex2 = np.array([-0.7714104440491060,
+                          +0.5598412061824225,
+                          +0.2425996277722475])
+        vhex2 = np.array([-0.0109189182414732,
+                          -0.0124718726844084,
+                          -0.0054075694180650])
+        phex2 = np.array([-0.7757238809297653,
+                          +0.5598052241363390,
+                          +0.2426998466481708])
+
+        (dvb, dpb, dvh, dph) = pal.evp( 2010.0, 2012.0 )
+        np.testing.assert_allclose( dvb, vbex, atol=1e-12 )
+        np.testing.assert_allclose( dpb, pbex, atol=1e-12 )
+        np.testing.assert_allclose( dvh, vhex, atol=1e-12 )
+        np.testing.assert_allclose( dph, phex, atol=1e-12 )
+
+        (dph, dvh, dpb, dvb) = pal.epv( 53411.52501161 )
+        np.testing.assert_allclose( dvb, vbex2, atol=1e-12 )
+        np.testing.assert_allclose( dpb, pbex2, atol=1e-12 )
+        np.testing.assert_allclose( dvh, vhex2, atol=1e-12 )
+        np.testing.assert_allclose( dph, phex2, atol=1e-12 )
 
     def test_fk45z(self):
         (r2000, d2000) = pal.fk45z( 1.2, -0.3, 1960 )
