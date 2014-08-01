@@ -31,17 +31,45 @@ dict with keys name, long, lat and height.
 
 See ``test_pal.py`` for detailed examples of all functions.
 
+Documentation:
+--------------
+
+The module provides documentation on how to use the perl interface
+to PAL. It does not contain information on how to use
+PAL itself.
+
+The basic PAL documentation can be found at
+
+ http://www.starlink.ac.uk/star/docs/sun267.htx/sun267.html
+
+For more information the SLA documentation provides much more
+detail:
+
+  http://www.starlink.ac.uk/star/docs/sun67.htx/sun67.html
+
+A description paper for PAL was published in the ADASS XXII
+conference proceedings:
+
+  http://adsabs.harvard.edu/abs/2013ASPC..475..307J
+
+Please consider citing this if you use PAL or palpy in your
+research.
+
 Further Work
 ----------
 
-Currently a handful of PAL routines are missing from the python interface.
-They can trivially be added when time is available and there is a demand.
-Furthermore not all the SLALIB routines are available from PAL.
+Documentation is missing from the Python description. Please
+look at the PAL C code for now but the intent is to add the
+API descriptions to the source (preferably dynamically).
+
+Not all the SLALIB routines are available from PAL.
 
 Author
 ------
 
+Copyright (C) 2012, 2014
 Tim Jenness (tim.jenness@gmail.com).
+All Rights Reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License as
