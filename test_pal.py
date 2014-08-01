@@ -491,7 +491,7 @@ class TestPAL(unittest.TestCase) :
         ] )
 
         rmatn = pal.nut( 46012.32 )
-        np.testing.assert_array_almost_equal( rmatn, expected, 3 )
+        np.testing.assert_array_almost_equal( rmatn, expected, decimal=3 )
 
         (dpsi, deps, eps0) = pal.nutc( 54388.0 )
         self.assertAlmostEqual( eps0, 0.4090749229387258204, 14 )
