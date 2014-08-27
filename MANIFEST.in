@@ -1,2 +1,2 @@
-include README.rst CHANGES.rst test_*.py
+include README.rst CHANGES.rst COPYING test_*.py
 recursive-include cextern *.c *.h
