@@ -956,5 +956,9 @@ class TestPAL(unittest.TestCase) :
         np.testing.assert_array_almost_equal( dv6, dvn_expected, decimal=12 )
         self.assertAlmostEqual( dvm, 1661.042127339937, 9 )
 
+        dv7 = pal.dvxv( dv6, dv1 )
+        dvxv_expected = np.array( [ 0.7767720597123304, -0.1645663574562769, -0.5093390925544726 ] )
+        np.testing.assert_array_almost_equal( dv7, dvxv_expected, decimal=12 )
+
 if __name__ == '__main__':
     unittest.main()

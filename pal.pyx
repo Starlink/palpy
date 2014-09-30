@@ -557,6 +557,20 @@ def dvn( np.ndarray[double, ndim=1] v not None):
         uv[i] = c_uv[i]
     return (uv, vm)
 
+def dvxv( np.ndarray[double, ndim=1] va not None, np.ndarray[double, ndim=1] vb not None):
+    cdef double c_va[3]
+    cdef double c_vb[3]
+    cdef double c_vc[3]
+    for i in range(3):
+        c_va[i] = va[i]
+        c_vb[i] = vb[i]
+    cpal.palDvxv( c_va, c_vb, c_vc )
+
+    cdef np.ndarray vc = np.zeros([3], dtype=np.float64)
+    for i in range(3):
+        vc[i] = c_vc[i]
+    return vc
+
 def ecmat( double date ):
      cdef double crmat[3][3]
      cpal.palEcmat( date, crmat )
