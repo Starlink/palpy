@@ -293,6 +293,21 @@ def dh2e( double az, double el, double phi ):
      cpal.palDh2e( az, el, phi, &ha, &dec )
      return (ha, dec)
 
+def dimxv( np.ndarray[double, ndim=2] dm not None, np.ndarray[double, ndim=1] va not None):
+     cdef double c_dm[3][3]
+     cdef double c_va[3]
+     cdef double c_vb[3]
+     for i in range(3):
+          for j in range(3):
+                c_dm[i][j] = dm[i][j]
+          c_va[i] = va[i]
+     cpal.palDimxv(c_dm, c_va, c_vb)
+
+     cdef np.ndarray vb = np.zeros([3], dtype=np.float64)
+     for i in range(3):
+          vb[i] = c_vb[i]
+     return vb
+
 def djcal( int ndp, double djm ):
      cdef int iymdf[4]
      cdef int j
