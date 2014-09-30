@@ -212,6 +212,19 @@ def dafin( string, int ipos ):
 def dat( double dju ):
      return cpal.palDat( dju )
 
+def dav2m( np.ndarray[double, ndim=1] axvec not None ):
+     cdef double c_rmat[3][3]
+     cdef double c_axvec[3]
+     for i in range(3):
+         c_axvec[i] = axvec[i]
+     cpal.palDav2m( c_axvec, c_rmat )
+
+     cdef np.ndarray rmat = np.zeros([3,3], dtype=np.float64)
+     for i in range(3):
+         for j in range(3):
+             rmat[i][j] = c_rmat[i][j]
+     return rmat
+
 def dbear( double a1, double b1, double a2, double b2 ):
      return cpal.palDbear( a1, b1, a2, b2 )
 

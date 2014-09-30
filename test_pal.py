@@ -905,7 +905,16 @@ class TestPAL(unittest.TestCase) :
         self.assertIsNone( dd02 )
 
     def test_vecmat(self):
-        pass
+        # Not everything is implemented here
+        dav = np.array( [ -0.123, 0.0987, 0.0654 ] )
+        dav2m_expected = np.array( [
+            [  0.9930075842721269,  0.05902743090199868, -0.1022335560329612 ],
+            [ -0.07113807138648245, 0.9903204657727545,  -0.1191836812279541 ],
+            [  0.09420887631983825, 0.1256229973879967,   0.9875948309655174 ],
+        ] )
+
+        drm1 = pal.dav2m( dav )
+        np.testing.assert_array_almost_equal( drm1, dav2m_expected, decimal=12 )
 
 
 if __name__ == '__main__':
