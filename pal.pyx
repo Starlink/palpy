@@ -423,6 +423,19 @@ def dmxv(np.ndarray[double, ndim=2] dm not None, np.ndarray[double, ndim=1] va n
           vb[i] = c_vb[i]
      return vb
 
+def dm2av(np.ndarray[double, ndim=2] rmat not None):
+    cdef double c_rmat[3][3]
+    cdef double c_axvec[3]
+    for i in range(3):
+        for j in range(3):
+            c_rmat[i][j] = rmat[i][j]
+    cpal.palDm2av( c_rmat, c_axvec )
+
+    cdef np.ndarray axvec = np.zeros([3], dtype=np.float64)
+    for i in range(3):
+        axvec[i] = c_axvec[i]
+    return axvec
+
 def dpav( np.ndarray[double, ndim=1] v1 not None, np.ndarray[double, ndim=1] v2 not None ):
      cdef double cv1[3]
      cdef double cv2[3]
