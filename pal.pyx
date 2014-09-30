@@ -355,6 +355,21 @@ def dmoon( double date ):
           pv[i] = cpv[i]
      return pv
 
+def dmxv(np.ndarray[double, ndim=2] dm not None, np.ndarray[double, ndim=1] va not None):
+     cdef double c_dm[3][3]
+     cdef double c_va[3]
+     cdef double c_vb[3]
+     for i in range(3):
+          for j in range(3):
+                c_dm[i][j] = dm[i][j]
+          c_va[i] = va[i]
+     cpal.palDmxv(c_dm, c_va, c_vb)
+
+     cdef np.ndarray vb = np.zeros([3], dtype=np.float64)
+     for i in range(3):
+          vb[i] = c_vb[i]
+     return vb
+
 def dpav( np.ndarray[double, ndim=1] v1 not None, np.ndarray[double, ndim=1] v2 not None ):
      cdef double cv1[3]
      cdef double cv2[3]
