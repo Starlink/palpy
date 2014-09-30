@@ -67,6 +67,18 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( pal.airmas( 1.2354 ),
                                 3.015698990074724, 11 );
 
+    def test_altaz(self):
+        (az, azd, azdd, el, eld, eldd, pa, pad, padd) = pal.altaz( 0.7, -0.7, -0.65 )
+        self.assertAlmostEqual( az, 4.400560746660174, 12 )
+        self.assertAlmostEqual( azd, -0.2015438937145421, 12 )
+        self.assertAlmostEqual( azdd, -0.4381266949668748, 13 )
+        self.assertAlmostEqual( el, 1.026646506651396, 12 )
+        self.assertAlmostEqual( eld, -0.7576920683826450, 13 )
+        self.assertAlmostEqual( eldd, 0.04922465406857453, 14 )
+        self.assertAlmostEqual( pa, 1.707639969653937, 12 )
+        self.assertAlmostEqual( pad, 0.4717832355365627, 13 )
+        self.assertAlmostEqual( padd, -0.2957914128185515, 13 )
+
     def test_amp(self):
         (rm, dm) = pal.amp( 2.345, -1.234, 50100., 1990. )
         self.assertAlmostEqual( rm, 2.344472180027961, 6 )
