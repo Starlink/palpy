@@ -932,6 +932,14 @@ class TestPAL(unittest.TestCase) :
         drm = pal.dmxm( drm2, drm1 )
         np.testing.assert_array_almost_equal( drm, dmxm_expected, decimal=12 )
 
+        dv1 = pal.dcs2c( 3.0123, -0.999 )
+        dcs2c_expected = np.array( [-0.5366267667260525, 0.06977111097651444, -0.8409302618566215] )
+        np.testing.assert_array_almost_equal( dv1, dcs2c_expected, decimal=12 )
+
+        dv2 = pal.dmxv( drm1, dv1 )
+        dv3 = pal.dmxv( drm2, dv2 )
+        dmxv_expected = np.array( [-0.7267487768696160, 0.5011537352639822, 0.4697671220397141] )
+        np.testing.assert_array_almost_equal( dv3, dmxv_expected, decimal=12 )
 
 if __name__ == '__main__':
     unittest.main()
