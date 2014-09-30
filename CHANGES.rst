@@ -1,3 +1,17 @@
+1.2
+
+- Include PAL v0.6+
+
+- Include ERFA v1.1.1
+
+- Submodules now use explicit https URLs to make them more robust
+  (especially when forking the repo) (thanks to Srini Chandrasekharan).
+
+- New interfaces added: altaz, dmxv (thanks to Srini Chandrasekharan
+  for those 2), dav2m, deuler, dmxm, dimxv, dm2av, dvn and dvxv.
+
+- Explicitly include GPLv3 text in distribution.
+
 1.1
 ---
 
