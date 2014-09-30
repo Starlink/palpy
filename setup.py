@@ -51,7 +51,7 @@ erfa_c = (
 
 pal_c = (
     "pal1Atms.c", "pal1Atmt.c", "palAddet.c", "palAirmas.c",
-    "palAmp.c", "palAmpqk.c", "palAop.c", "palAoppa.c",
+    "palAltaz.c", "palAmp.c", "palAmpqk.c", "palAop.c", "palAoppa.c",
     "palAoppat.c", "palAopqk.c", "palAtmdsp.c", "palCaldj.c",
     "palDafin.c", "palDat.c", "palDe2h.c", "palDeuler.c",
     "palDfltin.c", "palDh2e.c", "palDjcal.c", "palDmat.c",
