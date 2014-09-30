@@ -544,6 +544,19 @@ def dtps2c( double xi, double eta, double ra, double dec ):
 def dtt( double dju ):
      return cpal.palDtt( dju )
 
+def dvn( np.ndarray[double, ndim=1] v not None):
+    cdef double c_v[3]
+    cdef double c_uv[3]
+    cdef double vm
+    for i in range(3):
+        c_v[i] = v[i]
+    cpal.palDvn( c_v, c_uv, &vm )
+
+    cdef np.ndarray uv = np.zeros([3], dtype=np.float64)
+    for i in range(3):
+        uv[i] = c_uv[i]
+    return (uv, vm)
+
 def ecmat( double date ):
      cdef double crmat[3][3]
      cpal.palEcmat( date, crmat )
