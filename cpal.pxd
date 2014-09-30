@@ -50,8 +50,8 @@ cdef extern from "pal.h":
     void palDd2tf ( int ndp, double days, char *sign, int ihmsf[4] )
     void palDe2h ( double ha, double dec, double phi,
                    double *az, double *el )
-        #    void palDeuler ( const char *order, double phi, double theta, double psi,
-        #            double rmat[3][3] )
+    void palDeuler ( const char *order, double phi, double theta, double psi,
+                     double rmat[3][3] )
         #    void palDfltin ( const char string[], int *nstrt, double *dreslt, int *jflag )
     void palDh2e ( double az, double el, double phi, double *ha, double *dec)
     void palDimxv ( double dm[3][3], double va[3], double vb[3] )

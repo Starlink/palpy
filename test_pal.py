@@ -913,8 +913,16 @@ class TestPAL(unittest.TestCase) :
             [  0.09420887631983825, 0.1256229973879967,   0.9875948309655174 ],
         ] )
 
+        deuler_expected = np.array( [
+            [ -0.1681574770810878,  0.1981362273264315,  0.9656423242187410 ],
+            [ -0.2285369373983370,  0.9450659587140423, -0.2337117924378156 ],
+            [ -0.9589024617479674, -0.2599853247796050, -0.1136384607117296 ] ] )
+
         drm1 = pal.dav2m( dav )
         np.testing.assert_array_almost_equal( drm1, dav2m_expected, decimal=12 )
+
+        drm2 = pal.deuler( "YZY", 2.345, -0.333, 2.222 )
+        np.testing.assert_array_almost_equal( drm2, deuler_expected, decimal=12 )
 
 
 if __name__ == '__main__':

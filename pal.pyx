@@ -274,7 +274,16 @@ def de2h( double ha, double dec, double phi ):
      cpal.palDe2h( ha, dec, phi, &az, &el )
      return (az, el)
 
-# deuler() goes here
+def deuler( order, double phi, double theta, double psi ):
+    cdef double c_rmat[3][3]
+    byte_order = order.encode('ascii')
+    cdef char * c_order = byte_order
+    cpal.palDeuler( c_order, phi, theta, psi, c_rmat )
+    cdef np.ndarray rmat = np.zeros([3,3], dtype=np.float64)
+    for i in range(3):
+        for j in range(3):
+            rmat[i][j] = c_rmat[i][j]
+    return rmat
 
 # dfltin() not implemented -- not necessary for python
 
