@@ -15,6 +15,10 @@ cdef extern from "palmac.h":
 cdef extern from "pal.h":
     void palAddet ( double rm, double dm, double eq, double *rc, double *dc )
     double palAirmas ( double zd )
+    void palAltaz ( double ha, double dec, double phi,
+		double *az, double *azd, double *azdd,
+		double *el, double *eld, double *eldd,
+		double *pa, double *pad, double *padd )
     void palAmp ( double ra, double da, double date, double eq,
               double *rm, double *dm )
     void palAmpqk ( double ra, double da, double amprms[21],

@@ -44,6 +44,19 @@ def addet( double rm, double dm, double eq ):
 def airmas( double zd ):
      return cpal.palAirmas( zd )
 
+def altaz(double ha, double dec, double phi):
+     cdef double az
+     cdef double azd
+     cdef double azdd
+     cdef double el
+     cdef double eld
+     cdef double eldd
+     cdef double pa
+     cdef double pad
+     cdef double padd
+     cpal.palAltaz (ha, dec, phi, &az, &azd, &azdd, &el, &eld, &eldd, &pa, &pad, &padd )
+     return (az, azd, azdd, el, eld, eldd, pa, pad, padd )
+
 def amp( double ra, double da, double date, double eq):
      cdef double rm
      cdef double dm
