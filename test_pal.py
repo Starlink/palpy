@@ -918,11 +918,19 @@ class TestPAL(unittest.TestCase) :
             [ -0.2285369373983370,  0.9450659587140423, -0.2337117924378156 ],
             [ -0.9589024617479674, -0.2599853247796050, -0.1136384607117296 ] ] )
 
+        dmxm_expected = np.array( [
+            [ -0.09010460088585805,  0.3075993402463796,  0.9472400998581048 ],
+            [ -0.3161868071070688,   0.8930686362478707, -0.3200848543149236 ],
+            [ -0.9444083141897035,  -0.3283459407855694,  0.01678926022795169 ] ] )
+
         drm1 = pal.dav2m( dav )
         np.testing.assert_array_almost_equal( drm1, dav2m_expected, decimal=12 )
 
         drm2 = pal.deuler( "YZY", 2.345, -0.333, 2.222 )
         np.testing.assert_array_almost_equal( drm2, deuler_expected, decimal=12 )
+
+        drm = pal.dmxm( drm2, drm1 )
+        np.testing.assert_array_almost_equal( drm, dmxm_expected, decimal=12 )
 
 
 if __name__ == '__main__':
