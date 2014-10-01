@@ -1,9 +1,13 @@
 
 import os
 import numpy
+import re
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
+
+# Local code
+from support import sst2pydoc as sst
 
 erfa_c = (
     "a2af.c", "a2tf.c", "ab.c", "af2a.c", "anp.c", "anpm.c",
@@ -80,8 +84,35 @@ sources = [ "cpal.pxd", "pal.pyx" ]
 for cfile in erfa_c:
     sources.append( os.path.join( 'cextern', 'erfa', 'src', cfile ) )
 
+# Also read in prologues
+palprologs = {}
 for cfile in pal_c:
-    sources.append( os.path.join( 'cextern', 'pal', cfile ) )
+    palfile = os.path.join( 'cextern', 'pal', cfile )
+    sources.append( palfile )
+    prologs = sst.read_prologs( palfile )
+    palprologs.update(prologs)
+
+# Generate cpal.pxd
+paldoc_re = re.compile(r"@(pal.*)@")
+outfh = open("pal.pyx", "w", encoding="utf8")
+with open('pal.pyx.in') as file:
+    prevline = ""
+    for line in file.readlines():
+        match_paldoc = paldoc_re.search(line)
+        if match_paldoc is not None:
+            funcname = match_paldoc.group(1)
+            palpyname = funcname[3:].lower()
+            if funcname in palprologs:
+                info = palprologs[funcname]
+                line = info['purpose'] + "\n"
+                line = line + info['arguments'] + "\n"
+                if "notes" in info:
+                    line = line + info['notes'] + "\n"
+            else:
+                continue
+        outfh.write(line)
+
+outfh.close()
 
 # Description
 with open('README.rst') as file:
@@ -89,7 +120,7 @@ with open('README.rst') as file:
 
 setup(
     name = "palpy",
-    version = "1.1",
+    version = "1.2",
     author = "Tim Jenness",
     author_email = "tim.jenness@gmail.com",
     license="GPL",
