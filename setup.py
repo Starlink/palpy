@@ -2,6 +2,7 @@
 import os
 import numpy
 import re
+import codecs
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
@@ -94,8 +95,8 @@ for cfile in pal_c:
 
 # Generate cpal.pxd
 paldoc_re = re.compile(r"@(pal.*)@")
-outfh = open("pal.pyx", "w", encoding="utf8")
-with open('pal.pyx.in') as file:
+outfh = codecs.open("pal.pyx", "w", "utf8")
+with codecs.open('pal.pyx.in', 'r', 'utf8') as file:
     prevline = ""
     for line in file.readlines():
         match_paldoc = paldoc_re.search(line)
