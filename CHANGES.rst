@@ -1,4 +1,5 @@
 1.2
+---
 
 - Include PAL v0.6+
 
@@ -12,6 +13,13 @@
 
 - Explicitly include GPLv3 text in distribution.
 
+- New routine palvers() can be used to obtain the version
+  information of the underyling C PAL library.
+
+- Python docstring documentation is now included for all
+  palpy routines.
+
+
 1.1
 ---
 
@@ -23,7 +31,7 @@
 - New interfaces added for refraction and moving sources. The new
   functions are: epv, evp, el2ue, pertel, pertue, planel, planet,
   plante, plantu, pv2el, pv2ue, rdplan, ue2el, ue2pv, atmdsp,
-  refcoq, refro, refv, aopqk, prenut, prenut, refco and refz.
+  refcoq, refro, refv, aopqk, prenut, refco and refz.
   Thanks to Scott Daniel for adding the final four in that list.
 
 1.0
