@@ -67,6 +67,10 @@ def read_prologs( filename ):
         # End of a prolog. Must store the current dict
         if line.startswith("*-"):
             counter = 0
+            if len(heading):
+                # Flush current heading
+                prolog[heading] = content
+                content = ""
             name = prolog['name'].strip()
             results[name] = prolog
             prolog = None
