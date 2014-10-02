@@ -35,6 +35,24 @@ DR2H = cpal.PAL__DR2H
 DR2S = cpal.PAL__DR2S
 DS2R = cpal.PAL__DS2R
 
+def palvers():
+    """
+    versiondict = palvers()
+
+    Returns the version information from the underlying PAL C
+    library used to build palpy. Version information is returned in
+    a dict with keys:
+
+    verstring : Version in string form, e.g "1.6.2"
+    major : Major version number as integer, e.g. 1
+    minor : Minor version number as integer, e.g. 6
+    patchlevel : Patch level as integer, e.g. 2
+    """
+    return dict( { "verstring": @VERSTRING@,
+                    "major": @MAJOR_VERSION@,
+                    "minor": @MINOR_VERSION@,
+                    "patchlevel": @PATCH_VERSION@ } )
+
 def addet( double rm, double dm, double eq ):
      """
      (rc, dc) = addet( rm, dm, eq)

@@ -9,6 +9,7 @@ from Cython.Distutils import build_ext
 
 # Local code
 from support import sst2pydoc as sst
+from support import palvers
 
 erfa_c = (
     "a2af.c", "a2tf.c", "ab.c", "af2a.c", "anp.c", "anpm.c",
@@ -93,6 +94,9 @@ for cfile in pal_c:
     prologs = sst.read_prologs( palfile )
     palprologs.update(prologs)
 
+# And the version of the C PAL library
+(verstring, major, minor, patch) = palvers.read_pal_version()
+
 # Generate cpal.pxd
 paldoc_re = re.compile(r"@(pal.*)@")
 outfh = codecs.open("pal.pyx", "w", "utf8")
@@ -116,6 +120,15 @@ with codecs.open('pal.pyx.in', 'r', 'utf8') as file:
                 line = "\n".join(lines)
             else:
                 continue
+        elif line.count( "@"):
+            if line.count( "@VERSTRING@" ):
+                line = line.replace( "@VERSTRING@", '"'+verstring+'"')
+            if line.count( "@MAJOR_VERSION" ):
+                line = line.replace( "@MAJOR_VERSION@", str(major) )
+            if line.count( "@MINOR_VERSION@" ):
+                line = line.replace( "@MINOR_VERSION@", str(minor))
+            if line.count( "@PATCH_VERSION@" ):
+                line = line.replace( "@PATCH_VERSION@", str(patch))
         outfh.write(line)
 
 outfh.close()
