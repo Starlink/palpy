@@ -97,18 +97,23 @@ for cfile in pal_c:
 paldoc_re = re.compile(r"@(pal.*)@")
 outfh = codecs.open("pal.pyx", "w", "utf8")
 with codecs.open('pal.pyx.in', 'r', 'utf8') as file:
-    prevline = ""
     for line in file.readlines():
         match_paldoc = paldoc_re.search(line)
         if match_paldoc is not None:
+            lines = []
             funcname = match_paldoc.group(1)
             palpyname = funcname[3:].lower()
             if funcname in palprologs:
                 info = palprologs[funcname]
-                line = info['purpose'] + "\n"
-                line = line + info['arguments'] + "\n"
+                lines.append( info['purpose'] )
+                lines += ( "Arguments", "---------", info['arguments'] )
+                if "returned value" in info:
+                    lines += ( "", "Returned Value", "--------------",
+                                  info['returned value'] )
                 if "notes" in info:
-                    line = line + info['notes'] + "\n"
+                    lines += ( "", "Notes", "-----",
+                                  info['notes'] )
+                line = "\n".join(lines)
             else:
                 continue
         outfh.write(line)
