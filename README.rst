@@ -29,12 +29,18 @@ returns a simple dict that can be searched using standard python.
 The keys to the dict are the short names and the values are another
 dict with keys name, long, lat and height.
 
+Docstrings are included with each routine describing the python
+usage and the associated C documentation:
+
+     help(palpy)
+     help(palpy.caldj)
+
 See ``test_pal.py`` for detailed examples of all functions.
 
 Documentation:
 --------------
 
-The module provides documentation on how to use the perl interface
+The module provides documentation on how to use the python interface
 to PAL. It does not contain information on how to use
 PAL itself.
 
@@ -57,10 +63,6 @@ research.
 
 Further Work
 ----------
-
-Documentation is missing from the Python description. Please
-look at the PAL C code for now but the intent is to add the
-API descriptions to the source (preferably dynamically).
 
 Not all the SLALIB routines are available from PAL.
 
