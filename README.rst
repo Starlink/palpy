@@ -64,7 +64,8 @@ research.
 Further Work
 ----------
 
-Not all the SLALIB routines are available from PAL.
+Not all the SLALIB routines are available from PAL. More can be added
+as need arises.
 
 Author
 ------
