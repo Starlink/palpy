@@ -1,5 +1,3 @@
-# Licensed under a 3-clause BSD style license - see file LICENSE.rst
-
 """
 
 Read the SST (Starlink Software Tool) prologue(s) from a file and
