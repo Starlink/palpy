@@ -1256,6 +1256,50 @@ def mapqkz( double rm, double dm, np.ndarray[double, ndim=1] amprms not None):
      cpal.palMapqkz( rm, dm, camprms, &ra, &da )
      return (ra, da)
 
+def mapqkAllVector( np.ndarray rm, np.ndarray dm, np.ndarray pr, np.ndarray pd,
+np.ndarray px, np.ndarray rv, np.ndarray[double, ndim=1] amprms not None):
+     """
+     This routine accepts ndarrays
+     rm = ra of objects
+     dm = dec of objects
+     pr = proper motion in ra
+     pd = proper motion in dec
+     px = parallax
+     rv = radial velocity
+     aprms = outputs of palMappa
+
+     and returns ra and dec corrected for aberration, parallax, and
+     precession-nutation.
+
+     It determines on the fly whether or not to call mapqk or mapqkz
+     """
+
+     cdef int i
+     cdef int length=len(rm)
+     cdef np.ndarray raout=np.zeros(length,dtype=np.float64)
+     cdef np.ndarray daout=np.zeros(length,dtype=np.float64)
+     cdef double ra
+     cdef double da
+     cdef double camprms[21]
+     cdef double tol=1.0e-9
+     cdef double ntol=-1.0*tol
+     for i in range(21):
+          camprms[i] = amprms[i]
+
+     for i in range(length):
+         if pr[i] > tol or pr[i] < ntol or \
+            pd[i] > tol or pd[i] < ntol or \
+            px[i] > tol or px[i] < ntol or \
+            rv[i] > tol or rv[i] < ntol:
+
+              cpal.palMapqk(rm[i],dm[i],pr[i],pd[i],px[i],rv[i],camprms,&ra,&da)
+         else:
+              cpal.palMapqkz(rm[i],dm[i],camprms,&ra,&da)
+
+         raout[i]=ra
+         daout[i]=da
+
+     return (raout,daout)
 
 def nut( double date ):
      """
@@ -1566,26 +1610,26 @@ def pm( double r0, double d0, double pr, double pd,
      return (r1, d1)
 
 def pmVector( np.ndarray r0, np.ndarray d0, np.ndarray pr,
-        np.ndarray pd, np.ndarray px, np.ndarray rv, double ep0,
-        double ep1):
-        """
-        This is pm (see above), except that it accepts an
-        ndarray of values for each argument
-        """
+     np.ndarray pd, np.ndarray px, np.ndarray rv, double ep0,
+     double ep1):
+     """
+     This is pm (see above), except that it accepts an
+     ndarray of values for each argument
+     """
 
-        cdef int i
-        cdef int length=len(r0)
-        cdef np.ndarray r1out=np.zeros(length,dtype=np.float64)
-        cdef np.ndarray d1out=np.zeros(length,dtype=np.float64)
-        cdef double r1
-        cdef double d1
+     cdef int i
+     cdef int length=len(r0)
+     cdef np.ndarray r1out=np.zeros(length,dtype=np.float64)
+     cdef np.ndarray d1out=np.zeros(length,dtype=np.float64)
+     cdef double r1
+     cdef double d1
 
-        for i in range(length):
-            cpal.palPm(r0[i],d0[i],pr[i],pd[i],px[i],rv[i],ep0,ep1,&r1,&d1)
-            r1out[i]=r1
-            d1out[i]=d1
+     for i in range(length):
+          cpal.palPm(r0[i],d0[i],pr[i],pd[i],px[i],rv[i],ep0,ep1,&r1,&d1)
+          r1out[i]=r1
+          d1out[i]=d1
 
-        return(r1out,d1out)
+     return(r1out,d1out)
 
 def prebn( double bep0, double bep1 ):
      """
