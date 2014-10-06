@@ -1565,6 +1565,28 @@ def pm( double r0, double d0, double pr, double pd,
      cpal.palPm( r0, d0, pr, pd, px, rv, ep0, ep1, &r1, &d1 )
      return (r1, d1)
 
+def pmVector( np.ndarray r0, np.ndarray d0, np.ndarray pr,
+        np.ndarray pd, np.ndarray px, np.ndarray rv, double ep0,
+        double ep1):
+        """
+        This is pm (see above), except that it accepts an
+        ndarray of values for each argument
+        """
+
+        cdef int i
+        cdef int length=len(r0)
+        cdef np.ndarray r1out=np.zeros(length,dtype=np.float64)
+        cdef np.ndarray d1out=np.zeros(length,dtype=np.float64)
+        cdef double r1
+        cdef double d1
+
+        for i in range(length):
+            cpal.palPm(r0[i],d0[i],pr[i],pd[i],px[i],rv[i],ep0,ep1,&r1,&d1)
+            r1out[i]=r1
+            d1out[i]=d1
+
+        return(r1out,d1out)
+
 def prebn( double bep0, double bep1 ):
      """
      rmatp = prebn( bep0, bep1 )
