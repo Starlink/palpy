@@ -1242,6 +1242,29 @@ def mapqk( double rm, double dm, double pr, double pd, double px, double rv, np.
      cpal.palMapqk( rm, dm, pr, pd, px, rv, camprms, &ra, &da )
      return (ra, da)
 
+def mapqkVector( np.ndarray rm, np.ndarray dm, np.ndarray pr, np.ndarray pd,
+np.ndarray px, np.ndarray rv, np.ndarray[double, ndim=1] amprms not None):
+     """
+     (ra, da) = mapqk( rm, dm, pr, pd, px, rv, amprms )
+
+     @palMapqk@
+     """
+     cdef int i
+     cdef int length=len(rm)
+     cdef np.ndarray raout=np.zeros(length,dtype=np.float64)
+     cdef np.ndarray decout=np.zeros(length,dtype=np.float64)
+     cdef double ra
+     cdef double da
+     cdef double camprms[21]
+     for i in range(21):
+          camprms[i] = amprms[i]
+     for i in range(length):
+         cpal.palMapqk( rm[i], dm[i], pr[i], pd[i], px[i], rv[i], camprms, &ra, &da )
+         raout[i]=ra
+         decout[i]=da
+
+     return (raout, decout)
+
 def mapqkz( double rm, double dm, np.ndarray[double, ndim=1] amprms not None):
      """
      (ra, da) = mapqkz( rm, dm, amprms )
@@ -1256,7 +1279,31 @@ def mapqkz( double rm, double dm, np.ndarray[double, ndim=1] amprms not None):
      cpal.palMapqkz( rm, dm, camprms, &ra, &da )
      return (ra, da)
 
-def mapqkAllVector( np.ndarray rm, np.ndarray dm, np.ndarray pr, np.ndarray pd,
+
+def mapqkzVector( np.ndarray rm, np.ndarray dm, np.ndarray[double, ndim=1] amprms not None):
+     """
+     (ra, da) = mapqkz( rm, dm, amprms )
+
+     @palMapqkz@
+     """
+     cdef int i
+     cdef int length=len(rm)
+     cdef np.ndarray raout=np.zeros(length,dtype=np.float64)
+     cdef np.ndarray decout=np.zeros(length,dtype=np.float64)
+     cdef double ra
+     cdef double da
+     cdef double camprms[21]
+     for i in range(21):
+          camprms[i] = amprms[i]
+     for i in range(length):
+          cpal.palMapqkz( rm[i], dm[i], camprms, &ra, &da )
+          raout[i]=ra
+          decout[i]=da
+     return (raout, decout)
+
+
+
+def mapqkChooseVector( np.ndarray rm, np.ndarray dm, np.ndarray pr, np.ndarray pd,
 np.ndarray px, np.ndarray rv, np.ndarray[double, ndim=1] amprms not None):
      """
      This routine accepts ndarrays
