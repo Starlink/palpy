@@ -750,6 +750,34 @@ def ds2tp( double ra, double dec, double raz, double decz ):
      else:
           raise ValueError( "Antistart too far from axis" )
 
+def ds2tpVector( np.ndarray ra, np.ndarray dec, double raz, double decz ):
+     """
+     This is just ds2tp, except that it takes an array of ra and array
+     of dec and calculates xi and eta for each relative to the scalar
+     raz and decz
+     """
+     cdef int i
+     cdef int j
+     cdef int length=len(ra)
+     cdef double xi
+     cdef double eta
+     cdef np.ndarray xiout=np.zeros(length,dtype=np.float64)
+     cdef np.ndarray etaout=np.zeros(length,dtype=np.float64)
+
+     for i in range(length):
+          cpal.palDs2tp( ra[i], dec[i], raz, decz, &xi, &eta, &j )
+          if j==0:
+               xiout[i] = xi
+               etaout[i] = eta
+          elif j==1:
+               raise ValueError( "Star too far from axis" )
+          elif j==2:
+               raise ValueError( "Antistar on tangent plane" )
+          else:
+               raise ValueError( "Antistart too far from axis" )
+
+     return xiout, etaout
+
 def dsep( double a1, double b1, double a2, double b2 ):
      """
      s = dsep( a1, b1, a2, b2 )
