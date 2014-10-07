@@ -193,9 +193,8 @@ def aopqk(double rap, double dap, np.ndarray[double, ndim=1] aoprms not None):
 
 def aopqkVector(np.ndarray rap, np.ndarray dap, np.ndarray[double, ndim=1] aoprms not None):
     """
-    (aob, zob, hob, dob, rob) = aopqk( rap, dap, aoprms )
-
-    @palAopqk@
+    This is just aopqk, except that it accepts a vector of inputs and
+    returns a vector of outputs.
     """
     cdef int i
     cdef int length=len(rap)
@@ -441,9 +440,8 @@ def de2h( double ha, double dec, double phi ):
 
 def de2hVector( np.ndarray ha, np.ndarray dec, double phi ):
      """
-     (az, el) = de2h( ha, dec, phi )
-
-     @palDe2h@
+     This isjust de2h, except that it accepts a vector of inputs
+     and returns a vector of outputs
      """
      cdef int i
      cdef int length=len(ha)
