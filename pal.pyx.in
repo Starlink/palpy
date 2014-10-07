@@ -191,6 +191,37 @@ def aopqk(double rap, double dap, np.ndarray[double, ndim=1] aoprms not None):
 
     return (aob,zob,hob,dob,rob)
 
+def aopqkVector(np.ndarray rap, np.ndarray dap, np.ndarray[double, ndim=1] aoprms not None):
+    """
+    (aob, zob, hob, dob, rob) = aopqk( rap, dap, aoprms )
+
+    @palAopqk@
+    """
+    cdef int i
+    cdef int length=len(rap)
+    cdef np.ndarray aobout = np.zeros(length,dtype=np.float64)
+    cdef np.ndarray zobout = np.zeros(length,dtype=np.float64)
+    cdef np.ndarray hobout = np.zeros(length,dtype=np.float64)
+    cdef np.ndarray dobout = np.zeros(length,dtype=np.float64)
+    cdef np.ndarray robout = np.zeros(length,dtype=np.float64)
+    cdef double aob
+    cdef double zob
+    cdef double hob
+    cdef double dob
+    cdef double rob
+
+    cdef double caoprms[14]
+    for i in range(14):
+         caoprms[i]=aoprms[i]
+    for i in range(length):
+         cpal.palAopqk(rap[i],dap[i],caoprms,&aob,&zob,&hob,&dob,&rob)
+         aobout[i]=aob
+         zobout[i]=zob
+         hobout[i]=hob
+         dobout[i]=dob
+         robout[i]=rob
+    return (aobout,zobout,hobout,dobout,robout)
+
 def atmdsp(double tdk, double pmb, double rh, double wl1,
                  double a1, double b1, double wl2):
     """
@@ -407,6 +438,26 @@ def de2h( double ha, double dec, double phi ):
      cdef double el
      cpal.palDe2h( ha, dec, phi, &az, &el )
      return (az, el)
+
+def de2hVector( np.ndarray ha, np.ndarray dec, double phi ):
+     """
+     (az, el) = de2h( ha, dec, phi )
+
+     @palDe2h@
+     """
+     cdef int i
+     cdef int length=len(ha)
+     cdef np.ndarray azout = np.zeros(length,dtype=np.float64)
+     cdef np.ndarray elout = np.zeros(length,dtype=np.float64)
+     cdef double az
+     cdef double el
+     for i in range(length):
+          cpal.palDe2h( ha[i], dec[i], phi, &az, &el )
+          azout[i]=az
+          elout[i]=el
+     return (azout, elout)
+
+
 
 def deuler( order, double phi, double theta, double psi ):
     """
@@ -1300,8 +1351,6 @@ def mapqkzVector( np.ndarray rm, np.ndarray dm, np.ndarray[double, ndim=1] amprm
           raout[i]=ra
           decout[i]=da
      return (raout, decout)
-
-
 
 def mapqkChooseVector( np.ndarray rm, np.ndarray dm, np.ndarray pr, np.ndarray pd,
 np.ndarray px, np.ndarray rv, np.ndarray[double, ndim=1] amprms not None):
