@@ -1322,9 +1322,8 @@ def mapqk( double rm, double dm, double pr, double pd, double px, double rv, np.
 def mapqkVector( np.ndarray rm, np.ndarray dm, np.ndarray pr, np.ndarray pd,
 np.ndarray px, np.ndarray rv, np.ndarray[double, ndim=1] amprms not None):
      """
-     (ra, da) = mapqk( rm, dm, pr, pd, px, rv, amprms )
-
-     @palMapqk@
+     This is just mapqk except that it accepts a vector of inputs and
+     returns a vector of outputs
      """
      cdef int i
      cdef int length=len(rm)
@@ -1359,9 +1358,8 @@ def mapqkz( double rm, double dm, np.ndarray[double, ndim=1] amprms not None):
 
 def mapqkzVector( np.ndarray rm, np.ndarray dm, np.ndarray[double, ndim=1] amprms not None):
      """
-     (ra, da) = mapqkz( rm, dm, amprms )
-
-     @palMapqkz@
+     This is just mapqkz except that it accepts a vector of inputs
+     and returns a vector of outputs
      """
      cdef int i
      cdef int length=len(rm)
