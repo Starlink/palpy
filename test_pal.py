@@ -93,6 +93,55 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( rm, 1.2335120411026936349, 11 )
         self.assertAlmostEqual( dm, -0.56702908706930343907, 11 )
 
+    def test_aopqkVector(self):
+        date = 51000.1
+        dut = 25.0
+        elongm = 2.1
+        phim = 0.5
+        hm = 3000.0
+        xp = -0.5e-6
+        yp = 1.0e-6
+        tdk = 280.0
+        pmb = 550.0
+        rh = 0.6
+        tlr = 0.006
+        wl=0.45
+        obsrms = pal.aoppa(date,dut,elongm,phim,hm,xp,yp,tdk,pmb,rh,wl,tlr)
+        np.random.seed(32)
+        nTests = 100
+        raIn = np.random.sample(nTests)*2.0*np.pi
+        decIn = (np.random.sample(nTests)-0.5)*np.pi
+        azControl = None
+        zeControl = None
+        haControl = None
+        dControl = None
+        rControl = None
+        for (rr,dd) in zip(raIn,decIn):
+            az,ze,ha,d,r = pal.aopqk(rr,dd,obsrms)
+            if azControl is None:
+                azControl = np.array([az])
+                zeControl = np.array([ze])
+                haControl = np.array([ha])
+                dControl = np.array([d])
+                rControl = np.array([r])
+            else:
+                azControl = np.append(azControl,az)
+                zeControl = np.append(zeControl,ze)
+                haControl = np.append(haControl,ha)
+                dControl = np.append(dControl,d)
+                rControl = np.append(rControl,r)
+
+        azTest,zeTest,haTest,dTest,rTest = pal.aopqkVector(raIn,decIn,obsrms)
+        for (a1,z1,h1,d1,r1,a2,z2,h2,d2,r2) in \
+            zip(azControl,zeControl,haControl,dControl,rControl,
+                azTest,zeTest,haTest,dTest,rTest):
+
+            self.assertAlmostEqual(a1,a2,12)
+            self.assertAlmostEqual(z1,z2,12)
+            self.assertAlmostEqual(h1,h2,12)
+            self.assertAlmostEqual(d1,d2,12)
+            self.assertAlmostEqual(r1,r2,12)
+
     def test_aop(self):
         dap = -0.1234
         date = 51000.1
