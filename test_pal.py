@@ -311,15 +311,16 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dh, hin, 12 )
         self.assertAlmostEqual( dd, din, 12 )
 
-    def test_e2hVector(self):
+    def test_de2hVector(self):
         nTests = 100
         phi = 0.35
+        np.random.seed(32)
         raIn = np.random.random_sample(nTests)*np.pi*2.0
         decIn = (np.random.random_sample(nTests)-0.5)*np.pi
         azControl = None
         elControl = None
         for (rr,dd) in zip (raIn,decIn):
-            az, el = pal.de2h( rr, dd, phi)
+            az, el = pal.de2h(rr, dd, phi)
             if azControl is None:
                 azControl = np.array([az])
                 elControl = np.array([el])
@@ -328,7 +329,7 @@ class TestPAL(unittest.TestCase) :
                 elControl = np.append(elControl,el)
 
         azTest, elTest = pal.de2hVector(raIn, decIn, phi)
-        for (a1, e1, a2, e2) in zip (azControl,elControl,azTest,elTest):
+        for (a1,e1,a2,e2) in zip (azControl,elControl,azTest,elTest):
             self.assertAlmostEqual(a1,a2,12)
             self.assertAlmostEqual(e1,e2,12)
 
@@ -924,6 +925,29 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dd01, dd0 )
         self.assertIsNone( dr02 )
         self.assertIsNone( dd02 )
+
+    def test_ds2tpVector(self):
+        raz = 0.3
+        decz = 0.1
+        nTests = 100
+        np.random.seed(32)
+        raIn = raz+(np.random.sample(nTests)-0.5)*0.2
+        decIn = decz+(np.random.sample(nTests)-0.5)*0.2
+        xiControl = None
+        etaControl = None
+        for (rr,dd) in zip(raIn,decIn):
+            xi, eta = pal.ds2tp(rr, dd, raz, decz)
+            if xiControl is None:
+                xiControl = np.array([xi])
+                etaControl = np.array([eta])
+            else:
+                xiControl = np.append(xiControl,xi)
+                etaControl = np.append(etaControl,eta)
+
+        xiTest, etaTest = pal.ds2tpVector(raIn, decIn, raz, decz)
+        for (x1,e1,x2,e2) in zip(xiControl,etaControl,xiTest,etaTest):
+            self.assertAlmostEqual(x1,x2,12)
+            self.assertAlmostEqual(e1,e2,12)
 
     def test_vecmat(self):
         # Not everything is implemented here
