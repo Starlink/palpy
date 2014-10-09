@@ -567,8 +567,8 @@ class TestPAL(unittest.TestCase) :
         nTests = 100
         raIn = np.random.sample(nTests)*2.0*np.pi
         decIn = (np.random.sample(nTests)-0.5)*np.pi
-        pmr = (np.random.sample(nTests)-0.5)*0.001
-        pmd = (np.random.sample(nTests)-0.5)*0.001
+        pmr = (np.random.sample(nTests)-0.5)*0.01
+        pmd = (np.random.sample(nTests)-0.5)*0.01
         px = 0.00045+np.random.sample(nTests)*0.001
         rv = 200.0*np.random.sample(nTests)
         rControl=None
@@ -818,6 +818,33 @@ class TestPAL(unittest.TestCase) :
                             pal.epj( 50083.0 ), pal.epj( 53736.0 ) )
         self.assertAlmostEqual( ra, 0.01668919069414242368, 13 )
         self.assertAlmostEqual( dec, -1.093966454217127879, 13 )
+
+    def test_pmVector(self):
+        ep0 = 52000.0
+        ep1 = 53510.0
+        np.random.seed(32)
+        nTests = 100
+        raIn = np.random.sample(nTests)*2.0*np.pi
+        decIn = (np.random.sample(nTests)-0.5)*np.pi
+        pmr = 0.01*np.random.sample(nTests)
+        pmd = 0.01*np.random.sample(nTests)
+        px = 0.00045 + 0.001*np.random.sample(nTests)
+        rv = 1000.0*np.random.sample(nTests)
+        rControl = None
+        dControl = None
+        for (rr,dd,pr,pd,x,v) in zip(raIn,decIn,pmr,pmd,px,rv):
+            r, d = pal.pm(rr,dd,pr,pd,x,v,ep0,ep1)
+            if rControl is None:
+                rControl = np.array([r])
+                dControl = np.array([d])
+            else:
+                rControl = np.append(rControl,r)
+                dControl = np.append(dControl,d)
+
+        rTest, dTest = pal.pmVector(raIn,decIn,pmr,pmd,px,rv,ep0,ep1)
+        for (r1,d1,r2,d2) in zip(rControl,dControl,rTest,dTest):
+            self.assertAlmostEqual(r1,r2,12)
+            self.assertAlmostEqual(d1,d2,12)
 
     def test_prebn(self):
         expected = np.array( [
