@@ -539,6 +539,28 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( ra, 1.2344879748414849807, 7 )
         self.assertAlmostEqual( da, -0.56697099554368701746, 7 )
 
+    def test_mapqkzVector(self):
+        amprms = pal.mappa(2010, 55927)
+        np.random.seed(32)
+        nTests = 100
+        raIn = np.random.sample(nTests)*2.0*np.pi
+        decIn = (np.random.sample(nTests)-0.5)*np.pi
+        rControl=None
+        dControl=None
+        for (rr,dd) in zip(raIn,decIn):
+            r,d = pal.mapqkz(rr, dd, amprms)
+            if rControl is None:
+                rControl = np.array([r])
+                dControl = np.array([d])
+            else:
+                rControl = np.append(rControl,r)
+                dControl = np.append(dControl,d)
+
+        rTest,dTest = pal.mapqkzVector(raIn,decIn,amprms)
+        for (r1,d1,r2,d2) in zip(rControl,dControl,rTest,dTest):
+            self.assertAlmostEqual(r1,r2,12)
+            self.assertAlmostEqual(d1,d2,12)
+
     def test_moon(self):
         expected = np.array( [
              0.00229161514616454,
