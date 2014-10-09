@@ -311,6 +311,27 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dh, hin, 12 )
         self.assertAlmostEqual( dd, din, 12 )
 
+    def test_e2hVector(self):
+        nTests = 100
+        phi = 0.35
+        raIn = np.random.random_sample(nTests)*np.pi*2.0
+        decIn = (np.random.random_sample(nTests)-0.5)*np.pi
+        azControl = None
+        elControl = None
+        for (rr,dd) in zip (raIn,decIn):
+            az, el = pal.de2h( rr, dd, phi)
+            if azControl is None:
+                azControl = np.array([az])
+                elControl = np.array([el])
+            else:
+                azControl = np.append(azControl,az)
+                elControl = np.append(elControl,el)
+
+        azTest, elTest = pal.de2hVector(raIn, decIn, phi)
+        for (a1, e1, a2, e2) in zip (azControl,elControl,azTest,elTest):
+            self.assertAlmostEqual(a1,a2,12)
+            self.assertAlmostEqual(e1,e2,12)
+
     def test_ecmat(self):
         expected = np.array( [
             [ 1.0,                    0.0,                   0.0 ],
