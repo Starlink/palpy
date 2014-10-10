@@ -93,6 +93,55 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( rm, 1.2335120411026936349, 11 )
         self.assertAlmostEqual( dm, -0.56702908706930343907, 11 )
 
+    def test_aopqkVector(self):
+        date = 51000.1
+        dut = 25.0
+        elongm = 2.1
+        phim = 0.5
+        hm = 3000.0
+        xp = -0.5e-6
+        yp = 1.0e-6
+        tdk = 280.0
+        pmb = 550.0
+        rh = 0.6
+        tlr = 0.006
+        wl=0.45
+        obsrms = pal.aoppa(date,dut,elongm,phim,hm,xp,yp,tdk,pmb,rh,wl,tlr)
+        np.random.seed(32)
+        nTests = 100
+        raIn = np.random.sample(nTests)*2.0*np.pi
+        decIn = (np.random.sample(nTests)-0.5)*np.pi
+        azControl = None
+        zeControl = None
+        haControl = None
+        dControl = None
+        rControl = None
+        for (rr,dd) in zip(raIn,decIn):
+            az,ze,ha,d,r = pal.aopqk(rr,dd,obsrms)
+            if azControl is None:
+                azControl = np.array([az])
+                zeControl = np.array([ze])
+                haControl = np.array([ha])
+                dControl = np.array([d])
+                rControl = np.array([r])
+            else:
+                azControl = np.append(azControl,az)
+                zeControl = np.append(zeControl,ze)
+                haControl = np.append(haControl,ha)
+                dControl = np.append(dControl,d)
+                rControl = np.append(rControl,r)
+
+        azTest,zeTest,haTest,dTest,rTest = pal.aopqkVector(raIn,decIn,obsrms)
+        for (a1,z1,h1,d1,r1,a2,z2,h2,d2,r2) in \
+            zip(azControl,zeControl,haControl,dControl,rControl,
+                azTest,zeTest,haTest,dTest,rTest):
+
+            self.assertAlmostEqual(a1,a2,12)
+            self.assertAlmostEqual(z1,z2,12)
+            self.assertAlmostEqual(h1,h2,12)
+            self.assertAlmostEqual(d1,d2,12)
+            self.assertAlmostEqual(r1,r2,12)
+
     def test_aop(self):
         dap = -0.1234
         date = 51000.1
@@ -311,6 +360,28 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dh, hin, 12 )
         self.assertAlmostEqual( dd, din, 12 )
 
+    def test_de2hVector(self):
+        nTests = 100
+        phi = 0.35
+        np.random.seed(32)
+        raIn = np.random.random_sample(nTests)*np.pi*2.0
+        decIn = (np.random.random_sample(nTests)-0.5)*np.pi
+        azControl = None
+        elControl = None
+        for (rr,dd) in zip (raIn,decIn):
+            az, el = pal.de2h(rr, dd, phi)
+            if azControl is None:
+                azControl = np.array([az])
+                elControl = np.array([el])
+            else:
+                azControl = np.append(azControl,az)
+                elControl = np.append(elControl,el)
+
+        azTest, elTest = pal.de2hVector(raIn, decIn, phi)
+        for (a1,e1,a2,e2) in zip (azControl,elControl,azTest,elTest):
+            self.assertAlmostEqual(a1,a2,12)
+            self.assertAlmostEqual(e1,e2,12)
+
     def test_ecmat(self):
         expected = np.array( [
             [ 1.0,                    0.0,                   0.0 ],
@@ -516,6 +587,54 @@ class TestPAL(unittest.TestCase) :
         (ra, da) = pal.mapqk( 1.234, -0.567, 0., 0., 0., 0., amprms )
         self.assertAlmostEqual( ra, 1.2344879748414849807, 7 )
         self.assertAlmostEqual( da, -0.56697099554368701746, 7 )
+
+    def test_mapqkzVector(self):
+        amprms = pal.mappa(2010, 55927)
+        np.random.seed(32)
+        nTests = 100
+        raIn = np.random.sample(nTests)*2.0*np.pi
+        decIn = (np.random.sample(nTests)-0.5)*np.pi
+        rControl=None
+        dControl=None
+        for (rr,dd) in zip(raIn,decIn):
+            r,d = pal.mapqkz(rr, dd, amprms)
+            if rControl is None:
+                rControl = np.array([r])
+                dControl = np.array([d])
+            else:
+                rControl = np.append(rControl,r)
+                dControl = np.append(dControl,d)
+
+        rTest,dTest = pal.mapqkzVector(raIn,decIn,amprms)
+        for (r1,d1,r2,d2) in zip(rControl,dControl,rTest,dTest):
+            self.assertAlmostEqual(r1,r2,12)
+            self.assertAlmostEqual(d1,d2,12)
+
+    def test_mapqkVector(self):
+        amprms = pal.mappa(2010, 55927)
+        np.random.seed(32)
+        nTests = 100
+        raIn = np.random.sample(nTests)*2.0*np.pi
+        decIn = (np.random.sample(nTests)-0.5)*np.pi
+        pmr = (np.random.sample(nTests)-0.5)*0.01
+        pmd = (np.random.sample(nTests)-0.5)*0.01
+        px = 0.00045+np.random.sample(nTests)*0.001
+        rv = 200.0*np.random.sample(nTests)
+        rControl=None
+        dControl=None
+        for (rr,dd,pr,pd,x,v) in zip(raIn,decIn,pmr,pmd,px,rv):
+            r,d = pal.mapqk(rr, dd, pr, pd, x, v, amprms)
+            if rControl is None:
+                rControl = np.array([r])
+                dControl = np.array([d])
+            else:
+                rControl = np.append(rControl,r)
+                dControl = np.append(dControl,d)
+
+        rTest,dTest = pal.mapqkVector(raIn,decIn,pmr,pmd,px,rv,amprms)
+        for (r1,d1,r2,d2) in zip(rControl,dControl,rTest,dTest):
+            self.assertAlmostEqual(r1,r2,12)
+            self.assertAlmostEqual(d1,d2,12)
 
     def test_moon(self):
         expected = np.array( [
@@ -749,6 +868,33 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( ra, 0.01668919069414242368, 13 )
         self.assertAlmostEqual( dec, -1.093966454217127879, 13 )
 
+    def test_pmVector(self):
+        ep0 = 52000.0
+        ep1 = 53510.0
+        np.random.seed(32)
+        nTests = 100
+        raIn = np.random.sample(nTests)*2.0*np.pi
+        decIn = (np.random.sample(nTests)-0.5)*np.pi
+        pmr = 0.01*np.random.sample(nTests)
+        pmd = 0.01*np.random.sample(nTests)
+        px = 0.00045 + 0.001*np.random.sample(nTests)
+        rv = 1000.0*np.random.sample(nTests)
+        rControl = None
+        dControl = None
+        for (rr,dd,pr,pd,x,v) in zip(raIn,decIn,pmr,pmd,px,rv):
+            r, d = pal.pm(rr,dd,pr,pd,x,v,ep0,ep1)
+            if rControl is None:
+                rControl = np.array([r])
+                dControl = np.array([d])
+            else:
+                rControl = np.append(rControl,r)
+                dControl = np.append(dControl,d)
+
+        rTest, dTest = pal.pmVector(raIn,decIn,pmr,pmd,px,rv,ep0,ep1)
+        for (r1,d1,r2,d2) in zip(rControl,dControl,rTest,dTest):
+            self.assertAlmostEqual(r1,r2,12)
+            self.assertAlmostEqual(d1,d2,12)
+
     def test_prebn(self):
         expected = np.array( [
             [ 9.999257613786738e-1, -1.117444640880939e-2, -4.858341150654265e-3 ],
@@ -903,6 +1049,29 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dd01, dd0 )
         self.assertIsNone( dr02 )
         self.assertIsNone( dd02 )
+
+    def test_ds2tpVector(self):
+        raz = 0.3
+        decz = 0.1
+        nTests = 100
+        np.random.seed(32)
+        raIn = raz+(np.random.sample(nTests)-0.5)*0.2
+        decIn = decz+(np.random.sample(nTests)-0.5)*0.2
+        xiControl = None
+        etaControl = None
+        for (rr,dd) in zip(raIn,decIn):
+            xi, eta = pal.ds2tp(rr, dd, raz, decz)
+            if xiControl is None:
+                xiControl = np.array([xi])
+                etaControl = np.array([eta])
+            else:
+                xiControl = np.append(xiControl,xi)
+                etaControl = np.append(etaControl,eta)
+
+        xiTest, etaTest = pal.ds2tpVector(raIn, decIn, raz, decz)
+        for (x1,e1,x2,e2) in zip(xiControl,etaControl,xiTest,etaTest):
+            self.assertAlmostEqual(x1,x2,12)
+            self.assertAlmostEqual(e1,e2,12)
 
     def test_vecmat(self):
         # Not everything is implemented here

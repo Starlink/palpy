@@ -191,6 +191,36 @@ def aopqk(double rap, double dap, np.ndarray[double, ndim=1] aoprms not None):
 
     return (aob,zob,hob,dob,rob)
 
+def aopqkVector(np.ndarray rap, np.ndarray dap, np.ndarray[double, ndim=1] aoprms not None):
+    """
+    This is just aopqk, except that it accepts a vector of inputs and
+    returns a vector of outputs.
+    """
+    cdef int i
+    cdef int length=len(rap)
+    cdef np.ndarray aobout = np.zeros(length,dtype=np.float64)
+    cdef np.ndarray zobout = np.zeros(length,dtype=np.float64)
+    cdef np.ndarray hobout = np.zeros(length,dtype=np.float64)
+    cdef np.ndarray dobout = np.zeros(length,dtype=np.float64)
+    cdef np.ndarray robout = np.zeros(length,dtype=np.float64)
+    cdef double aob
+    cdef double zob
+    cdef double hob
+    cdef double dob
+    cdef double rob
+
+    cdef double caoprms[14]
+    for i in range(14):
+         caoprms[i]=aoprms[i]
+    for i in range(length):
+         cpal.palAopqk(rap[i],dap[i],caoprms,&aob,&zob,&hob,&dob,&rob)
+         aobout[i]=aob
+         zobout[i]=zob
+         hobout[i]=hob
+         dobout[i]=dob
+         robout[i]=rob
+    return (aobout,zobout,hobout,dobout,robout)
+
 def atmdsp(double tdk, double pmb, double rh, double wl1,
                  double a1, double b1, double wl2):
     """
@@ -407,6 +437,25 @@ def de2h( double ha, double dec, double phi ):
      cdef double el
      cpal.palDe2h( ha, dec, phi, &az, &el )
      return (az, el)
+
+def de2hVector( np.ndarray ha, np.ndarray dec, double phi ):
+     """
+     This isjust de2h, except that it accepts a vector of inputs
+     and returns a vector of outputs
+     """
+     cdef int i
+     cdef int length=len(ha)
+     cdef np.ndarray azout = np.zeros(length,dtype=np.float64)
+     cdef np.ndarray elout = np.zeros(length,dtype=np.float64)
+     cdef double az
+     cdef double el
+     for i in range(length):
+          cpal.palDe2h( ha[i], dec[i], phi, &az, &el )
+          azout[i]=az
+          elout[i]=el
+     return (azout, elout)
+
+
 
 def deuler( order, double phi, double theta, double psi ):
     """
@@ -700,6 +749,34 @@ def ds2tp( double ra, double dec, double raz, double decz ):
           raise ValueError( "Antistar on tangent plane" )
      else:
           raise ValueError( "Antistart too far from axis" )
+
+def ds2tpVector( np.ndarray ra, np.ndarray dec, double raz, double decz ):
+     """
+     This is just ds2tp, except that it takes an array of ra and array
+     of dec and calculates xi and eta for each relative to the scalar
+     raz and decz
+     """
+     cdef int i
+     cdef int j
+     cdef int length=len(ra)
+     cdef double xi
+     cdef double eta
+     cdef np.ndarray xiout=np.zeros(length,dtype=np.float64)
+     cdef np.ndarray etaout=np.zeros(length,dtype=np.float64)
+
+     for i in range(length):
+          cpal.palDs2tp( ra[i], dec[i], raz, decz, &xi, &eta, &j )
+          if j==0:
+               xiout[i] = xi
+               etaout[i] = eta
+          elif j==1:
+               raise ValueError( "Star too far from axis" )
+          elif j==2:
+               raise ValueError( "Antistar on tangent plane" )
+          else:
+               raise ValueError( "Antistart too far from axis" )
+
+     return xiout, etaout
 
 def dsep( double a1, double b1, double a2, double b2 ):
      """
@@ -1242,6 +1319,28 @@ def mapqk( double rm, double dm, double pr, double pd, double px, double rv, np.
      cpal.palMapqk( rm, dm, pr, pd, px, rv, camprms, &ra, &da )
      return (ra, da)
 
+def mapqkVector( np.ndarray rm, np.ndarray dm, np.ndarray pr, np.ndarray pd,
+np.ndarray px, np.ndarray rv, np.ndarray[double, ndim=1] amprms not None):
+     """
+     This is just mapqk except that it accepts a vector of inputs and
+     returns a vector of outputs
+     """
+     cdef int i
+     cdef int length=len(rm)
+     cdef np.ndarray raout=np.zeros(length,dtype=np.float64)
+     cdef np.ndarray decout=np.zeros(length,dtype=np.float64)
+     cdef double ra
+     cdef double da
+     cdef double camprms[21]
+     for i in range(21):
+          camprms[i] = amprms[i]
+     for i in range(length):
+         cpal.palMapqk( rm[i], dm[i], pr[i], pd[i], px[i], rv[i], camprms, &ra, &da )
+         raout[i]=ra
+         decout[i]=da
+
+     return (raout, decout)
+
 def mapqkz( double rm, double dm, np.ndarray[double, ndim=1] amprms not None):
      """
      (ra, da) = mapqkz( rm, dm, amprms )
@@ -1256,6 +1355,26 @@ def mapqkz( double rm, double dm, np.ndarray[double, ndim=1] amprms not None):
      cpal.palMapqkz( rm, dm, camprms, &ra, &da )
      return (ra, da)
 
+
+def mapqkzVector( np.ndarray rm, np.ndarray dm, np.ndarray[double, ndim=1] amprms not None):
+     """
+     This is just mapqkz except that it accepts a vector of inputs
+     and returns a vector of outputs
+     """
+     cdef int i
+     cdef int length=len(rm)
+     cdef np.ndarray raout=np.zeros(length,dtype=np.float64)
+     cdef np.ndarray decout=np.zeros(length,dtype=np.float64)
+     cdef double ra
+     cdef double da
+     cdef double camprms[21]
+     for i in range(21):
+          camprms[i] = amprms[i]
+     for i in range(length):
+          cpal.palMapqkz( rm[i], dm[i], camprms, &ra, &da )
+          raout[i]=ra
+          decout[i]=da
+     return (raout, decout)
 
 def nut( double date ):
      """
@@ -1564,6 +1683,28 @@ def pm( double r0, double d0, double pr, double pd,
      cdef double d1
      cpal.palPm( r0, d0, pr, pd, px, rv, ep0, ep1, &r1, &d1 )
      return (r1, d1)
+
+def pmVector( np.ndarray r0, np.ndarray d0, np.ndarray pr,
+     np.ndarray pd, np.ndarray px, np.ndarray rv, double ep0,
+     double ep1):
+     """
+     This is pm (see above), except that it accepts an
+     ndarray of values for each argument
+     """
+
+     cdef int i
+     cdef int length=len(r0)
+     cdef np.ndarray r1out=np.zeros(length,dtype=np.float64)
+     cdef np.ndarray d1out=np.zeros(length,dtype=np.float64)
+     cdef double r1
+     cdef double d1
+
+     for i in range(length):
+          cpal.palPm(r0[i],d0[i],pr[i],pd[i],px[i],rv[i],ep0,ep1,&r1,&d1)
+          r1out[i]=r1
+          d1out[i]=d1
+
+     return(r1out,d1out)
 
 def prebn( double bep0, double bep1 ):
      """
