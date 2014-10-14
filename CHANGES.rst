@@ -11,6 +11,12 @@
 - New interfaces added: altaz, dmxv (thanks to Srini Chandrasekharan
   for those 2), dav2m, deuler, dmxm, dimxv, dm2av, dvn and dvxv.
 
+- Some routines now have "Vector" forms to allow numpy arrays to be
+  given as arguments and to return numpy arrays with results. This
+  provides a signficant performance enhancement over looping in
+  Python code: aopqkVector, de2hVector, ds2tpVector, mapqkVector,
+  mapqkzVector, pmVector (Thanks to Scott Daniel for these).
+
 - Explicitly include GPLv3 text in distribution.
 
 - New routine palvers() can be used to obtain the version
