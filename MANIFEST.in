@@ -1,2 +1,3 @@
-include README.rst CHANGES.rst COPYING test_*.py
-recursive-include cextern *.c *.h
+include README.rst CHANGES.rst COPYING test_*.py pal.pyx.in
+recursive-include cextern *.c *.h *.ac
+recursive-include support *.py
