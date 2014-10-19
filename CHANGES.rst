@@ -1,3 +1,9 @@
+1.3
+---
+
+- Include PAL v0.7.0.
+- Add polmo (polar motion).
+
 1.2
 ---
 

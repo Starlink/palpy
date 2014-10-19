@@ -139,7 +139,7 @@ with open('README.rst') as file:
 
 setup(
     name = "palpy",
-    version = "1.2",
+    version = "1.3",
     author = "Tim Jenness",
     author_email = "tim.jenness@gmail.com",
     license="GPL",
