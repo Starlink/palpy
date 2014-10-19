@@ -895,6 +895,13 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(r1,r2,12)
             self.assertAlmostEqual(d1,d2,12)
 
+    def test_polmo(self):
+        (elong, phi, daz) = pal.polmo( 0.7, -0.5, 1.0e-6, -2.0e-6)
+
+        self.assertAlmostEqual( elong, 0.7000004837322044, 12 )
+        self.assertAlmostEqual( phi, -0.4999979467222241, 12 )
+        self.assertAlmostEqual( daz, 1.008982781275728e-6, 12 )
+
     def test_prebn(self):
         expected = np.array( [
             [ 9.999257613786738e-1, -1.117444640880939e-2, -4.858341150654265e-3 ],

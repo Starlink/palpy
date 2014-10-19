@@ -71,7 +71,7 @@ pal_c = (
     "palNutc.c", "palOap.c", "palOapqk.c", "palObs.c",
     "palOne2One.c", "palPa.c", "palPertel.c", "palPertue.c",
     "palPlanel.c", "palPlanet.c", "palPlante.c", "palPlantu.c",
-    "palPm.c", "palPrebn.c", "palPrec.c", "palPreces.c",
+    "palPm.c", "palPolmo.c", "palPrebn.c", "palPrec.c", "palPreces.c",
     "palPrenut.c", "palPv2el.c", "palPv2ue.c", "palPvobs.c",
     "palRdplan.c", "palRefco.c", "palRefro.c", "palRefv.c",
     "palRefz.c", "palRverot.c", "palRvgalc.c", "palRvlg.c",

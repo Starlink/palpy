@@ -1489,6 +1489,20 @@ def pa( double ha, double dec, double phi):
      """
      return cpal.palPa( ha, dec, phi )
 
+def polmo( double elongm, double phim, double xp, double yp):
+    """
+    (elong, phi, daz) = polmo( elongm, phim, xp, yp )
+
+    @palPolmo@
+    """
+    cdef double elong
+    cdef double phi
+    cdef double daz
+
+    cpal.palPolmo( elongm, phim, xp, yp, &elong, &phi, &daz )
+
+    return (elong, phi, daz)
+
 def pertel(int jform, double date0, double date1,
             double epoch0, double orbi0, double anode0,
             double perih0, double aorq0, double e0, double am0):

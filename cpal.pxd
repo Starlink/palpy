@@ -161,6 +161,8 @@ cdef extern from "pal.h":
                  double *ra, double *dec, double *r, int *jstat )
     void palPlantu ( double date, double elong, double phi, double u[13],
                double *ra, double *dec, double *r, int *jstat )
+    void palPolmo( double elongm, double phim, double xp, double yp,
+                   double *elong, double *phi, double *daz )
     void palPm ( double r0, double d0, double pr, double pd,
              double px, double rv, double ep0, double ep1,
              double *r1, double *d1 )
