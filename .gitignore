@@ -4,3 +4,4 @@ MANIFEST
 dist/
 __pycache__/
 pal.pyx
+*.pyc
