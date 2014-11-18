@@ -1,3 +1,9 @@
+1.4
+---
+
+- Include PAL v0.8.0
+- Add ecleq (Ecliptic to J2000)
+
 1.3
 ---
 
