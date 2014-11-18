@@ -382,6 +382,11 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(a1,a2,12)
             self.assertAlmostEqual(e1,e2,12)
 
+    def test_ecleq(self):
+        (dr,dd) = pal.ecleq( 1.234, -0.123, 43210.0)
+        self.assertAlmostEqual( dr, 1.229910118208851, 5 )
+        self.assertAlmostEqual( dd, 0.2638461400411088, 5 )
+
     def test_ecmat(self):
         expected = np.array( [
             [ 1.0,                    0.0,                   0.0 ],

@@ -62,7 +62,7 @@ pal_c = (
     "palDafin.c", "palDat.c", "palDe2h.c", "palDeuler.c",
     "palDfltin.c", "palDh2e.c", "palDjcal.c", "palDmat.c",
     "palDmoon.c", "palDrange.c", "palDs2tp.c", "palDt.c",
-    "palDtp2s.c", "palDtps2c.c", "palDtt.c", "palEcmat.c",
+    "palDtp2s.c", "palDtps2c.c", "palDtt.c", "palEcleq.c", "palEcmat.c",
     "palEl2ue.c", "palEpco.c", "palEpv.c", "palEqecl.c",
     "palEqgal.c", "palEtrms.c", "palEvp.c", "palFk45z.c",
     "palFk524.c", "palFk54z.c", "palGaleq.c", "palGalsup.c",
