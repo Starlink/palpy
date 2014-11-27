@@ -83,7 +83,7 @@ cdef extern from "pal.h":
     double palDvdv ( double va[3], double vb[3] )
     void palDvn ( double v[3], double uv[3], double *vm )
     void palDvxv ( double va[3], double vb[3], double vc[3] )
-    void palEcleq ( double dl, double db, double date, double *dr, double *dd );
+    void palEcleq ( double dl, double db, double date, double *dr, double *dd )
     void palEcmat ( double date, double rmat[3][3] )
     void palEl2ue ( double date, int jform, double epoch, double orbinc,
                     double anode, double perih, double aorq, double e,
