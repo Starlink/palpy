@@ -1,3 +1,9 @@
+1.4.1
+-----
+
+Fix a build problem on some systems. A semi-colon had crept in to
+cpal.pxd
+
 1.4
 ---
 
