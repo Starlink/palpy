@@ -1500,6 +1500,18 @@ def pa( double ha, double dec, double phi):
      """
      return cpal.palPa( ha, dec, phi )
 
+def pcd( double disco, double x, double y):
+    """
+    (cx, cy) = pcd( x, y )
+
+    Returns the distorted coordinates and does not
+    modify the supplied arguments.
+
+    @palPcd@
+    """
+    cpal.palPcd( disco, &x, &y )
+    return (x, y)
+
 def polmo( double elongm, double phim, double xp, double yp):
     """
     (elong, phi, daz) = polmo( elongm, phim, xp, yp )
@@ -2060,3 +2072,15 @@ def ue2pv( double date, np.ndarray[double, ndim=1] u not None ):
     for i in range(6):
         pv[i] = cpv[i]
     return (u2, pv)
+
+def unpcd( double disco, double x, double y):
+    """
+    (tx, ty) = unpcd( x, y )
+
+    Returns the tangent plane coordinates and does not
+    modify the supplied arguments.
+
+    @palUnpcd@
+    """
+    cpal.palUnpcd( disco, &x, &y )
+    return (x, y)

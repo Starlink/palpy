@@ -685,6 +685,24 @@ class TestPAL(unittest.TestCase) :
                                 -1.486288540423851, 12 )
         self.assertAlmostEqual( pal.pa( 0, 0.789, 0.789 ), 0, 12 )
 
+    def test_pcd(self):
+        disco = 178.585
+        REFX = 0.0123
+        REFY = -0.00987
+        (x, y) = pal.pcd( disco, REFX, REFY )
+        self.assertAlmostEqual( x, 0.01284630845735895, 14 )
+        self.assertAlmostEqual( y, -0.01030837922553926, 14 )
+
+        (x, y) = pal.unpcd( disco, x, y )
+        self.assertAlmostEqual( x, REFX, 14 )
+        self.assertAlmostEqual( y, REFY, 14 )
+
+        # Round trip
+        (x, y) = pal.pcd( -disco, REFX, REFY )
+        (x, y) = pal.unpcd( -disco, x, y )
+        self.assertAlmostEqual( x, REFX, 14 )
+        self.assertAlmostEqual( y, REFY, 14 )
+
     def test_planet(self):
         # palEl2ue
         u = pal.el2ue( 50000, 1, 49000, 0.1, 2, 0.2,

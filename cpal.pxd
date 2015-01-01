@@ -145,6 +145,7 @@ cdef extern from "pal.h":
                 char * name, size_t namelen,
                 double * w, double * p, double * h )
     double palPa ( double ha, double dec, double phi )
+    void palPcd( double disco, double *x, double *y )
     void palPertel (int jform, double date0, double date1,
                 double epoch0, double orbi0, double anode0,
                 double perih0, double aorq0, double e0, double am0,
@@ -204,3 +205,4 @@ cdef extern from "pal.h":
                 double *anode, double *perih, double *aorq, double *e,
                 double *aorl, double *dm, int *jstat )
     void palUe2pv ( double date, double u[13], double pv[], int *jstat )
+    void palUnpcd( double disco, double *x, double *y )
