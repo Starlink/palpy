@@ -1,3 +1,8 @@
+1.5.0
+-----
+
+- Add palPcd and palUnpcd (PAL v0.9.0)
+
 1.4.1
 -----
 
