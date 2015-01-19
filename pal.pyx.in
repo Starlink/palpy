@@ -700,14 +700,14 @@ def dpav( np.ndarray[double, ndim=1] v1 not None, np.ndarray[double, ndim=1] v2 
      result = cpal.palDpav( cv1, cv2 )
      return result
 
-def dr2af( int ndp, double days ):
+def dr2af( int ndp, double angle ):
      """
-     (sign, id, im, is, frac) = dr2af( ndp, days )
+     (sign, id, im, is, frac) = dr2af( ndp, angle )
      @palDr2af@
      """
      cdef char * csign = " "
      cdef int idmsf[4]
-     cpal.palDr2af( ndp, days, csign, idmsf )
+     cpal.palDr2af( ndp, angle, csign, idmsf )
      sign = csign.decode('UTF-8')
      return ( sign, idmsf[0], idmsf[1], idmsf[2], idmsf[3] )
 
