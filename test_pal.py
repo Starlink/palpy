@@ -296,6 +296,14 @@ class TestPAL(unittest.TestCase) :
         self.assertEqual( sec, 30 )
         self.assertEqual( f, 9706 )
 
+    def test_cr2tf(self):
+        (sign, hr, min, sec, f) = pal.dr2tf( 4, -3.01234 )
+        self.assertEqual( sign, "-" )
+        self.assertEqual( hr, 11 )
+        self.assertEqual( min, 30 )
+        self.assertEqual( sec, 22 )
+        self.assertEqual( f, 6484 )
+
     def test_ctf2d(self):
         dd = pal.dtf2d( 23, 56, 59.1 )
         self.assertAlmostEqual( dd, 0.99790625, 12 )

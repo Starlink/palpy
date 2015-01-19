@@ -711,6 +711,17 @@ def dr2af( int ndp, double angle ):
      sign = csign.decode('UTF-8')
      return ( sign, idmsf[0], idmsf[1], idmsf[2], idmsf[3] )
 
+def dr2tf( int ndp, double angle ):
+     """
+     (sign, ih, im, is, frac) = dr2tf( ndp, angle )
+     @palDr2tf@
+     """
+     cdef char * csign = " "
+     cdef int ihmsf[4]
+     cpal.palDr2tf( ndp, angle, csign, ihmsf )
+     sign = csign.decode('UTF-8')
+     return ( sign, ihmsf[0], ihmsf[1], ihmsf[2], ihmsf[3] )
+
 def drange( double angle ):
      """
      a = drange( angle )
