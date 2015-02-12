@@ -1105,6 +1105,24 @@ def eqgal( double dr, double dd ):
      cpal.palEqgal( dr, dd, &dl, &dd )
      return (dl, dd)
 
+def eqgalVector(np.ndarray dr, np.ndarray dd):
+     """
+     This is the same as eqgal, but it accepts and returns vectors
+     """
+
+     cdef int length=len(dr)
+     cdef np.ndarray dlout = np.zeros(length, dtype=np.float64)
+     cdef np.ndarray dbout = np.zeros(length, dtype=np.float64)
+     cdef double dl
+     cdef double db
+
+     for i in range(length):
+         cpal.palEqgal(dr[i], dd[i], &dl, &db)
+         dlout[i] = dl
+         dbout[i] = db
+
+     return (dlout, dbout)
+
 def etrms( double ep ):
      """
      ev = etrms( ep )
