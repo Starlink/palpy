@@ -1058,6 +1058,16 @@ class TestPAL(unittest.TestCase) :
         zr = pal.refz( 1.55, refa, refb )
         self.assertAlmostEqual( zr, 1.545697350690958, 12 )
 
+        np.random.seed(32)
+        zuIn = np.random.sample(20)*1.4
+        zrControl = np.zeros(20, dtype=np.float64)
+        for i, zu in enumerate(zuIn):
+            zr = pal.refz(zu, refa, refb)
+            zrControl[i] = zr
+        zrTest = pal.refzVector(zuIn, refa, refb)
+        for zt, zc in zip(zrTest, zrControl):
+            self.assertAlmostEqual(zt, zc, 12)
+
     def test_refc(self): # This is the SOFA test
         (refa, refb) = pal.refcoq( 10.0+273.15, 800.0, 0.9, 0.4)
         self.assertAlmostEqual( refa, 0.2264949956241415009e-3, 15 )
