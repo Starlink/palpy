@@ -79,6 +79,44 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( pad, 0.4717832355365627, 13 )
         self.assertAlmostEqual( padd, -0.2957914128185515, 13 )
 
+    def test_altazVector(self):
+        np.random.seed(32)
+        phi = 0.5
+        haIn = np.random.sample(20)*2.0*np.pi
+        decIn = (np.random.sample(20)-0.5)*np.pi
+        azC = np.zeros(20, dtype=np.float64)
+        azdC = np.zeros(20, dtype=np.float64)
+        azddC = np.zeros(20, dtype=np.float64)
+        elC = np.zeros(20, dtype=np.float64)
+        eldC = np.zeros(20, dtype=np.float64)
+        elddC = np.zeros(20, dtype=np.float64)
+        paC = np.zeros(20, dtype=np.float64)
+        padC = np.zeros(20, dtype=np.float64)
+        paddC = np.zeros(20, dtype=np.float64)
+        for i in range(20):
+            az, azd, azdd, el, eld, eldd, pa, pad, padd = pal.altaz(haIn[i], decIn[i], phi)
+            azC[i] = az
+            azdC[i] = azd
+            azddC[i] = azdd
+            elC[i] = el
+            eldC[i] = eld
+            elddC[i] = eldd
+            paC[i] = pa
+            padC[i] = pad
+            paddC[i] = padd
+        azT, azdT, azddT, elT, eldT, elddT, paT, padT, paddT = pal.altazVector(haIn, decIn, phi)
+
+        for i in range(20):
+            self.assertAlmostEqual(azC[i], azT[i], 12)
+            self.assertAlmostEqual(azdC[i], azdT[i], 12)
+            self.assertAlmostEqual(azddC[i], azddT[i], 12)
+            self.assertAlmostEqual(elC[i], elT[i], 12)
+            self.assertAlmostEqual(eldC[i], eldT[i], 12)
+            self.assertAlmostEqual(elddC[i], elddT[i], 12)
+            self.assertAlmostEqual(paC[i], paT[i], 12)
+            self.assertAlmostEqual(padC[i], padT[i], 12)
+            self.assertAlmostEqual(paddC[i], paddT[i], 12)
+
     def test_amp(self):
         (rm, dm) = pal.amp( 2.345, -1.234, 50100., 1990. )
         self.assertAlmostEqual( rm, 2.344472180027961, 6 )
