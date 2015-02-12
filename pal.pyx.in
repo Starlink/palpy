@@ -1237,6 +1237,22 @@ def galeq( double dl, double db ):
      cpal.palGaleq( dl, db, &dr, &dd )
      return (dr, dd)
 
+def galeqVector(np.ndarray dl, np.ndarray db):
+     """
+     this is galeq, but it accepts and returns vectors
+     """
+     cdef int length=len(dl)
+     cdef np.ndarray drout = np.zeros(length, dtype=np.float64)
+     cdef np.ndarray ddout = np.zeros(length, dtype=np.float64)
+     cdef double dr
+     cdef double dd
+     cdef int i
+     for i in range(length):
+          cpal.palGaleq(dl[i], db[i], &dr, &dd)
+          drout[i] = dr
+          ddout[i] = dd
+     return (drout, ddout)
+
 def galsup( double dl, double db ):
      """
      (dsl, dsb) = galsup( dl, db )
