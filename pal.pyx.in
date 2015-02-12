@@ -1307,6 +1307,19 @@ def gmst( double ut1 ):
      """
      return cpal.palGmst( ut1 )
 
+def gmstVector(np.ndarray ut1):
+     """
+     this is gmst, except that it accepts and returns vectors
+     """
+     cdef int length = len(ut1)
+     cdef np.ndarray gmout = np.zeros(length, dtype=np.float64)
+     cdef double gm
+     cdef int i
+     for i in range(length):
+          gm = cpal.palGmst(ut1[i])
+          gmout[i] = gm
+     return gmout
+
 def gmsta( double date, double ut1 ):
      """
      t = gmsta( date, ut1 )
