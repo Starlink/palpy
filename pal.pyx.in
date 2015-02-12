@@ -2001,6 +2001,21 @@ def refz( double zu, double refa, double refb ):
     cpal.palRefz(zu,refa,refb,&zr)
     return zr
 
+def refzVector(np.ndarray zu, double refa, double refb):
+     """
+     this is just refz, but accepts a vector of zenith distances
+     and returns a vector of corrected zenith distances (the refraction
+     coefficients must be the same for all of the sources)
+     """
+     cdef int length = len(zu)
+     cdef np.ndarray zrout = np.zeros(length, dtype=np.float64)
+     cdef double zr
+     cdef int i
+     for i in range(length):
+          cpal.palRefz(zu[i], refa, refb, &zr)
+          zrout[i] = zr
+     return zrout
+
 def rverot( double phi, double ra, double da, double st ):
      """
      r = rverot( phi, ra, da, st )
