@@ -1595,6 +1595,19 @@ def pa( double ha, double dec, double phi):
      """
      return cpal.palPa( ha, dec, phi )
 
+def paVector(np.ndarray ha, np.ndarray dec, double phi):
+     """
+     This is pa, except that it accepts vectors of hour angle
+     and declination.  Latitude is still a double.
+     Vectors of parallactic angle are returned.
+     """
+     cdef int length = len(ha)
+     cdef np.ndarray paOut = np.zeros(length, dtype=np.float64)
+     cdef int i
+     for i in range(length):
+          paOut[i]= cpal.palPa(ha[i], dec[i], phi)
+     return paOut
+
 def pcd( double disco, double x, double y):
     """
     (cx, cy) = pcd( x, y )
