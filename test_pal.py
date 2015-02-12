@@ -577,6 +577,17 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( pal.gmst( 53736 ), 1.754174971870091203, 12 )
         self.assertAlmostEqual( pal.gmsta( 53736, 0 ), 1.754174971870091203, 12 )
 
+    def test_gmstVector(self):
+        np.random.seed(32)
+        dateIn = 53000.0 + np.random.sample(20)*5000.0
+        gmControl = np.zeros(20, dtype=np.float64)
+        for i, d in enumerate(dateIn):
+             gm = pal.gmst(d)
+             gmControl[i] = gm
+        gmTest = pal.gmstVector(dateIn)
+        for gt, gc in zip(gmTest, gmControl):
+            self.assertAlmostEqual(gt, gc, 12)
+
     def test_intin(self):
         s = "  -12345, , -0  2000  +     "
         i = 1
