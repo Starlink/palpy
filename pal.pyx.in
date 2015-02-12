@@ -90,6 +90,45 @@ def altaz(double ha, double dec, double phi):
      cpal.palAltaz (ha, dec, phi, &az, &azd, &azdd, &el, &eld, &eldd, &pa, &pad, &padd )
      return (az, azd, azdd, el, eld, eldd, pa, pad, padd )
 
+def altazVector(np.ndarray ha, np.ndarray dec, double phi):
+     """
+     This is just altaz, except that it accepts vectors of hour angle and declination.
+     Latitude is still a float.
+     All outputs are vectors.
+     """
+     cdef int length = len(ha)
+     cdef np.ndarray azout = np.zeros(length, dtype=np.float64)
+     cdef double az
+     cdef np.ndarray azdout = np.zeros(length, dtype=np.float64)
+     cdef double azd
+     cdef np.ndarray azddout = np.zeros(length, dtype=np.float64)
+     cdef double azdd
+     cdef np.ndarray elout = np.zeros(length, dtype=np.float64)
+     cdef double el
+     cdef np.ndarray eldout = np.zeros(length, dtype=np.float64)
+     cdef double eld
+     cdef np.ndarray elddout = np.zeros(length, dtype=np.float64)
+     cdef double eldd
+     cdef np.ndarray paout = np.zeros(length, dtype=np.float64)
+     cdef double pa
+     cdef np.ndarray padout = np.zeros(length, dtype=np.float64)
+     cdef double pad
+     cdef np.ndarray paddout = np.zeros(length, dtype=np.float64)
+     cdef double padd
+     cdef int i
+     for i in range(length):
+          cpal.palAltaz(ha[i], dec[i], phi, &az, &azd, &azdd, &el, &eld, &eldd, &pa, &pad, &padd)
+          azout[i] = az
+          azdout[i] = azd
+          azddout[i] = azdd
+          elout[i] = el
+          eldout[i] = eld
+          elddout[i] = eldd
+          paout[i] = pa
+          padout[i] = pad
+          paddout[i] = padd
+     return (azout, azdout, azddout, elout, eldout, elddout, paout, padout, paddout)
+
 def amp( double ra, double da, double date, double eq):
      """
      (rm, dm) = amp( ra, da, date, eq )
