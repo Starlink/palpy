@@ -1102,8 +1102,8 @@ def eqgal( double dr, double dd ):
      """
      cdef double dl
      cdef double db
-     cpal.palEqgal( dr, dd, &dl, &dd )
-     return (dl, dd)
+     cpal.palEqgal( dr, dd, &dl, &db )
+     return (dl, db)
 
 def eqgalVector(np.ndarray dr, np.ndarray dd):
      """
