@@ -429,6 +429,16 @@ class TestPAL(unittest.TestCase) :
     def test_eqeqx(self):
         self.assertAlmostEqual( pal.eqeqx( 53736 ), -0.8834195072043790156e-5, 15 )
 
+    def test_eqeqxVector(self):
+        np.random.seed(32)
+        dateIn = 53000.0 + np.random.sample(20)*5000.0
+        eqControl = np.zeros(20, dtype=np.float64)
+        for i, d in enumerate(dateIn):
+            eqControl[i] = pal.eqeqx(d)
+        eqTest = pal.eqeqxVector(dateIn)
+        for et, ec in zip(eqTest, eqControl):
+            self.assertAlmostEqual(et, ec, 15)
+
     def test_eqgal(self):
         (dl, db) = pal.eqgal( 5.67, -1.23 )
         self.assertAlmostEqual( dl, 5.612270780904526, 12 )
