@@ -531,6 +531,21 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dr, 0.04729270418071426, 12 )
         self.assertAlmostEqual( dd, -0.7834003666745548, 12 )
 
+    def test_galeqVector(self):
+        np.random.seed(32)
+        dlIn = np.random.sample(10)*2.0*np.pi
+        dbIn = (np.random.sample(10)-0.5)*np.pi
+        drControl = np.zeros(10, dtype=np.float64)
+        ddControl = np.zeros(10, dtype=np.float64)
+        for (i, cc) in enumerate(zip(dlIn, dbIn)):
+            dr, dd = pal.galeq(cc[0], cc[1])
+            drControl[i] = dr
+            ddControl[i] = dd
+        drTest, ddTest = pal.galeqVector(dlIn, dbIn)
+        for (drt, ddt, drc, ddc) in zip(drTest, ddTest, drControl, ddControl):
+            self.assertAlmostEqual(drt, drc, 12)
+            self.assertAlmostEqual(ddt, ddc, 12)
+
     def test_galsup(self):
         (dsl, dsb) = pal.galsup( 6.1, -1.4 )
         self.assertAlmostEqual( dsl, 4.567933268859171, 12 )
