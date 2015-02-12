@@ -1083,6 +1083,20 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( pal.dsepv( d1, d2 ),
                                 2.8603919190246608, 7 )
 
+    def test_dsepVector(self):
+        np.random.seed(32)
+        ra1 = np.random.sample(20)*2.0*np.pi
+        dec1 = np.random.sample(20)*2.0*np.pi
+        ra2 = np.random.sample(20)*2.0*np.pi
+        dec2 = np.random.sample(20)*2.0*np.pi
+        ddControl = np.zeros(20, dtype=np.float64)
+        for (i, rr) in enumerate(zip(ra1, dec1, ra2, dec2)):
+            dd = pal.dsep(rr[0], rr[1], rr[2], rr[3])
+            ddControl[i] = dd
+        ddTest = pal.dsepVector(ra1, dec1, ra2, dec2)
+        for (ddc, ddt) in zip (ddTest, ddControl):
+            self.assertAlmostEqual(ddc, ddt, 12)
+
     def test_supgal(self):
         (dl, db) = pal.supgal( 6.1, -1.4 )
         self.assertAlmostEqual( dl, 3.798775860769474, 12 )
