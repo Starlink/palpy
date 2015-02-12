@@ -1328,6 +1328,17 @@ def gmsta( double date, double ut1 ):
      """
      return cpal.palGmsta( date, ut1 )
 
+def gmstaVector(np.ndarray date, np.ndarray ut1):
+     """
+     this is gmsta except that it accepts and returns vectors
+     """
+     cdef int length = len(date)
+     cdef np.ndarray gmout = np.zeros(length, dtype=np.float)
+     cdef int i
+     for i in range(length):
+          gmout[i] = cpal.palGmsta(date[i], ut1[i])
+     return gmout
+
 def hfk5z( double rh, double dh, double epoch ):
      """
      (r5, d5, dr5, dd5) = hfk5z( rh, dh, epoch )
