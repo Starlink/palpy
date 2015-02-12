@@ -434,6 +434,25 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dl, 5.612270780904526, 12 )
         self.assertAlmostEqual( db, -0.6800521449061520, 12 )
 
+    def test_eqgalVector(self):
+        np.random.seed(32)
+        raIn = np.random.sample(10)*2.0*np.pi
+        decIn = (np.random.sample(10)-0.5)*np.pi
+        dlControl = None
+        dbControl = None
+        for (ra, dec) in zip(raIn, decIn):
+            dl, db = pal.eqgal(ra, dec)
+            if dlControl is None:
+                dlControl = np.array([dl])
+                dbControl = np.array([db])
+            else:
+                np.append(dlControl, dl)
+                np.append(dbControl, db)
+        dlTest, dbTest = pal.eqgalVector(raIn, decIn)
+        for (dlt, dbt, dlc, dbc) in zip(dlTest, dbTest, dlControl, dbControl):
+            self.assertAlmostEqual(dlt, dlc, 12)
+            self.assertAlmostEqual(dbt, dbc, 12)
+
     def test_etrms(self):
         ev = pal.etrms( 1976.9 )
         self.assertAlmostEqual( ev[0], -1.621617102537041e-6, 18 )
