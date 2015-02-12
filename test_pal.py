@@ -588,6 +588,18 @@ class TestPAL(unittest.TestCase) :
         for gt, gc in zip(gmTest, gmControl):
             self.assertAlmostEqual(gt, gc, 12)
 
+    def test_gmstaVector(self):
+        np.random.seed(32)
+        dateIn = 53000 + np.random.random_integers(0, 1000, 20)
+        utIn = np.random.sample(20)
+        gmControl = np.zeros(20, dtype=np.float64)
+        for i, d in enumerate(zip(dateIn, utIn)):
+            dd = pal.gmsta(d[0], d[1])
+            gmControl[i] = dd
+        gmTest = pal.gmstaVector(dateIn, utIn)
+        for gt, gc in zip(gmTest, gmControl):
+            self.assertAlmostEqual(gt, gc, 12)
+
     def test_intin(self):
         s = "  -12345, , -0  2000  +     "
         i = 1
