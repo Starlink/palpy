@@ -760,6 +760,18 @@ class TestPAL(unittest.TestCase) :
                                 -1.486288540423851, 12 )
         self.assertAlmostEqual( pal.pa( 0, 0.789, 0.789 ), 0, 12 )
 
+    def test_paVector(self):
+        np.random.seed(32)
+        haIn = np.random.sample(20)*2.0*np.pi
+        decIn = (np.random.sample(20)-0.5)*np.pi
+        phi = 0.3
+        paControl = np.zeros(20, dtype=np.float64)
+        for i in range(20):
+            paControl[i] = pal.pa(haIn[i], decIn[i], phi)
+        paTest = pal.paVector(haIn, decIn, phi)
+        for pt, pc in zip(paTest, paControl):
+            self.assertAlmostEqual(pt, pc, 12)
+
     def test_pcd(self):
         disco = 178.585
         REFX = 0.0123
