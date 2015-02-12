@@ -1107,6 +1107,19 @@ def eqeqx( double date ):
      """
      return cpal.palEqeqx( date )
 
+def eqeqxVector(np.ndarray date):
+     """
+     this is eqeqx except that it accepts and returns vectors
+     """
+     cdef int length=len(date)
+     cdef np.ndarray eqout = np.zeros(length, dtype=np.float64)
+     cdef double eq
+     cdef int i
+     for i in range(length):
+          eq = cpal.palEqeqx(date[i])
+          eqout[i] = eq
+     return eqout
+
 def eqgal( double dr, double dd ):
      """
      (dl, dd) = eqgal( dr, dd )
