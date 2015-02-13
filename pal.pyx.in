@@ -90,6 +90,45 @@ def altaz(double ha, double dec, double phi):
      cpal.palAltaz (ha, dec, phi, &az, &azd, &azdd, &el, &eld, &eldd, &pa, &pad, &padd )
      return (az, azd, azdd, el, eld, eldd, pa, pad, padd )
 
+def altazVector(np.ndarray ha, np.ndarray dec, double phi):
+     """
+     This is just altaz, except that it accepts vectors of hour angle and declination.
+     Latitude is still a float.
+     All outputs are vectors.
+     """
+     cdef int length = len(ha)
+     cdef np.ndarray azout = np.zeros(length, dtype=np.float64)
+     cdef double az
+     cdef np.ndarray azdout = np.zeros(length, dtype=np.float64)
+     cdef double azd
+     cdef np.ndarray azddout = np.zeros(length, dtype=np.float64)
+     cdef double azdd
+     cdef np.ndarray elout = np.zeros(length, dtype=np.float64)
+     cdef double el
+     cdef np.ndarray eldout = np.zeros(length, dtype=np.float64)
+     cdef double eld
+     cdef np.ndarray elddout = np.zeros(length, dtype=np.float64)
+     cdef double eldd
+     cdef np.ndarray paout = np.zeros(length, dtype=np.float64)
+     cdef double pa
+     cdef np.ndarray padout = np.zeros(length, dtype=np.float64)
+     cdef double pad
+     cdef np.ndarray paddout = np.zeros(length, dtype=np.float64)
+     cdef double padd
+     cdef int i
+     for i in range(length):
+          cpal.palAltaz(ha[i], dec[i], phi, &az, &azd, &azdd, &el, &eld, &eldd, &pa, &pad, &padd)
+          azout[i] = az
+          azdout[i] = azd
+          azddout[i] = azdd
+          elout[i] = el
+          eldout[i] = eld
+          elddout[i] = eldd
+          paout[i] = pa
+          padout[i] = pad
+          paddout[i] = padd
+     return (azout, azdout, azddout, elout, eldout, elddout, paout, padout, paddout)
+
 def amp( double ra, double da, double date, double eq):
      """
      (rm, dm) = amp( ra, da, date, eq )
@@ -797,6 +836,19 @@ def dsep( double a1, double b1, double a2, double b2 ):
      """
      return cpal.palDsep( a1, b1, a2, b2 )
 
+def dsepVector(np.ndarray a1, np.ndarray b1, np.ndarray a2, np.ndarray b2):
+     """
+     this is dsep but it accepts and returns vectors
+     """
+     cdef int length=len(a1)
+     cdef np.ndarray dd = np.zeros(length, dtype=np.float64)
+     cdef double d
+     cdef int i
+     for i in range(length):
+          d = cpal.palDsep(a1[i], b1[i], a2[i], b2[i])
+          dd[i] = d
+     return dd
+
 def dsepv( np.ndarray[double, ndim=1] v1 not None, np.ndarray[double, ndim=1] v2 not None ):
      """
      s = dsepv( v1, v2 )
@@ -1094,6 +1146,19 @@ def eqeqx( double date ):
      """
      return cpal.palEqeqx( date )
 
+def eqeqxVector(np.ndarray date):
+     """
+     this is eqeqx except that it accepts and returns vectors
+     """
+     cdef int length=len(date)
+     cdef np.ndarray eqout = np.zeros(length, dtype=np.float64)
+     cdef double eq
+     cdef int i
+     for i in range(length):
+          eq = cpal.palEqeqx(date[i])
+          eqout[i] = eq
+     return eqout
+
 def eqgal( double dr, double dd ):
      """
      (dl, dd) = eqgal( dr, dd )
@@ -1102,8 +1167,26 @@ def eqgal( double dr, double dd ):
      """
      cdef double dl
      cdef double db
-     cpal.palEqgal( dr, dd, &dl, &dd )
-     return (dl, dd)
+     cpal.palEqgal( dr, dd, &dl, &db )
+     return (dl, db)
+
+def eqgalVector(np.ndarray dr, np.ndarray dd):
+     """
+     This is the same as eqgal, but it accepts and returns vectors
+     """
+
+     cdef int length=len(dr)
+     cdef np.ndarray dlout = np.zeros(length, dtype=np.float64)
+     cdef np.ndarray dbout = np.zeros(length, dtype=np.float64)
+     cdef double dl
+     cdef double db
+
+     for i in range(length):
+         cpal.palEqgal(dr[i], dd[i], &dl, &db)
+         dlout[i] = dl
+         dbout[i] = db
+
+     return (dlout, dbout)
 
 def etrms( double ep ):
      """
@@ -1206,6 +1289,22 @@ def galeq( double dl, double db ):
      cpal.palGaleq( dl, db, &dr, &dd )
      return (dr, dd)
 
+def galeqVector(np.ndarray dl, np.ndarray db):
+     """
+     this is galeq, but it accepts and returns vectors
+     """
+     cdef int length=len(dl)
+     cdef np.ndarray drout = np.zeros(length, dtype=np.float64)
+     cdef np.ndarray ddout = np.zeros(length, dtype=np.float64)
+     cdef double dr
+     cdef double dd
+     cdef int i
+     for i in range(length):
+          cpal.palGaleq(dl[i], db[i], &dr, &dd)
+          drout[i] = dr
+          ddout[i] = dd
+     return (drout, ddout)
+
 def galsup( double dl, double db ):
      """
      (dsl, dsb) = galsup( dl, db )
@@ -1247,6 +1346,19 @@ def gmst( double ut1 ):
      """
      return cpal.palGmst( ut1 )
 
+def gmstVector(np.ndarray ut1):
+     """
+     this is gmst, except that it accepts and returns vectors
+     """
+     cdef int length = len(ut1)
+     cdef np.ndarray gmout = np.zeros(length, dtype=np.float64)
+     cdef double gm
+     cdef int i
+     for i in range(length):
+          gm = cpal.palGmst(ut1[i])
+          gmout[i] = gm
+     return gmout
+
 def gmsta( double date, double ut1 ):
      """
      t = gmsta( date, ut1 )
@@ -1254,6 +1366,17 @@ def gmsta( double date, double ut1 ):
      @palGmsta@
      """
      return cpal.palGmsta( date, ut1 )
+
+def gmstaVector(np.ndarray date, np.ndarray ut1):
+     """
+     this is gmsta except that it accepts and returns vectors
+     """
+     cdef int length = len(date)
+     cdef np.ndarray gmout = np.zeros(length, dtype=np.float)
+     cdef int i
+     for i in range(length):
+          gmout[i] = cpal.palGmsta(date[i], ut1[i])
+     return gmout
 
 def hfk5z( double rh, double dh, double epoch ):
      """
@@ -1510,6 +1633,19 @@ def pa( double ha, double dec, double phi):
      @palPa@
      """
      return cpal.palPa( ha, dec, phi )
+
+def paVector(np.ndarray ha, np.ndarray dec, double phi):
+     """
+     This is pa, except that it accepts vectors of hour angle
+     and declination.  Latitude is still a double.
+     Vectors of parallactic angle are returned.
+     """
+     cdef int length = len(ha)
+     cdef np.ndarray paOut = np.zeros(length, dtype=np.float64)
+     cdef int i
+     for i in range(length):
+          paOut[i]= cpal.palPa(ha[i], dec[i], phi)
+     return paOut
 
 def pcd( double disco, double x, double y):
     """
@@ -1953,6 +2089,21 @@ def refz( double zu, double refa, double refb ):
     cdef double zr
     cpal.palRefz(zu,refa,refb,&zr)
     return zr
+
+def refzVector(np.ndarray zu, double refa, double refb):
+     """
+     this is just refz, but accepts a vector of zenith distances
+     and returns a vector of corrected zenith distances (the refraction
+     coefficients must be the same for all of the sources)
+     """
+     cdef int length = len(zu)
+     cdef np.ndarray zrout = np.zeros(length, dtype=np.float64)
+     cdef double zr
+     cdef int i
+     for i in range(length):
+          cpal.palRefz(zu[i], refa, refb, &zr)
+          zrout[i] = zr
+     return zrout
 
 def rverot( double phi, double ra, double da, double st ):
      """

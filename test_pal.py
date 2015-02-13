@@ -79,6 +79,44 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( pad, 0.4717832355365627, 13 )
         self.assertAlmostEqual( padd, -0.2957914128185515, 13 )
 
+    def test_altazVector(self):
+        np.random.seed(32)
+        phi = 0.5
+        haIn = np.random.sample(20)*2.0*np.pi
+        decIn = (np.random.sample(20)-0.5)*np.pi
+        azC = np.zeros(20, dtype=np.float64)
+        azdC = np.zeros(20, dtype=np.float64)
+        azddC = np.zeros(20, dtype=np.float64)
+        elC = np.zeros(20, dtype=np.float64)
+        eldC = np.zeros(20, dtype=np.float64)
+        elddC = np.zeros(20, dtype=np.float64)
+        paC = np.zeros(20, dtype=np.float64)
+        padC = np.zeros(20, dtype=np.float64)
+        paddC = np.zeros(20, dtype=np.float64)
+        for i in range(20):
+            az, azd, azdd, el, eld, eldd, pa, pad, padd = pal.altaz(haIn[i], decIn[i], phi)
+            azC[i] = az
+            azdC[i] = azd
+            azddC[i] = azdd
+            elC[i] = el
+            eldC[i] = eld
+            elddC[i] = eldd
+            paC[i] = pa
+            padC[i] = pad
+            paddC[i] = padd
+        azT, azdT, azddT, elT, eldT, elddT, paT, padT, paddT = pal.altazVector(haIn, decIn, phi)
+
+        for i in range(20):
+            self.assertAlmostEqual(azC[i], azT[i], 12)
+            self.assertAlmostEqual(azdC[i], azdT[i], 12)
+            self.assertAlmostEqual(azddC[i], azddT[i], 12)
+            self.assertAlmostEqual(elC[i], elT[i], 12)
+            self.assertAlmostEqual(eldC[i], eldT[i], 12)
+            self.assertAlmostEqual(elddC[i], elddT[i], 12)
+            self.assertAlmostEqual(paC[i], paT[i], 12)
+            self.assertAlmostEqual(padC[i], padT[i], 12)
+            self.assertAlmostEqual(paddC[i], paddT[i], 12)
+
     def test_amp(self):
         (rm, dm) = pal.amp( 2.345, -1.234, 50100., 1990. )
         self.assertAlmostEqual( rm, 2.344472180027961, 6 )
@@ -429,10 +467,39 @@ class TestPAL(unittest.TestCase) :
     def test_eqeqx(self):
         self.assertAlmostEqual( pal.eqeqx( 53736 ), -0.8834195072043790156e-5, 15 )
 
+    def test_eqeqxVector(self):
+        np.random.seed(32)
+        dateIn = 53000.0 + np.random.sample(20)*5000.0
+        eqControl = np.zeros(20, dtype=np.float64)
+        for i, d in enumerate(dateIn):
+            eqControl[i] = pal.eqeqx(d)
+        eqTest = pal.eqeqxVector(dateIn)
+        for et, ec in zip(eqTest, eqControl):
+            self.assertAlmostEqual(et, ec, 15)
+
     def test_eqgal(self):
         (dl, db) = pal.eqgal( 5.67, -1.23 )
         self.assertAlmostEqual( dl, 5.612270780904526, 12 )
         self.assertAlmostEqual( db, -0.6800521449061520, 12 )
+
+    def test_eqgalVector(self):
+        np.random.seed(32)
+        raIn = np.random.sample(10)*2.0*np.pi
+        decIn = (np.random.sample(10)-0.5)*np.pi
+        dlControl = None
+        dbControl = None
+        for (ra, dec) in zip(raIn, decIn):
+            dl, db = pal.eqgal(ra, dec)
+            if dlControl is None:
+                dlControl = np.array([dl])
+                dbControl = np.array([db])
+            else:
+                np.append(dlControl, dl)
+                np.append(dbControl, db)
+        dlTest, dbTest = pal.eqgalVector(raIn, decIn)
+        for (dlt, dbt, dlc, dbc) in zip(dlTest, dbTest, dlControl, dbControl):
+            self.assertAlmostEqual(dlt, dlc, 12)
+            self.assertAlmostEqual(dbt, dbc, 12)
 
     def test_etrms(self):
         ev = pal.etrms( 1976.9 )
@@ -512,6 +579,21 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dr, 0.04729270418071426, 12 )
         self.assertAlmostEqual( dd, -0.7834003666745548, 12 )
 
+    def test_galeqVector(self):
+        np.random.seed(32)
+        dlIn = np.random.sample(10)*2.0*np.pi
+        dbIn = (np.random.sample(10)-0.5)*np.pi
+        drControl = np.zeros(10, dtype=np.float64)
+        ddControl = np.zeros(10, dtype=np.float64)
+        for (i, cc) in enumerate(zip(dlIn, dbIn)):
+            dr, dd = pal.galeq(cc[0], cc[1])
+            drControl[i] = dr
+            ddControl[i] = dd
+        drTest, ddTest = pal.galeqVector(dlIn, dbIn)
+        for (drt, ddt, drc, ddc) in zip(drTest, ddTest, drControl, ddControl):
+            self.assertAlmostEqual(drt, drc, 12)
+            self.assertAlmostEqual(ddt, ddc, 12)
+
     def test_galsup(self):
         (dsl, dsb) = pal.galsup( 6.1, -1.4 )
         self.assertAlmostEqual( dsl, 4.567933268859171, 12 )
@@ -532,6 +614,29 @@ class TestPAL(unittest.TestCase) :
     def test_gmst(self):
         self.assertAlmostEqual( pal.gmst( 53736 ), 1.754174971870091203, 12 )
         self.assertAlmostEqual( pal.gmsta( 53736, 0 ), 1.754174971870091203, 12 )
+
+    def test_gmstVector(self):
+        np.random.seed(32)
+        dateIn = 53000.0 + np.random.sample(20)*5000.0
+        gmControl = np.zeros(20, dtype=np.float64)
+        for i, d in enumerate(dateIn):
+             gm = pal.gmst(d)
+             gmControl[i] = gm
+        gmTest = pal.gmstVector(dateIn)
+        for gt, gc in zip(gmTest, gmControl):
+            self.assertAlmostEqual(gt, gc, 12)
+
+    def test_gmstaVector(self):
+        np.random.seed(32)
+        dateIn = 53000 + np.random.random_integers(0, 1000, 20)
+        utIn = np.random.sample(20)
+        gmControl = np.zeros(20, dtype=np.float64)
+        for i, d in enumerate(zip(dateIn, utIn)):
+            dd = pal.gmsta(d[0], d[1])
+            gmControl[i] = dd
+        gmTest = pal.gmstaVector(dateIn, utIn)
+        for gt, gc in zip(gmTest, gmControl):
+            self.assertAlmostEqual(gt, gc, 12)
 
     def test_intin(self):
         s = "  -12345, , -0  2000  +     "
@@ -692,6 +797,18 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( pal.pa( -1.567, 1.5123, 0.987 ),
                                 -1.486288540423851, 12 )
         self.assertAlmostEqual( pal.pa( 0, 0.789, 0.789 ), 0, 12 )
+
+    def test_paVector(self):
+        np.random.seed(32)
+        haIn = np.random.sample(20)*2.0*np.pi
+        decIn = (np.random.sample(20)-0.5)*np.pi
+        phi = 0.3
+        paControl = np.zeros(20, dtype=np.float64)
+        for i in range(20):
+            paControl[i] = pal.pa(haIn[i], decIn[i], phi)
+        paTest = pal.paVector(haIn, decIn, phi)
+        for pt, pc in zip(paTest, paControl):
+            self.assertAlmostEqual(pt, pc, 12)
 
     def test_pcd(self):
         disco = 178.585
@@ -1024,6 +1141,16 @@ class TestPAL(unittest.TestCase) :
         zr = pal.refz( 1.55, refa, refb )
         self.assertAlmostEqual( zr, 1.545697350690958, 12 )
 
+        np.random.seed(32)
+        zuIn = np.random.sample(20)*1.4
+        zrControl = np.zeros(20, dtype=np.float64)
+        for i, zu in enumerate(zuIn):
+            zr = pal.refz(zu, refa, refb)
+            zrControl[i] = zr
+        zrTest = pal.refzVector(zuIn, refa, refb)
+        for zt, zc in zip(zrTest, zrControl):
+            self.assertAlmostEqual(zt, zc, 12)
+
     def test_refc(self): # This is the SOFA test
         (refa, refb) = pal.refcoq( 10.0+273.15, 800.0, 0.9, 0.4)
         self.assertAlmostEqual( refa, 0.2264949956241415009e-3, 15 )
@@ -1063,6 +1190,20 @@ class TestPAL(unittest.TestCase) :
                                 2.8603919190246608, 7 )
         self.assertAlmostEqual( pal.dsepv( d1, d2 ),
                                 2.8603919190246608, 7 )
+
+    def test_dsepVector(self):
+        np.random.seed(32)
+        ra1 = np.random.sample(20)*2.0*np.pi
+        dec1 = np.random.sample(20)*2.0*np.pi
+        ra2 = np.random.sample(20)*2.0*np.pi
+        dec2 = np.random.sample(20)*2.0*np.pi
+        ddControl = np.zeros(20, dtype=np.float64)
+        for (i, rr) in enumerate(zip(ra1, dec1, ra2, dec2)):
+            dd = pal.dsep(rr[0], rr[1], rr[2], rr[3])
+            ddControl[i] = dd
+        ddTest = pal.dsepVector(ra1, dec1, ra2, dec2)
+        for (ddc, ddt) in zip (ddTest, ddControl):
+            self.assertAlmostEqual(ddc, ddt, 12)
 
     def test_supgal(self):
         (dl, db) = pal.supgal( 6.1, -1.4 )
