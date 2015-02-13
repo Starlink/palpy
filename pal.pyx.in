@@ -1161,7 +1161,7 @@ def eqeqxVector(np.ndarray date):
 
 def eqgal( double dr, double dd ):
      """
-     (dl, dd) = eqgal( dr, dd )
+     (dl, db) = eqgal( dr, dd )
 
      @palEqgal@
      """
