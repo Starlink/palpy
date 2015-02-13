@@ -1,5 +1,9 @@
+1.6.0
+-----
 
 - Add palDr2tf
+- Added vectorized forms for altaz, pa, gmsta, gmst, eqeqx, refz, galeq,
+  dsep, eqgal (Thanks to Scott Daniel for these).
 
 1.5.0
 -----
