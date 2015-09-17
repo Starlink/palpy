@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
 import unittest
 import palpy as pal
 import numpy as np
@@ -827,6 +828,31 @@ class TestPAL(unittest.TestCase) :
         (x, y) = pal.unpcd( -disco, x, y )
         self.assertAlmostEqual( x, REFX, 14 )
         self.assertAlmostEqual( y, REFY, 14 )
+
+    def test_pcdVector(self):
+        """
+        Test that pcdVector returns the same results as running
+        pcd on each element of the vectors
+        """
+        np.random.seed(120)
+        x_in = 2.0*(np.random.random_sample(100)-0.5)
+        y_in = 2.0*(np.random.random_sample(100)-0.5)
+        disco = 191.0
+
+        xTestList, yTestList = pal.pcdVector(disco, x_in, y_in)
+        for xTest, yTest, xx, yy in zip(xTestList, yTestList, x_in, y_in):
+           xControl, yControl = pal.pcd(disco, xx, yy)
+           self.assertEqual(xControl, xTest)
+           self.assertEqual(yControl, yTest)
+
+        # make sure that an exceptoion is raised if you pass in
+        # mismatched x and y vectors
+        with self.assertRaises(RuntimeError) as context:
+            xTestList, yTestLIst = pal.pcdVector(disco, x_in, y_in[:10])
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of x as y " \
+                         + "coordinates to pcdVector")
+
 
     def test_planet(self):
         # palEl2ue

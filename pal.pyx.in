@@ -1659,6 +1659,36 @@ def pcd( double disco, double x, double y):
     cpal.palPcd( disco, &x, &y )
     return (x, y)
 
+def pcdVector( double disco, np.ndarray[ double, ndim=1] x_in not None,
+               np.ndarray[ double, ndim=1] y_in not None):
+    """
+    (cx, cy) = pcd( disco, x, y )
+
+    where x and y are numpy arrays of x, y tangent plane coordinates
+    and cx, cy are numpy arrays of tangent plane coordinates with the
+    pincushion distortion applied.
+
+    @palPcd@
+    """
+
+    cdef int length = len(x_in)
+    if len(y_in) != length:
+        raise RuntimeError("You did not pass the same number of x as y " \
+                           + "coordinates to pcdVector")
+
+    cdef np.ndarray x_out = np.zeros(length, dtype=np.float64)
+    cdef np.ndarray y_out = np.zeros(length, dtype=np.float64)
+    cdef double xx
+    cdef double yy
+    for i in range(length):
+        xx = x_in[i]
+        yy = y_in[i]
+        cpal.palPcd( disco, &xx, &yy)
+        x_out[i] = xx
+        y_out[i] = yy
+
+    return (x_out, y_out)
+
 def polmo( double elongm, double phim, double xp, double yp):
     """
     (elong, phi, daz) = polmo( elongm, phim, xp, yp )
