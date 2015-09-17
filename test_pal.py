@@ -370,9 +370,9 @@ class TestPAL(unittest.TestCase) :
             self.assertEqual(radianControl, radianTest[ii])
 
         # test that bad values get set to np.NaN
-        deg[9] = 371
-        imin[17] = 70
-        asec[21] = 61.0
+        deg[9] = 360
+        imin[17] = 60
+        asec[21] = 60.0
 
         radianTest = pal.daf2rVector(deg, imin, asec)
         for ii, rad in enumerate(radianTest):
