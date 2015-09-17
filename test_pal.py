@@ -387,6 +387,30 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( da, -0.4636476090008061, 12 )
         self.assertAlmostEqual( db, 0.2199879773954594, 12 )
 
+    def test_dcc2sVector(self):
+        """
+        Test that dcc2sVector returns the same results as dcc2s
+        """
+        np.random.seed(124)
+        inputData = np.random.random_sample((20,3))*10.0
+        aTest, bTest = pal.dcc2sVector(inputData)
+        for ix in range(inputData.shape[0]):
+            aControl, bControl = pal.dcc2s(inputData[ix])
+            self.assertEqual(aControl, aTest[ix])
+            self.assertEqual(bControl, bTest[ix])
+
+        # test that an exception is raised if you don't pass in
+        # 3-D cartesian points
+        dummyData = np.random.random_sample((20, 5))*10.0
+        with self.assertRaises(RuntimeError) as context:
+            aTest, bTest = pal.dcc2sVector(dummyData)
+        self.assertEqual(context.exception.message,
+                         "The input to dcc2sVector should be " \
+                         + "a 2-D numpy array in which each row " \
+                         + "is a point in 3-D Cartesian coordinates." \
+                         + " The rows of your input" \
+                         + " have 5 dimensions")
+
     def test_cd2tf(self):
         ( sign, hours, minutes, seconds, fraction ) = pal.dd2tf( 4, -0.987654321 )
         self.assertEqual( sign, "-" )

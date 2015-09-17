@@ -530,6 +530,40 @@ def dcc2s( np.ndarray[double, ndim=1] v not None ):
      cpal.palDcc2s( cv, &a, &b )
      return (a, b)
 
+def dcc2sVector( np.ndarray[double, ndim=2] v_in not None):
+    """
+    (a, b) = dcc2sVector( v )
+
+    where v is a 2-D numpy array in which each row is a different
+    point in Cartesian coordinates.  a and b will be numpy arrays
+    containing the corresponding spherical coordinates
+
+    @palDcc2s@
+    """
+
+    if v_in.shape[1] != 3:
+        raise RuntimeError("The input to dcc2sVector should be " \
+                           + "a 2-D numpy array in which each row " \
+                           + "is a point in 3-D Cartesian coordinates." \
+                           + " The rows of your input" \
+                           + " have %d dimensions" % v_in.shape[1])
+
+    cdef int length = v_in.shape[0]
+    cdef double cv[3]
+    cdef double a
+    cdef double b
+    cdef np.ndarray a_out = np.zeros(length, dtype=np.float64)
+    cdef np.ndarray b_out = np.zeros(length, dtype=np.float64)
+
+    for row in range(length):
+        for i in range(3):
+            cv[i] = v_in[row][i]
+        cpal.palDcc2s( cv, &a, &b)
+        a_out[row] = a
+        b_out[row]= b
+
+    return (a_out, b_out)
+
 def dcs2c( double a, double b ):
      """
      v = dcs2c( a, b )
