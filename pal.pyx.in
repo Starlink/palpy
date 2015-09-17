@@ -1680,6 +1680,7 @@ def pcdVector( double disco, np.ndarray[ double, ndim=1] x_in not None,
     cdef np.ndarray y_out = np.zeros(length, dtype=np.float64)
     cdef double xx
     cdef double yy
+
     for i in range(length):
         xx = x_in[i]
         yy = y_in[i]

@@ -846,6 +846,8 @@ class TestPAL(unittest.TestCase) :
            self.assertEqual(yControl, yTest)
 
         # make sure that x and y were changed by applying pcd
+        # (also make sure that x_in and y_in were not changed
+        # by pcdVector)
         with self.assertRaises(AssertionError) as context:
             np.testing.assert_array_almost_equal(xTestList, x_in, 9)
 
