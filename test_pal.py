@@ -354,6 +354,34 @@ class TestPAL(unittest.TestCase) :
         dr = pal.daf2r( 76, 54, 32.1 )
         self.assertAlmostEqual( dr, 1.342313819975276, 12 )
 
+    def test_daf2rVector(self):
+        """
+        Test that daf2rVector returns the same results as daf2r
+        """
+        np.random.seed(123)
+        nSamples = 100
+        deg = np.random.random_integers(0, 359, nSamples)
+        imin = np.random.random_integers(0, 59, nSamples)
+        asec = np.random.random_sample(nSamples)*60.0
+
+        radianTest = pal.daf2rVector(deg, imin, asec)
+        for ii in range(len(deg)):
+            radianControl = pal.daf2r(deg[ii], imin[ii], asec[ii])
+            self.assertEqual(radianControl, radianTest[ii])
+
+        # test that bad values get set to np.NaN
+        deg[9] = 371
+        imin[17] = 70
+        asec[21] = 61.0
+
+        radianTest = pal.daf2rVector(deg, imin, asec)
+        for ii, rad in enumerate(radianTest):
+            if ii==9 or ii==17 or ii==21:
+                self.assertTrue(np.isnan(rad))
+            else:
+                self.assertFalse(np.isnan(rad))
+
+
     def test_cc2s(self):
         (da, db) = pal.dcc2s( np.array( [100., -50., 25. ] ) )
         self.assertAlmostEqual( da, -0.4636476090008061, 12 )

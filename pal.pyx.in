@@ -476,6 +476,40 @@ def daf2r( int ideg, int iamin, double asec ):
                bad = "Arcsec argument outside range 0-59.9999..."
           raise ValueError( bad )
 
+def daf2rVector(np.ndarray[long, ndim=1] ideg_in not None,
+                np.ndarray[long, ndim=1] iamin_in not None,
+                np.ndarray[double, ndim=1] asec_in not None):
+    """
+    ang = daf2r( ideg, iamin, asec)
+
+    where ideg, iamin, and asec are numpy arrays of degrees,
+    minutes, and seconds.  ideg and iamin are arrays of ints.  asec
+    is an array of doubles.  ang is a numpy array of the same angles
+    converted to radians.
+
+    Bad values are mapped to numpy.NaNs in ang.
+
+    @palDaf2r@
+    """
+    cdef int length = len(ideg_in)
+
+    if len(iamin_in)!=length or len(asec_in)!=length:
+        raise RuntimeError("You need to pass the same number of degrees as " \
+                           + "minutes and seconds to daf2rVector")
+
+    cdef np.ndarray ang_out = np.zeros(length, dtype=np.float64)
+    cdef double rad
+    cdef int flag
+
+    for i in range(length):
+       cpal.palDaf2r(ideg_in[i], iamin_in[i], asec_in[i], &rad, &flag)
+       if flag==0:
+           ang_out[i] = rad
+       else:
+           ang_out[i] = np.NaN
+
+    return ang_out
+
 def dcc2s( np.ndarray[double, ndim=1] v not None ):
      """
      (a, b) = dcc2s( v )
