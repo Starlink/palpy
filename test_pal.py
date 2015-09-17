@@ -853,6 +853,44 @@ class TestPAL(unittest.TestCase) :
                          "You did not pass the same number of x as y " \
                          + "coordinates to pcdVector")
 
+    def test_unpcdVector(self):
+        """
+        Test that unpcdVector produces the same results as running unpcd
+        on each element of the input vectors
+        """
+        np.random.seed(121)
+        disco = 132.0
+        x_in = 2.0*(np.random.random_sample(120)-0.5)
+        y_in = 2.0*(np.random.random_sample(120)-0.5)
+
+        xTestList, yTestList = pal.unpcdVector(disco, x_in, y_in)
+
+        # make sure that unpcdVector and unpcd give the same results
+        for xTest, yTest, xx, yy in zip(xTestList, yTestList, x_in, y_in):
+            xControl, yControl = pal.unpcd(disco, xx, yy)
+            self.assertEqual(xTest, xControl)
+            self.assertEqual(yTest, yControl)
+
+        # make sure that xTestList and yTestList are different from x_in and y_in
+        with self.assertRaises(AssertionError) as context:
+            np.testing.assert_array_almost_equal(xTestList, x_in, 9)
+
+        with self.assertRaises(AssertionError) as context:
+            np.testing.assert_array_almost_equal(yTestList, y_in ,9)
+
+        # use pcdVector to transform back into the distorted coordinates and
+        # verify that those are equivalent to x_in and y_in
+        xDistorted, yDistorted = pal.pcdVector(disco, xTestList, yTestList)
+        np.testing.assert_array_almost_equal(xDistorted, x_in, 9)
+        np.testing.assert_array_almost_equal(yDistorted, y_in, 9)
+
+        # test that an exception is raised if you pass in different numbers
+        # of x and y coordinates
+        with self.assertRaises(RuntimeError) as context:
+            xTestList, yTestList = pal.unpcdVector(disco, x_in, y_in[:30])
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of x as y " \
+                         + "coordinates to unpcdVector")
 
     def test_planet(self):
         # palEl2ue
