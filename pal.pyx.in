@@ -2080,6 +2080,28 @@ def refv( np.ndarray[ double, ndim=1] vu not None, double refa, double refb):
         vr[i] = cvr[i]
     return vr
 
+def refvVector(np.ndarray[double, ndim=2] vu not None, double refa, double refb):
+    """
+    vr = refvVector( vu, refa, refb )
+
+    where vu is a 2-D numpy array in which each row is a different 3-D cartesian
+    vector.  vr will be a 2-D numpy array in which each row is the
+    refraction-corrected vector corresponding to the same row in vu
+
+    @palRefv@
+    """
+    cdef double cvr[3]
+    cdef double cvu[3]
+    cdef np.ndarray vr = np.zeros( [vu.shape[0], vu.shape[1]], dtype=np.float64)
+
+    for row in range(vu.shape[0]):
+        for i in range(3):
+            cvu[i] = vu[row][i]
+        cpal.palRefv( cvu, refa, refb, cvr )
+        for i in range(3):
+            vr[row][i] = cvr[i]
+    return vr
+
 def refz( double zu, double refa, double refb ):
     """
     zr = refz( zu, refa, refb )

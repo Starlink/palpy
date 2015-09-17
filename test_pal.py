@@ -1151,6 +1151,21 @@ class TestPAL(unittest.TestCase) :
         for zt, zc in zip(zrTest, zrControl):
             self.assertAlmostEqual(zt, zc, 12)
 
+    def test_refvVector(self):
+        """
+        Test that refvVector gives the same results as iterating over
+        vectors with refv
+        """
+        np.random.seed(118)
+        inputData = np.random.random_sample((4,3))*5.0
+        ref_a = 0.02
+        ref_b = 0.05
+        outputData = pal.refvVector(inputData, ref_a, ref_b)
+        for inVector, outVector in zip(inputData, outputData):
+            controlVector = pal.refv(inVector, ref_a, ref_b)
+            np.testing.assert_array_equal(outVector, controlVector)
+
+
     def test_refc(self): # This is the SOFA test
         (refa, refb) = pal.refcoq( 10.0+273.15, 800.0, 0.9, 0.4)
         self.assertAlmostEqual( refa, 0.2264949956241415009e-3, 15 )
