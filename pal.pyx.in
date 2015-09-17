@@ -577,6 +577,31 @@ def dcs2c( double a, double b ):
           v[i] = cv[i]
      return v
 
+def dcs2cVector( np.ndarray[double, ndim=1] a_in not None,
+                 np.ndarray[double, ndim=1] b_in not None):
+    """
+    v = dcs2cVector(a, b)
+
+    where a and b are numpy arrays of spherical coordinates.
+    v is a 2-D numpy array in which each row contains the
+    directional cosines of the corresponding Cartesian coordinates
+    """
+
+    cdef int length = len(a_in)
+    if len(b_in) != length:
+        raise RuntimeError("You did not pass as many latitudes as longitudes " \
+                           + "into dcs2sVector")
+
+    cdef double cv[3]
+    cdef np.ndarray v_out = np.zeros((length, 3), dtype=np.float64)
+    for row in range(length):
+        cpal.palDcs2c(a_in[row], b_in[row], cv)
+        for i in range(3):
+            v_out[row][i] = cv[i]
+
+    return v_out
+
+
 def dd2tf( int ndp, double days ):
      """
      (sign, ih, im, is, frac) = dd2tf( ndp, days )

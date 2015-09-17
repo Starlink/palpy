@@ -411,6 +411,34 @@ class TestPAL(unittest.TestCase) :
                          + " The rows of your input" \
                          + " have 5 dimensions")
 
+    def test_dcs2cVector(self):
+        """
+        Test that dcs2cVector returns the same results as dcs2c
+        """
+        np.random.seed(125)
+        nSamples = 100
+        ra = np.random.random_sample(nSamples)*2.0*np.pi
+        dec = (np.random.random_sample(nSamples)-0.5)*np.pi
+        vTest = pal.dcs2cVector(ra, dec)
+        for ii in range(nSamples):
+            vControl = pal.dcs2c(ra[ii], dec[ii])
+            np.testing.assert_array_equal(vControl, vTest[ii])
+
+        # test that dcs2cVector and dcc2sVector do, in fact, invert one another
+        aTest, bTest = pal.dcc2sVector(vTest)
+        np.testing.assert_array_almost_equal(np.cos(ra), np.cos(aTest), 9)
+        np.testing.assert_array_almost_equal(np.sin(ra), np.sin(aTest), 9)
+        np.testing.assert_array_almost_equal(np.cos(dec), np.cos(bTest), 9)
+        np.testing.assert_array_almost_equal(np.sin(dec), np.sin(bTest), 9)
+
+        # test that an exception is raised if you pass in arrays of different lengths
+        with self.assertRaises(RuntimeError) as context:
+            vTest = pal.dcs2cVector(ra, dec[:16])
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many latitudes as longitudes " \
+                          + "into dcs2sVector")
+
+
     def test_cd2tf(self):
         ( sign, hours, minutes, seconds, fraction ) = pal.dd2tf( 4, -0.987654321 )
         self.assertEqual( sign, "-" )
