@@ -2064,6 +2064,26 @@ def refro( double zobs, double hm, double tdk, double pmb,
     cpal.palRefro(zobs, hm, tdk, pmb, rh, wl, phi, tlr, eps, &ref)
     return ref
 
+def refroVector( np.ndarray[ double, ndim=1] zobs not None, double hm, double tdk,
+                double pmb, double rh, double wl, double phi, double tlr,
+                double eps):
+    """
+    ref = refroVector( zobs, hm, tdk, pmb, rh, wl, phi, tlr, eps )
+
+    where zobs is a numpy array of zenith distances in radians.  ref will be
+    a numpy array of refractions (zenith distance minus observed zenith distance
+    in radians)
+
+    @palRefro@
+    """
+    cdef int length = len(zobs)
+    cdef double ref
+    cdef np.ndarray refVector = np.zeros([length], dtype=np.float64)
+    for i in range(length):
+        cpal.palRefro(zobs[i], hm, tdk, pmb, rh, wl, phi, tlr, eps, &ref)
+        refVector[i] = ref
+    return refVector
+
 def refv( np.ndarray[ double, ndim=1] vu not None, double refa, double refb):
     """
     vr = refv( vu, refa, refb )

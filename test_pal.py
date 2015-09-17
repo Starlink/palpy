@@ -1165,6 +1165,27 @@ class TestPAL(unittest.TestCase) :
             controlVector = pal.refv(inVector, ref_a, ref_b)
             np.testing.assert_array_equal(outVector, controlVector)
 
+    def test_refroVector(self):
+        """
+        Test that refroVector returns the same results as just calling
+        refro on each element of the input vector individually.
+        """
+        np.random.seed(119)
+        hm = 150.0
+        tdk = 289.0
+        pmb = 670.0
+        rh = 0.7
+        wl = 0.6
+        phi = 0.3
+        tlr = 0.008
+        eps = 1.0e-10
+        zobs = np.random.random_sample(20)*np.pi*0.5
+        testOutput = pal.refroVector(zobs, hm, tdk, pmb, rh, wl, phi, tlr, eps)
+        for zz, test in zip(zobs, testOutput):
+            control = pal.refro(zz, hm, tdk, pmb, rh, wl, phi, tlr, eps)
+            self.assertEqual(test, control)
+
+
 
     def test_refc(self): # This is the SOFA test
         (refa, refb) = pal.refcoq( 10.0+273.15, 800.0, 0.9, 0.4)
