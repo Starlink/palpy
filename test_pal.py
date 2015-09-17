@@ -295,6 +295,53 @@ class TestPAL(unittest.TestCase) :
         d2 = pal.dcs2c( a2, b2 )
         self.assertAlmostEqual( pal.dpav( d1, d2 ), 0.7045970341781791, 12 )
 
+    def test_dbearVector(self):
+        """
+        Test that dbearVector gives the same
+        results as dbear
+        """
+        np.random.seed(122)
+        nSamples = 100
+        a1_in = np.random.random_sample(nSamples)*2.0*np.pi
+        b1_in = (np.random.random_sample(nSamples)-0.5)*np.pi
+        a2_in = np.random.random_sample(nSamples)*2.0*np.pi
+        b2_in = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        # test case where a2, b2 have the same number of elements
+        # as a1, b1
+        bTest = pal.dbearVector(a1_in, b1_in, a2_in, b2_in)
+        for i in range(len(a1_in)):
+            bControl = pal.dbear(a1_in[i], b1_in[i], a2_in[i], b2_in[i])
+            self.assertEqual(bTest[i], bControl)
+
+        # test case where a2, b2 have only one element
+        bTest = pal.dbearVector(a1_in, b1_in, a2_in[7:8], b2_in[7:8])
+        for i in range(len(a1_in)):
+            bControl = pal.dbear(a1_in[i], b1_in[i], a2_in[7], b2_in[7])
+            self.assertEqual(bTest[i], bControl)
+
+        # test that exceptions are raied when the numpy arrays are of
+        # incorrect size
+        with self.assertRaises(RuntimeError) as context:
+            bTest = pal.dbearVector(a1_in, b1_in[:9], a2_in, b2_in)
+        self.assertEqual(context.exception.message,
+                         "The first two arguments of dbearVector must " \
+                         + "be numpy arrays with the same number of elements")
+
+        with self.assertRaises(RuntimeError) as context:
+            bTest = pal.dbearVector(a1_in, b1_in, a2_in, b2_in[:8])
+        self.assertEqual(context.exception.message,
+                         "The second two arguments of dbearVector must " \
+                         + "be numpy arrays with the same number of elements")
+
+        with self.assertRaises(RuntimeError) as context:
+            bTest = pal.dbearVector(a1_in, b1_in, a2_in[:9], b2_in[:9])
+        self.assertEqual(context.exception.message,
+                         "The second two arguments of dbearVector must " \
+                         + "either have the same number of elements " \
+                         + "as the first two arguments, or they must have " \
+                         + "only one element")
+
     def test_caldj(self):
         djm = pal.caldj( 1999, 12, 31 )
         self.assertEqual( djm, 51543 )
