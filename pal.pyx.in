@@ -489,6 +489,12 @@ def daf2rVector(np.ndarray[long, ndim=1] ideg_in not None,
 
     Bad values are mapped to numpy.NaNs in ang.
 
+    Bad values are defined as:
+
+    ideg > 359
+    iamin > 59
+    asec > 59.99999
+
     @palDaf2r@
     """
     cdef int length = len(ideg_in)
