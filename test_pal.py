@@ -350,7 +350,7 @@ class TestPAL(unittest.TestCase) :
         self.assertRaises( ValueError, pal.caldj, 1970, 13, 1 )
         self.assertRaises( ValueError, pal.caldj, 1970, 1, 32 )
 
-    def test_caf2r(self):
+    def test_daf2r(self):
         dr = pal.daf2r( 76, 54, 32.1 )
         self.assertAlmostEqual( dr, 1.342313819975276, 12 )
 
