@@ -1649,7 +1649,7 @@ def paVector(np.ndarray ha, np.ndarray dec, double phi):
 
 def pcd( double disco, double x, double y):
     """
-    (cx, cy) = pcd( x, y )
+    (cx, cy) = pcd( disco, x, y )
 
     Returns the distorted coordinates and does not
     modify the supplied arguments.
