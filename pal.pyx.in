@@ -2310,7 +2310,7 @@ def ue2pv( double date, np.ndarray[double, ndim=1] u not None ):
 
 def unpcd( double disco, double x, double y):
     """
-    (tx, ty) = unpcd( x, y )
+    (tx, ty) = unpcd( disco, x, y )
 
     Returns the tangent plane coordinates and does not
     modify the supplied arguments.
