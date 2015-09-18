@@ -1590,6 +1590,58 @@ class TestPAL(unittest.TestCase) :
         for (ddc, ddt) in zip (ddTest, ddControl):
             self.assertAlmostEqual(ddc, ddt, 12)
 
+
+    def test_dsepvVector(self):
+        """
+        Test that dsepvVector produces results that agree
+        with dsepv
+        """
+        np.random.seed(130)
+        nSamples = 100
+        v1 = (np.random.random_sample((nSamples, 3))-0.5)*100.0
+        v2 = (np.random.random_sample((nSamples, 3))-0.5)*100.0
+
+        testSep = pal.dsepvVector(v1, v2)
+        for ii in range(nSamples):
+            controlSep = pal.dsepv(v1[ii], v2[ii])
+            self.assertEqual(controlSep, testSep[ii])
+            self.assertFalse(np.isnan(testSep[ii]))
+
+        testSep = pal.dsepvVector(v1, v2[6])
+        for ii in range(nSamples):
+            controlSep = pal.dsepv(v1[ii], v2[6])
+            self.assertEqual(controlSep, testSep[ii])
+            self.assertFalse(np.isnan(testSep[ii]))
+
+        # test that exceptions are raised when they ought to be
+        with self.assertRaises(ValueError) as context:
+            testSep = pal.dsepvVector(v1, v2[0:19])
+        self.assertEqual(context.exception.message,
+                         "In dsepvVector v2 must either have one row or " \
+                         + "n rows, where n is the number of rows in v1")
+
+        v3 = np.random.random_sample((nSamples,2))
+        with self.assertRaises(ValueError) as context:
+            testSep = pal.dsepvVector(v3, v2)
+        self.assertEqual(context.exception.message,
+                         "In dsepvVector v1 must be a numpy array " \
+                         + "in which each row corresponds to a direction " \
+                         + "in 3-D space.  Your v1 has 2 columns.")
+
+        with self.assertRaises(ValueError) as context:
+            testSep = pal.dsepvVector(v1, v3)
+        self.assertEqual(context.exception.message,
+                         "In dsepvVector v2 must be a numpy array " \
+                         + "in which each row corresponds to a direction " \
+                         + "in 3-D space.  Your v2 has 2 columns.")
+
+        with self.assertRaises(ValueError) as context:
+            testSep = pal.dsepvVector(v1, np.random.random_sample(4))
+        self.assertEqual(context.exception.message,
+                          "The v2 you passed to dsepvVector is a single point " \
+                          + "with 4 elements; it should have 3 elements")
+
+
     def test_supgal(self):
         (dl, db) = pal.supgal( 6.1, -1.4 )
         self.assertAlmostEqual( dl, 3.798775860769474, 12 )
