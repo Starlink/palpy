@@ -1371,6 +1371,49 @@ def dtf2r( int ihour, int imin, double sec ):
                bad = "Arcsec argument outside range 0-59.9999..."
           raise ValueError( bad )
 
+def dtf2rVector(np.ndarray[long, ndim=1] ihour, np.ndarray[long, ndim=1] imin,
+                np.ndarray[double, ndim=1] sec):
+    """
+    rad = dtf2rVector(ihour, imin, sec)
+
+    where ihour, imin, sec, and rad are all numpy arrays
+
+    @palDtf2r@
+
+    Raises
+    ------
+    ValueError if input arrays do not have the same length
+
+    If bad values (ihour outside of 0-23, imin outside of 0-59,
+    sec outside of 0-59.999999) are passed in, these result in
+    numpy.NaNs in the output.
+    """
+
+    cdef int length = len(ihour)
+
+    if len(imin)!=length:
+        raise ValueError("In dtf2rVector, imin does not have the same length " \
+                         + "as ihour")
+
+    if len(sec)!=length:
+        raise ValueError("In dtf2rVector, sec does not have the same length " \
+                         + "as ihour")
+
+    cdef np.ndarray radians = np.empty(length, dtype=np.float64)
+    cdef int flag
+    cdef double value
+
+    for ii in range(length):
+        cpal.palDtf2r( ihour[ii], imin[ii], sec[ii], &value, &flag )
+        if flag==0:
+            radians[ii] = value
+        else:
+            radians[ii] = np.NaN
+
+    return radians
+
+
+
 def dtp2s( double xi, double eta, double raz, double decz):
      """
      (ra,dec) = dtp2s( xi, eta, raz, decz )

@@ -656,6 +656,52 @@ class TestPAL(unittest.TestCase) :
         self.assertRaises( ValueError, pal.dtf2r, 23, -1, 32 )
         self.assertRaises( ValueError, pal.dtf2r, 23, 1, 60 )
 
+    def test_dtf2rVector(self):
+        """
+        Test that dtf2rVector gives results consistent with
+        dtf2r
+        """
+        np.random.seed(131)
+        nSamples = 100
+        iHour = np.random.random_integers(0, 23, nSamples)
+        iMin = np.random.random_integers(0, 59, nSamples)
+        sec = np.random.random_sample(nSamples)*60.0
+
+        testRad = pal.dtf2rVector(iHour, iMin, sec)
+        for ii in range(nSamples):
+            controlRad = pal.dtf2r(iHour[ii], iMin[ii], sec[ii])
+            self.assertEqual(testRad[ii], controlRad)
+            self.assertFalse(np.isnan(testRad[ii]))
+
+        # test that NaN's are produced when bad inputs are given
+        iHour[5] = 24
+        iMin[7] = 60
+        sec[19] = 60.001
+        testRad = pal.dtf2rVector(iHour, iMin, sec)
+        for ii in range(nSamples):
+            if ii!=5 and ii!=7 and ii!=19:
+                controlRad = pal.dtf2r(iHour[ii], iMin[ii], sec[ii])
+                self.assertEqual(testRad[ii], controlRad)
+                self.assertFalse(np.isnan(testRad[ii]))
+            else:
+                self.assertTrue(np.isnan(testRad[ii]))
+
+        # test that exceptions are raised when you pass in
+        # mis-matched input arrays
+        with self.assertRaises(ValueError) as context:
+            testRad = pal.dtf2rVector(iHour, iMin[:19], sec)
+        self.assertEqual(context.exception.message,
+                         "In dtf2rVector, imin does not have the " \
+                         + "same length as ihour")
+
+        with self.assertRaises(ValueError) as context:
+            testRad = pal.dtf2rVector(iHour, iMin, sec[:19])
+        self.assertEqual(context.exception.message,
+                         "In dtf2rVector, sec does not have the " \
+                         + "same length as ihour")
+
+
+
     def test_dat(self):
         self.assertEqual( pal.dat( 43900 ), 18 )
         self.assertAlmostEqual( pal.dtt( 40404 ), 39.709746, 12 )
