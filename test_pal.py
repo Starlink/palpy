@@ -530,7 +530,7 @@ class TestPAL(unittest.TestCase) :
         self.assertRaises( ValueError, pal.cldj, 1970, 13, 1 )
         self.assertRaises( ValueError, pal.cldj, 1970, 1, 32 )
 
-    def test_cr2af(self):
+    def test_dr2af(self):
         (sign, deg, min, sec, f) = pal.dr2af( 4, 2.345 )
         self.assertEqual( sign, "+" )
         self.assertEqual( deg, 134 )
@@ -538,7 +538,7 @@ class TestPAL(unittest.TestCase) :
         self.assertEqual( sec, 30 )
         self.assertEqual( f, 9706 )
 
-    def test_cr2tf(self):
+    def test_dr2tf(self):
         (sign, hr, min, sec, f) = pal.dr2tf( 4, -3.01234 )
         self.assertEqual( sign, "-" )
         self.assertEqual( hr, 11 )
@@ -546,14 +546,14 @@ class TestPAL(unittest.TestCase) :
         self.assertEqual( sec, 22 )
         self.assertEqual( f, 6484 )
 
-    def test_ctf2d(self):
+    def test_dtf2d(self):
         dd = pal.dtf2d( 23, 56, 59.1 )
         self.assertAlmostEqual( dd, 0.99790625, 12 )
         self.assertRaises( ValueError, pal.dtf2d, 24, 1, 32 )
         self.assertRaises( ValueError, pal.dtf2d, 23, -1, 32 )
         self.assertRaises( ValueError, pal.dtf2d, 23, 1, 60 )
 
-    def test_ctf2r(self):
+    def test_dtf2r(self):
         dr = pal.dtf2r( 23, 56, 59.1 )
         self.assertAlmostEqual( dr, 6.270029887942679, 12 )
         self.assertRaises( ValueError, pal.dtf2r, 24, 1, 32 )
