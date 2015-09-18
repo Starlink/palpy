@@ -322,19 +322,19 @@ class TestPAL(unittest.TestCase) :
 
         # test that exceptions are raied when the numpy arrays are of
         # incorrect size
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(ValueError) as context:
             bTest = pal.dbearVector(a1_in, b1_in[:9], a2_in, b2_in)
         self.assertEqual(context.exception.message,
                          "The first two arguments of dbearVector must " \
                          + "be numpy arrays with the same number of elements")
 
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(ValueError) as context:
             bTest = pal.dbearVector(a1_in, b1_in, a2_in, b2_in[:8])
         self.assertEqual(context.exception.message,
                          "The second two arguments of dbearVector must " \
                          + "be numpy arrays with the same number of elements")
 
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(ValueError) as context:
             bTest = pal.dbearVector(a1_in, b1_in, a2_in[:9], b2_in[:9])
         self.assertEqual(context.exception.message,
                          "The second two arguments of dbearVector must " \
@@ -402,7 +402,7 @@ class TestPAL(unittest.TestCase) :
         # test that an exception is raised if you don't pass in
         # 3-D cartesian points
         dummyData = np.random.random_sample((20, 5))*10.0
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(ValueError) as context:
             aTest, bTest = pal.dcc2sVector(dummyData)
         self.assertEqual(context.exception.message,
                          "The input to dcc2sVector should be " \
@@ -432,7 +432,7 @@ class TestPAL(unittest.TestCase) :
         np.testing.assert_array_almost_equal(np.sin(dec), np.sin(bTest), 9)
 
         # test that an exception is raised if you pass in arrays of different lengths
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(ValueError) as context:
             vTest = pal.dcs2cVector(ra, dec[:16])
         self.assertEqual(context.exception.message,
                          "You did not pass as many latitudes as longitudes " \
@@ -983,7 +983,7 @@ class TestPAL(unittest.TestCase) :
 
         # make sure that an exceptoion is raised if you pass in
         # mismatched x and y vectors
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(ValueError) as context:
             xTestList, yTestLIst = pal.pcdVector(disco, x_in, y_in[:10])
         self.assertEqual(context.exception.message,
                          "You did not pass the same number of x as y " \
@@ -1022,7 +1022,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if you pass in different numbers
         # of x and y coordinates
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(ValueError) as context:
             xTestList, yTestList = pal.unpcdVector(disco, x_in, y_in[:30])
         self.assertEqual(context.exception.message,
                          "You did not pass the same number of x as y " \

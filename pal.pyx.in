@@ -423,22 +423,26 @@ def dbearVector( np.ndarray[ double, ndim=1] a1 not None,
     b_out[n] = bearing(a1[n], b1[n], a2[n], b2[n])
 
     @palDbear@
+
+    Raises
+    ------
+    Value error if input arrays have inconsistent lengths
     """
     cdef int length1 = len(a1)
     cdef int length2 = len(a2)
     if len(b1) != length1:
-        raise RuntimeError("The first two arguments of dbearVector must " \
-                           + "be numpy arrays with the same number of elements")
+        raise ValueError("The first two arguments of dbearVector must " \
+                         + "be numpy arrays with the same number of elements")
 
     if len(b2) != length2:
-        raise RuntimeError("The second two arguments of dbearVector must " \
-                           + "be numpy arrays with the same number of elements")
+        raise ValueError("The second two arguments of dbearVector must " \
+                         + "be numpy arrays with the same number of elements")
 
     if length2!=1 and length2!=length1:
-        raise RuntimeError("The second two arguments of dbearVector must " \
-                           + "either have the same number of elements " \
-                           + "as the first two arguments, or they must have " \
-                           + "only one element")
+        raise ValueError("The second two arguments of dbearVector must " \
+                         + "either have the same number of elements " \
+                         + "as the first two arguments, or they must have " \
+                         + "only one element")
 
     cdef np.ndarray b_out = np.zeros(length1, dtype=np.float64)
 
@@ -496,12 +500,16 @@ def daf2rVector(np.ndarray[long, ndim=1] ideg_in not None,
     asec > 59.99999
 
     @palDaf2r@
+
+    Raises
+    ------
+    ValueError if input arrays have inconsistent lengths
     """
     cdef int length = len(ideg_in)
 
     if len(iamin_in)!=length or len(asec_in)!=length:
-        raise RuntimeError("You need to pass the same number of degrees as " \
-                           + "minutes and seconds to daf2rVector")
+        raise ValueError("You need to pass the same number of degrees as " \
+                         + "minutes and seconds to daf2rVector")
 
     cdef np.ndarray ang_out = np.zeros(length, dtype=np.float64)
     cdef double rad
@@ -539,14 +547,19 @@ def dcc2sVector( np.ndarray[double, ndim=2] v_in not None):
     containing the corresponding spherical coordinates
 
     @palDcc2s@
+
+    Raises
+    ------
+    ValueError if you do not pass in a 2-D numpy array with
+    three columns
     """
 
     if v_in.shape[1] != 3:
-        raise RuntimeError("The input to dcc2sVector should be " \
-                           + "a 2-D numpy array in which each row " \
-                           + "is a point in 3-D Cartesian coordinates." \
-                           + " The rows of your input" \
-                           + " have %d dimensions" % v_in.shape[1])
+        raise ValueError("The input to dcc2sVector should be " \
+                         + "a 2-D numpy array in which each row " \
+                         + "is a point in 3-D Cartesian coordinates." \
+                         + " The rows of your input" \
+                         + " have %d dimensions" % v_in.shape[1])
 
     cdef int length = v_in.shape[0]
     cdef double cv[3]
@@ -585,12 +598,18 @@ def dcs2cVector( np.ndarray[double, ndim=1] a_in not None,
     where a and b are numpy arrays of spherical coordinates.
     v is a 2-D numpy array in which each row contains the
     directional cosines of the corresponding Cartesian coordinates
+
+    @palDcs2c@
+
+    Raises
+    ------
+    ValueError if input arrays have inconsisten lengths
     """
 
     cdef int length = len(a_in)
     if len(b_in) != length:
-        raise RuntimeError("You did not pass as many latitudes as longitudes " \
-                           + "into dcs2sVector")
+        raise ValueError("You did not pass as many latitudes as longitudes " \
+                         + "into dcs2sVector")
 
     cdef double cv[3]
     cdef np.ndarray v_out = np.zeros((length, 3), dtype=np.float64)
@@ -1817,12 +1836,16 @@ def pcdVector( double disco, np.ndarray[ double, ndim=1] x_in not None,
     pincushion distortion applied.
 
     @palPcd@
+
+    Raises
+    ------
+    ValueError if input arrays have inconsistent lengths
     """
 
     cdef int length = len(x_in)
     if len(y_in) != length:
-        raise RuntimeError("You did not pass the same number of x as y " \
-                           + "coordinates to pcdVector")
+        raise ValueError("You did not pass the same number of x as y " \
+                         + "coordinates to pcdVector")
 
     cdef np.ndarray x_out = np.zeros(length, dtype=np.float64)
     cdef np.ndarray y_out = np.zeros(length, dtype=np.float64)
@@ -2476,12 +2499,18 @@ def unpcdVector( double disco, np.ndarray[ double, ndim=1 ] x_in not None,
     where x and y are numpy arrays of x, y tangent plane coordinates and
     tx, ty are numpy arrays of tangent plane coordinates with the
     pincushion distortion removed
+
+    @palUnpcd@
+
+    Raises
+    ------
+    ValueError if input arrays have inconsistent lengths
     """
 
     cdef int length=len(x_in)
     if len(y_in) != length:
-        raise RuntimeError("You did not pass the same number of x as y " \
-                           + "coordinates to unpcdVector")
+        raise ValueError("You did not pass the same number of x as y " \
+                         + "coordinates to unpcdVector")
 
     cdef np.ndarray x_out = np.zeros(length, dtype=np.float64)
     cdef np.ndarray y_out = np.zeros(length, dtype=np.float64)
