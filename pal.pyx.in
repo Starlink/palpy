@@ -1014,6 +1014,34 @@ def dr2af( int ndp, double angle ):
      sign = csign.decode('UTF-8')
      return ( sign, idmsf[0], idmsf[1], idmsf[2], idmsf[3] )
 
+def dr2afVector( int ndp, np.ndarray[double, ndim=1] angle not None):
+    """
+    (sign, id, im, is, frac) = dr2af( ndp, angle)
+
+    where angle is a numpy array of angles in radians
+    and all outputs are numpy arrays of the same size
+
+    @palDr2af@
+    """
+    cdef int length = len(angle)
+    cdef np.ndarray sign_out = np.ndarray(length, dtype=(unicode, 1))
+    cdef np.ndarray id_out = np.ndarray(length, dtype=int)
+    cdef np.ndarray im_out = np.ndarray(length, dtype=int)
+    cdef np.ndarray isec_out = np.ndarray(length, dtype=int)
+    cdef np.ndarray frac_out = np.ndarray(length, dtype=int)
+    cdef char * csign = " "
+    cdef int idmsf[4]
+
+    for ii in range(length):
+        cpal.palDr2af(ndp, angle[ii], csign, idmsf)
+        sign_out[ii] = csign.decode('UTF-8')
+        id_out[ii] = idmsf[0]
+        im_out[ii] = idmsf[1]
+        isec_out[ii] = idmsf[2]
+        frac_out[ii] = idmsf[3]
+
+    return (sign_out, id_out, im_out, isec_out, frac_out)
+
 def dr2tf( int ndp, double angle ):
      """
      (sign, ih, im, is, frac) = dr2tf( ndp, angle )
