@@ -342,6 +342,61 @@ class TestPAL(unittest.TestCase) :
                          + "as the first two arguments, or they must have " \
                          + "only one element")
 
+
+    def test_dpavVector(self):
+        """
+        Test that dpavVector is consistent with dpav
+        """
+        np.random.seed(127)
+        nSamples = 200
+        phi = np.random.random_sample(nSamples)*2.0*np.pi
+        theta = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        v1 = np.array([[np.cos(th), np.sin(th)*np.cos(ph), np.sin(th)*np.sin(ph)] \
+                        for th, ph in zip(theta, phi)])
+
+        phi = np.random.random_sample(nSamples)*2.0*np.pi
+        theta = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        v2 = np.array([[np.cos(th), np.sin(th)*np.cos(ph), np.sin(th)*np.sin(ph)] \
+                          for th, ph in zip(theta, phi)])
+
+        testPa = pal.dpavVector(v1, v2)
+        for ii in range(nSamples):
+            paControl = pal.dpav(v1[ii], v2[ii])
+            self.assertEqual(paControl, testPa[ii])
+            self.assertFalse(np.isnan(paControl))
+
+        # test the case where we only feed one point in as v2
+        testPa = pal.dpavVector(v1, v2[4:5])
+        for ii in range(nSamples):
+            paControl = pal.dpav(v1[ii], v2[4])
+            self.assertEqual(paControl, testPa[ii])
+            self.assertFalse(np.isnan(paControl))
+
+        # test that exceptions are raised when they should be
+        with self.assertRaises(ValueError) as context:
+            testPa = pal.dpavVector(v1, v2[:19])
+        self.assertEqual(context.exception.message,
+                         "In dpavVector, v2 must either be a numpy array of " \
+                         + "shape (1, 3) or a numpy array of shape (n, 3) "\
+                         + "where n is the number of rows in v1")
+
+        v3 = np.random.random_sample((nSamples, 6))
+        with self.assertRaises(ValueError) as context:
+            testPa = pal.dpavVector(v3, v2)
+        self.assertEqual(context.exception.message,
+                         "In dpavVector, v1 must be a numpy array in which " \
+                         + "each row has 3 elements. " \
+                         + "Your rows have 6 elements.")
+
+        with self.assertRaises(ValueError) as context:
+            testPa = pal.dpavVector(v1, v3)
+        self.assertEqual(context.exception.message,
+                         "In dpavVector, v2 must be a numpy array in which " \
+                         + "each row has 3 elements. " \
+                         + "Your rows have 6 elements.")
+
     def test_caldj(self):
         djm = pal.caldj( 1999, 12, 31 )
         self.assertEqual( djm, 51543 )
