@@ -1413,6 +1413,34 @@ class TestPAL(unittest.TestCase) :
     def test_ranorm(self):
         self.assertAlmostEqual( pal.dranrm( -0.1 ), 6.183185307179587, 12 )
 
+    def test_dranrmVector(self):
+        """
+        Test that dranrmVector returns the same results as dranrm
+        """
+        np.random.seed(74310)
+        nSamples = 100
+        angle_in = (np.random.random_sample(100)-0.5)*4.0*np.pi
+        angle_in = np.array([aa + 2.0*np.pi if aa>0.0 else aa for aa in angle_in])
+
+        # make sure we created input angles that are outside the
+        # 0 to 2pi range
+        for aa in angle_in:
+            if aa>0.0 and aa<2.0*np.pi:
+                raise RuntimeError("did not create correct inputs for test_dranrmVector")
+
+        testAngle = pal.dranrmVector(angle_in)
+
+        # verify that the resulting angles are equivalent to the input
+        # angles normalized to the 0-2pi ranges
+        self.assertTrue(testAngle.min()>0.0)
+        self.assertTrue(testAngle.max()<2.0*np.pi)
+        np.testing.assert_array_almost_equal(np.cos(testAngle), np.cos(angle_in), 9)
+        np.testing.assert_array_almost_equal(np.sin(testAngle), np.sin(angle_in), 9)
+
+        for ii in range(nSamples):
+            controlAngle = pal.dranrm(angle_in[ii])
+            self.assertEqual(controlAngle, testAngle[ii])
+
     def test_ref(self):
         self.assertAlmostEqual( pal.refro(1.4, 3456.7, 280, 678.9, 0.9, 0.55,
                                 -0.3, 0.006, 1e-9 ),

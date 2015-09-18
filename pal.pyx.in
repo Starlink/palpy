@@ -1097,6 +1097,20 @@ def dranrm( double angle ):
      """
      return cpal.palDranrm( angle )
 
+def dranrmVector(np.ndarray[double, ndim=1] angle not None):
+    """
+    a = dranrm( angle )
+
+    where a and angle are numpy arrays
+
+    @palDranrm@
+    """
+    cdef int length=len(angle)
+    cdef np.ndarray angle_out = np.empty(length, dtype=np.float)
+    for ii in range(length):
+        angle_out[ii] = cpal.palDranrm(angle[ii])
+    return angle_out
+
 def ds2tp( double ra, double dec, double raz, double decz ):
      """
      (xi, eta) = ds2tp( ra, dec, raz, decz )
