@@ -569,6 +569,28 @@ class TestPAL(unittest.TestCase) :
         self.assertEqual( sec, 22 )
         self.assertEqual( f, 6484 )
 
+    def test_dr2tfVector(self):
+        """
+        Test that dr2tfVector produces the same results as
+        dr2tf
+        """
+        np.random.seed(128)
+        nSamples = 200
+        angleList = (np.random.random_sample(nSamples)-0.5)*4.0*np.pi
+        for npd in [2, 3, 4, 5]:
+            testSign, testHr, \
+            testMin, testSec, testFrac = pal.dr2tfVector(npd, angleList)
+
+            for ii in range(nSamples):
+                controlSign, controlHr, \
+                controlMin, controlSec, controlFrac = pal.dr2tf(npd, angleList[ii])
+
+                self.assertEqual(controlSign, testSign[ii])
+                self.assertEqual(controlHr, testHr[ii])
+                self.assertEqual(controlMin, testMin[ii])
+                self.assertEqual(controlSec, testSec[ii])
+                self.assertEqual(controlFrac, testFrac[ii])
+
     def test_dtf2d(self):
         dd = pal.dtf2d( 23, 56, 59.1 )
         self.assertAlmostEqual( dd, 0.99790625, 12 )
