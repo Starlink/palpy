@@ -1016,7 +1016,7 @@ def dr2af( int ndp, double angle ):
 
 def dr2afVector( int ndp, np.ndarray[double, ndim=1] angle not None):
     """
-    (sign, id, im, is, frac) = dr2af( ndp, angle)
+    (sign, id, im, is, frac) = dr2afVector( ndp, angle)
 
     where angle is a numpy array of angles in radians
     and all outputs are numpy arrays of the same size
