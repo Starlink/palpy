@@ -965,29 +965,35 @@ def dpavVector( np.ndarray[double, ndim=2] v1_in not None,
     """
 
     cdef nPts = v1_in.shape[0]
+    cdef nDim2 = len((<object> v2_in).shape)
 
-    if v2_in.shape[0] != 1 and v2_in.shape[0] != nPts:
+    if nDim2!=1 and v2_in.shape[0]!=nPts:
         raise ValueError("In dpavVector, v2 must either be a numpy array of " \
-                         + "shape (1, 3) or a numpy array of shape (n, 3) "\
+                         + "shape (3,) or a numpy array of shape (n, 3) "\
                          + "where n is the number of rows in v1")
 
-    if v1_in.shape[1] != 3:
+    if v1_in.shape[1]!=3:
         raise ValueError("In dpavVector, v1 must be a numpy array in which " \
                          + "each row has 3 elements. " \
                          + "Your rows have %d elements." % v1_in.shape[1])
 
-    if v2_in.shape[1] != 3:
+    if nDim2!=1 and v2_in.shape[1]!=3:
         raise ValueError("In dpavVector, v2 must be a numpy array in which " \
                          + "each row has 3 elements. " \
                          + "Your rows have %d elements." % v2_in.shape[1])
+
+    if nDim2==1 and v2_in.shape[0]!=3:
+        raise ValueError("The v2 you passed into dpavVector represents a single " \
+                         "point with %d elements; it should have 3 elements" \
+                         % v2_in.shape[0])
 
     cdef double cv1[3]
     cdef double cv2[3]
     cdef np.ndarray pa_out = np.ndarray(nPts, dtype=np.float)
 
-    if v2_in.shape[0] == 1:
+    if nDim2 == 1:
         for j in range(3):
-            cv2[j] = v2_in[0][j]
+            cv2[j] = v2_in[j]
         for i in range(nPts):
             for j in range(3):
                 cv1[j] = v1_in[i][j]

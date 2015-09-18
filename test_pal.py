@@ -368,7 +368,7 @@ class TestPAL(unittest.TestCase) :
             self.assertFalse(np.isnan(paControl))
 
         # test the case where we only feed one point in as v2
-        testPa = pal.dpavVector(v1, v2[4:5])
+        testPa = pal.dpavVector(v1, v2[4])
         for ii in range(nSamples):
             paControl = pal.dpav(v1[ii], v2[4])
             self.assertEqual(paControl, testPa[ii])
@@ -379,7 +379,7 @@ class TestPAL(unittest.TestCase) :
             testPa = pal.dpavVector(v1, v2[:19])
         self.assertEqual(context.exception.message,
                          "In dpavVector, v2 must either be a numpy array of " \
-                         + "shape (1, 3) or a numpy array of shape (n, 3) "\
+                         + "shape (3,) or a numpy array of shape (n, 3) "\
                          + "where n is the number of rows in v1")
 
         v3 = np.random.random_sample((nSamples, 6))
@@ -396,6 +396,12 @@ class TestPAL(unittest.TestCase) :
                          "In dpavVector, v2 must be a numpy array in which " \
                          + "each row has 3 elements. " \
                          + "Your rows have 6 elements.")
+
+        with self.assertRaises(ValueError) as context:
+            testPa = pal.dpavVector(v1, np.random.random_sample(9))
+        self.assertEqual(context.exception.message,
+                         "The v2 you passed into dpavVector represents a single " \
+                         "point with 9 elements; it should have 3 elements")
 
     def test_caldj(self):
         djm = pal.caldj( 1999, 12, 31 )
