@@ -1099,7 +1099,7 @@ def dranrm( double angle ):
 
 def dranrmVector(np.ndarray[double, ndim=1] angle not None):
     """
-    a = dranrm( angle )
+    a = dranrmVector( angle )
 
     where a and angle are numpy arrays
 
