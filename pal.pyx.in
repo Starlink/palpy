@@ -1364,7 +1364,7 @@ def dtf2r( int ihour, int imin, double sec ):
      else:
           bad = ""
           if j==1:
-               bad = "Degree argument outside range 0-369"
+               bad = "Hour argument outside range 0-23"
           elif j==2:
                bad = "Minute argument outside range 0-59"
           else:
