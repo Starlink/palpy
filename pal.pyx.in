@@ -633,6 +633,39 @@ def dd2tf( int ndp, double days ):
      sign = csign.decode('UTF-8')
      return ( sign, ihmsf[0], ihmsf[1], ihmsf[2], ihmsf[3] )
 
+def dd2tfVector( int ndp, np.ndarray[double, ndim=1] days not None):
+    """
+    (sign, ih, im, is ,frac) = ddtf( ndp, dayList)
+
+    where ndp is an integer denoting the resolution to which the
+    fraction of seconds should be taken and dayList is a numpy
+    array of values to be converted. sign, ih, im, is, and frac
+    will also be numpy arrays corresponding to the elements in
+    dayList.
+
+    @palDd2tf@
+    """
+
+    cdef int length = len(days)
+
+    cdef np.ndarray sign_out = np.empty(length, dtype = (unicode, 1))
+    cdef np.ndarray ih_out = np.empty(length, dtype = np.int)
+    cdef np.ndarray im_out = np.empty(length, dtype = np.int)
+    cdef np.ndarray is_out = np.empty(length, dtype = np.int)
+    cdef np.ndarray frac_out = np.empty(length, dtype = np.int)
+
+    cdef char * csign = " "
+    cdef int ihmsf[4]
+    for row in range(length):
+        cpal.palDd2tf( ndp, days[row], csign, ihmsf)
+        sign_out[row] = csign.decode('UTF-8')
+        ih_out[row] = ihmsf[0]
+        im_out[row] = ihmsf[1]
+        is_out[row] = ihmsf[2]
+        frac_out[row] = ihmsf[3]
+
+    return (sign_out, ih_out, im_out, is_out, frac_out)
+
 def de2h( double ha, double dec, double phi ):
      """
      (az, el) = de2h( ha, dec, phi )

@@ -447,6 +447,27 @@ class TestPAL(unittest.TestCase) :
         self.assertEqual( seconds, 13 )
         self.assertEqual( fraction, 3333 )
 
+    def test_dd2tfVector(self):
+        """
+        Test that dd2tfVector gives the same results as dd2tf
+        """
+        np.random.seed(126)
+        nSamples = 100
+        daysList = (np.random.sample(nSamples)-0.5)*1200.0
+
+        for ndp in [2, 3, 4, 5]:
+            testSign, testIh, testIm, testIs, testFrac = pal.dd2tfVector(ndp, daysList)
+            for ix, days in enumerate(daysList):
+                controlSign, controlIh,\
+                controlIm, controlIs,\
+                controlFrac = pal.dd2tf(ndp, days)
+
+                self.assertEqual(controlSign, testSign[ix])
+                self.assertEqual(controlIm, testIm[ix])
+                self.assertEqual(controlIs, testIs[ix])
+                self.assertEqual(controlFrac, testFrac[ix])
+
+
     def test_cldj(self):
         d = pal.cldj( 1899, 12, 31 )
         self.assertEqual( d, 15019 )
