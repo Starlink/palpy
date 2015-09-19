@@ -802,6 +802,20 @@ class TestPAL(unittest.TestCase) :
     def test_epj(self):
         self.assertAlmostEqual( pal.epj(42999), 1976.603696098563, 7)
 
+    def test_epjVector(self):
+        """
+        Test that epjVector returns results consistent with epj
+        """
+        np.random.seed(45738)
+        nSamples = 300
+        date = 43000.0 + np.random.random_sample(nSamples)*10000.0
+        testEpj = pal.epjVector(date)
+        for ii in range(nSamples):
+            controlEpj = pal.epj(date[ii])
+            self.assertEqual(controlEpj, testEpj[ii])
+            self.assertFalse(np.isnan(testEpj[ii]))
+
+
     def test_epj2d(self):
         self.assertAlmostEqual( pal.epj2d(2010.077), 55225.124250, 6 )
 

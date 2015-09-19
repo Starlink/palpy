@@ -1587,6 +1587,21 @@ def epj( double date ):
      """
      return cpal.palEpj(date)
 
+def epjVector( np.ndarray[double, ndim=1] date not None):
+    """
+    e = epjVector( date )
+
+    where e and date are both numpy arrays
+
+    @palEpj@
+    """
+    cdef int length = len(date)
+    cdef np.ndarray epj = np.empty(length, dtype=np.float64)
+    for ii in range(length):
+        epj[ii] = cpal.palEpj(date[ii])
+    return epj
+
+
 def epj2d( double epj ):
      """
      d = epj2d( epj )
