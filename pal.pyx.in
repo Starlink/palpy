@@ -1610,6 +1610,20 @@ def epj2d( double epj ):
      """
      return cpal.palEpj2d(epj)
 
+def epj2dVector(np.ndarray[double, ndim=1] epj not None):
+    """
+    d = epj2dVector(epj)
+
+    where both d and epj are numpy arrays
+
+    @palEpj2d@
+    """
+    cdef int length = len(epj)
+    cdef np.ndarray mjd = np.empty(length, dtype=np.float64)
+    for ii in range(length):
+        mjd[ii] = cpal.palEpj2d(epj[ii])
+    return mjd
+
 # epv goes here
 def epv( double date ):
     """

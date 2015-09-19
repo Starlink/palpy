@@ -815,9 +815,21 @@ class TestPAL(unittest.TestCase) :
             self.assertEqual(controlEpj, testEpj[ii])
             self.assertFalse(np.isnan(testEpj[ii]))
 
-
     def test_epj2d(self):
         self.assertAlmostEqual( pal.epj2d(2010.077), 55225.124250, 6 )
+
+    def test_epj2dVector(self):
+        """
+        Test that epj2dVector returns results consistent with epj
+        """
+        np.random.seed(45367)
+        nSamples = 300
+        epj = 2000.0 + np.random.random_sample(nSamples)*50.0
+        testMjd = pal.epj2dVector(epj)
+        for ii in range(nSamples):
+            controlMjd = pal.epj2d(epj[ii])
+            self.assertEqual(controlMjd, testMjd[ii])
+            self.assertFalse(np.isnan(testMjd[ii]))
 
     def test_eqecl(self):
         (dl, db) = pal.eqecl( 0.789, -0.123, 46555 )
