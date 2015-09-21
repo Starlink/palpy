@@ -960,6 +960,32 @@ class TestPAL(unittest.TestCase) :
                          "You did not pass the same number of " \
                          "RAs as Decs to fk5hzVector")
 
+    def test_hkf5zVector(self):
+        """
+        Test that hkf5zVector produces results consistent with
+        hkf5z
+        """
+        np.random.seed(133)
+        nSamples = 200
+        raList = np.random.random_sample(nSamples)*2.0*np.pi
+        decList = (np.random.random_sample(nSamples)-0.5)*np.pi
+        testRa, testDec, testDr, testDd = pal.hfk5zVector(raList, decList, 2000.0)
+        for ii in range(nSamples):
+            controlRa, controlDec, \
+            controlDr, controlDd = pal.hfk5z(raList[ii], decList[ii], 2000.0)
+            self.assertEqual(testRa[ii], controlRa)
+            self.assertEqual(testDec[ii], controlDec)
+            self.assertEqual(testDr[ii], controlDr)
+            self.assertEqual(testDd[ii], controlDd)
+
+        # test that an exception is raised if raList and decList are
+        # of different lengths
+        with self.assertRaises(ValueError) as context:
+            ra, dec, dr, dd = pal.hfk5zVector(raList, decList[:77], 2000.0)
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of RAs as " \
+                         + "Decs to hfk5zVector")
+
 
     def test_fk54z(self):
         (r1950, d1950, dr1950, dd1950) = pal.fk54z( 1.2, -0.3, 1960 )

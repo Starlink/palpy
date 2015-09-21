@@ -1945,6 +1945,46 @@ def hfk5z( double rh, double dh, double epoch ):
      cpal.palHfk5z( rh, dh, epoch, &r5, &d5, &dr5, &dd5 )
      return (r5, d5, dr5, dd5)
 
+def hfk5zVector(np.ndarray[double, ndim=1] rh not None,
+                np.ndarray[double, ndim=1] dh not None,
+                double epoch):
+    """
+    (r5, d5, dr5, dd5) = hfk5zVector( rh, dh, epoch)
+
+    where rh, dh, r5, d5, dr5 and dd5 are all numpy arrays
+
+    @palHfk5z@
+
+    Raises
+    ------
+    ValueError if input RA and Dec arrays do not have the same length
+    """
+
+    cdef int length = len(rh)
+
+    if len(dh)!=length:
+        raise ValueError("You did not pass the same number of RAs as " \
+                         + "Decs to hfk5zVector")
+
+    cdef np.ndarray ra_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dec_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dr_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dd_out = np.empty(length, dtype=np.float64)
+
+    cdef double r5
+    cdef double d5
+    cdef double dr5
+    cdef double dd5
+
+    for ii in range(length):
+        cpal.palHfk5z( rh[ii], dh[ii], epoch, &r5, &d5, &dr5, &dd5 )
+        ra_out[ii] = r5
+        dec_out[ii] = d5
+        dr_out[ii] = dr5
+        dd_out[ii] = dd5
+
+    return (ra_out, dec_out, dr_out, dd_out)
+
 # We need to return the sign in order to work out whether -0
 # is a negative integer (important when parsing "-0 22 33.0"
 # sexagesimal format. I'm assuming that no-one is going to really
