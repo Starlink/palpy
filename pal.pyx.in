@@ -2175,6 +2175,48 @@ def oapqk( type, double ob1, double ob2, np.ndarray[double, ndim=1] aoprms not N
      cpal.palOapqk( ctype, ob1, ob2, caoprms, &rap, &dap )
      return ( rap, dap )
 
+def oapqkVector(type,
+                np.ndarray[double, ndim=1] ob1 not None,
+                np.ndarray[double, ndim=1] ob2 not None,
+                np.ndarray[double, ndim=1] aoprms not None):
+    """
+    (rap, dap) = oapqkVector( type, ob1, ob2, aoprms )
+
+    where ob1, ob2, rap, dap are all numpy arrays
+
+    @palOapqk@
+
+    Raises
+    ------
+    ValueError if input coordinate arrays are of different length
+    """
+
+    cdef int length = len(ob1)
+    if len(ob2)!=length:
+        raise ValueError("The observed coordinate arrays you passed into " \
+                         + "oapqkVector are of different lengths")
+
+    cdef np.ndarray ra_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dec_out = np.empty(length, dtype=np.float64)
+
+    byte_string = type.encode('ascii')
+
+    cdef char * ctype = byte_string
+    cdef double caoprms[14]
+
+    for i in range(14):
+        caoprms[i] = aoprms[i]
+
+    cdef double rap
+    cdef double dap
+
+    for ii in range(length):
+        cpal.palOapqk( ctype, ob1[ii], ob2[ii], caoprms, &rap, &dap)
+        ra_out[ii] = rap
+        dec_out[ii] = dap
+
+    return (ra_out, dec_out)
+
 # Numeric lookup is only useful when scanning through the
 # list of telescopes. The python interface does not need this.
 # Instead obs() returns a dict (which may be a bit less efficient

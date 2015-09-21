@@ -284,6 +284,80 @@ class TestPAL(unittest.TestCase) :
         aoprms = pal.aoppat( date + pal.DS2R, aoprms )
         self.assertAlmostEqual( aoprms[13], 7.602374979243502, 8 )
 
+    def test_oapqkVector(self):
+        """
+        Test that oapqkVector gives results consistent with oapqk
+        """
+
+        dap = -0.1234
+        date = 51000.1
+        dut = 25.0
+        elongm = 2.1
+        phim = 0.5
+        hm = 3000.0
+        xp = -0.5e-6
+        yp = 1.0e-6
+        tdk = 280.0
+        pmb = 550.0
+        rh = 0.6
+        tlr = 0.006
+        wl = 0.45
+        aoprms = pal.aoppa( date, dut, elongm, phim, hm, xp, yp, tdk, pmb,
+                            rh, wl, tlr )
+
+        np.random.seed(133)
+        nSamples = 200
+        ob1 = np.random.random_sample(nSamples)*2.0*np.pi
+        ob2 = np.random.random_sample(nSamples)*0.5*np.pi
+        # restrict ob2 to 0 < ob2 < pi/2 because we will also be testing az-zenith distance
+        # coordinate pairs
+
+        for typeFlag in ['r', 'a', 'h']:
+            testRa, testDec = pal.oapqkVector(typeFlag, ob1, ob2, aoprms)
+            for ii in range(nSamples):
+                controlRa, controlDec = pal.oapqk(typeFlag, ob1[ii], ob2[ii], aoprms)
+                self.assertEqual(testRa[ii], controlRa)
+                self.assertEqual(testDec[ii], controlDec)
+
+        # verify that pal.aopqkVector and pal.oapqkVector invert each other;
+        # we limit our test raApparent, decApparent values to be within 75 degrees
+        # of zenith, because of the limited accuracy of these routines at
+        # large zenith distance (even though we approximate the sky as a flat
+        # surface and demand that all of the sample points be within 50 degrees
+        # of zenith in this gross approximation, heuristically, this causes
+        # the actual maximum zenith distance to be 74.1 degrees).
+        raApCenter, decApCenter = pal.oapqk('h', 0.0, 0.0, aoprms)
+
+        rr = np.random.random_sample(nSamples)*np.radians(50.0)
+        theta = np.random.random_sample(nSamples)*2.0*np.pi
+
+        raApList = raApCenter + rr*np.cos(theta)
+        decApList = decApCenter + rr*np.sin(theta)
+
+        azList, zdList, haList, \
+        decObList, raObList = pal.aopqkVector(raApList, decApList, aoprms)
+
+        testRa, testDec = pal.oapqkVector('r', raObList, decObList, aoprms)
+        np.testing.assert_array_almost_equal(testRa, raApList, 12)
+        np.testing.assert_array_almost_equal(testDec, decApList, 12)
+
+        testRa, testDec = pal.oapqkVector('h', haList, decObList, aoprms)
+        np.testing.assert_array_almost_equal(testRa, raApList, 12)
+        np.testing.assert_array_almost_equal(testDec, decApList, 12)
+
+        testRa, testDec = pal.oapqkVector('a', azList, zdList, aoprms)
+        np.testing.assert_array_almost_equal(testRa, raApList, 12)
+        np.testing.assert_array_almost_equal(testDec, decApList, 12)
+
+        # test that an exception is thrown if the input arrays do not
+        # have the same length
+        with self.assertRaises(ValueError) as context:
+            testRa, testDec = pal.oapqkVector('a', azList, zdList[:17], aoprms)
+        self.assertEqual(context.exception.message,
+                         "The observed coordinate arrays you passed into " \
+                         + "oapqkVector are of different lengths")
+
+
     def test_bear(self):
         a1 = 1.234
         b1 = -0.123
