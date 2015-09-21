@@ -1113,6 +1113,30 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dr, 0.1966825219934508, 12 )
         self.assertAlmostEqual( dd, -0.4924752701678960, 12 )
 
+    def test_ge50Vector(self):
+        """
+        Test that ge50Vector returns results consistent with ge50
+        """
+        np.random.seed(133)
+        nSamples = 200
+        llList = np.random.random_sample(nSamples)*2.0*np.pi
+        bbList = (np.random.random_sample(nSamples)-0.5)*np.pi
+        testRa, testDec = pal.ge50Vector(llList, bbList)
+        for ii in range(nSamples):
+            controlRa, controlDec = pal.ge50(llList[ii], bbList[ii])
+            self.assertEqual(controlRa, testRa[ii])
+            self.assertEqual(controlDec, testDec[ii])
+
+        # test that an exception is raised when you pass in different
+        # numbers of longitudes as you do latitudes
+        with self.assertRaises(ValueError) as context:
+            testRa, testDec = pal.ge50Vector(llList, bbList[:45])
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of " \
+                         + "Galactic longitudes as Galactic latitudes " \
+                         + "into ge50Vector")
+
+
     def test_gmst(self):
         self.assertAlmostEqual( pal.gmst( 53736 ), 1.754174971870091203, 12 )
         self.assertAlmostEqual( pal.gmsta( 53736, 0 ), 1.754174971870091203, 12 )

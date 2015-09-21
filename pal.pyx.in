@@ -1881,6 +1881,39 @@ def ge50( double dl, double db ):
      cpal.palGe50( dl, db, &dr, &dd )
      return (dr, dd)
 
+def ge50Vector( np.ndarray[double, ndim=1] dl not None,
+                np.ndarray[double, ndim=1] db not None):
+    """
+    (rd, dd) = ge50( dl, db )
+
+    where dl, db, rd, and dd are all numpy arrays
+
+    @palGe50@
+
+    Raises
+    ------
+    ValueError if input arrays have different lengths
+    """
+
+    cdef int length = len(dl)
+
+    if len(db)!=length:
+        raise ValueError("You did not pass the same number of " \
+                         + "Galactic longitudes as Galactic latitudes " \
+                         + "into ge50Vector")
+
+    cdef np.ndarray dr_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dd_out = np.empty(length, dtype=np.float64)
+    cdef double dr
+    cdef double dd
+
+    for ii in range(length):
+        cpal.palGe50(dl[ii], db[ii], &dr, &dd)
+        dr_out[ii] = dr
+        dd_out[ii] = dd
+
+    return (dr_out, dd_out)
+
 def geoc( double p, double h ):
      """
      (r, z) = geoc( p, h )
