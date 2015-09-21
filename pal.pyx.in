@@ -1799,6 +1799,39 @@ def fk5hz( double r5, double d5, double epoch):
      cpal.palFk5hz( r5, d5, epoch, &rh, &dh )
      return (rh, dh)
 
+def fk5hzVector(np.ndarray[double, ndim=1] r5,
+                np.ndarray[double, ndim=1] d5,
+                double epoch):
+    """
+    (rh, dh) = fk5hzVector(r5, d5, epoch)
+
+    where rh, dh, r5, and d5 are numpy arrays
+
+    @palFk5hz@
+
+    Raises
+    ------
+    ValueError if r5 and d5 have different lengths
+    """
+
+    cdef int length = len(r5)
+
+    if len(d5)!=length:
+        raise ValueError("You did not pass the same number of " \
+                         "RAs as Decs to fk5hzVector")
+
+    cdef np.ndarray ra_out = np.ndarray(length, dtype=np.float64)
+    cdef np.ndarray dec_out = np.ndarray(length, dtype=np.float64)
+    cdef double rh
+    cdef double dh
+
+    for ii in range(length):
+        cpal.palFk5hz( r5[ii], d5[ii], epoch, &rh, &dh )
+        ra_out[ii] = rh
+        dec_out[ii] = dh
+
+    return (ra_out, dec_out)
+
 def galeq( double dl, double db ):
      """
      (dr, dd) = galeq( dl, db )

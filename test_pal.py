@@ -936,6 +936,31 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dr5, 0.000000006822074, 13 )
         self.assertAlmostEqual( dd5, -0.000000002334012, 13 )
 
+    def test_fk5hzVector(self):
+        """
+        Test that fk5hzVector returns results consistent with
+        fk5hz
+        """
+        np.random.seed(132)
+        nSamples = 200
+        raList = np.random.random_sample(nSamples)*2.0*np.pi
+        decList = (np.random.random_sample(nSamples)-0.5)*np.pi
+        testRa, testDec = pal.fk5hzVector(raList, decList, 2000.0)
+
+        for ii in range(nSamples):
+            controlRa, controlDec = pal.fk5hz(raList[ii], decList[ii], 2000.0)
+            self.assertEqual(controlRa, testRa[ii])
+            self.assertEqual(controlDec, testDec[ii])
+
+        # test that an exception is raised if the input raList and decList
+        # are of different sizes
+        with self.assertRaises(ValueError) as context:
+            testRa, testDec = pal.fk5hzVector(raList, decList[:24], 2000.0)
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of " \
+                         "RAs as Decs to fk5hzVector")
+
+
     def test_fk54z(self):
         (r1950, d1950, dr1950, dd1950) = pal.fk54z( 1.2, -0.3, 1960 )
         self.assertAlmostEqual( r1950, 1.1902221805755279771, 12 )
