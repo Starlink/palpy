@@ -1870,6 +1870,39 @@ def galsup( double dl, double db ):
      cpal.palGalsup( dl, db, &dsl, &dsb )
      return (dsl, dsb)
 
+def galsupVector(np.ndarray[double, ndim=1] dl not None,
+                 np.ndarray[double, ndim=1] db not None):
+    """
+    (dsl, dsb) = galsupVector( dl, db )
+
+    where dl, db, dsl, and dsb are all numpy arrays
+
+    @palGalsup@
+
+    Raises
+    ------
+    ValueError if input arrays have different lengths
+    """
+
+    cdef int length=len(dl)
+
+    if len(db)!=length:
+        raise ValueError("You did not pass the same number of " \
+                         + "Galactic longitudes as Galactic latitudes " \
+                         + "into galsupVector")
+
+    cdef np.ndarray dsl_out = np.empty(length, dtype=np.float)
+    cdef np.ndarray dsb_out = np.empty(length, dtype=np.float)
+    cdef double dsl
+    cdef double dsb
+
+    for ii in range(length):
+        cpal.palGalsup(dl[ii], db[ii], &dsl, &dsb)
+        dsl_out[ii] = dsl
+        dsb_out[ii] = dsb
+
+    return (dsl_out, dsb_out)
+
 def ge50( double dl, double db ):
      """
      (rd, dd) = ge50( dl, db )

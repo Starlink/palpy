@@ -1101,6 +1101,33 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dsl, 4.567933268859171, 12 )
         self.assertAlmostEqual( dsb, -0.01862369899731829, 12 )
 
+    def test_galsupVector(self):
+        """
+        Test that galsupVector gives results consistent with galsup
+        """
+        np.random.seed(134)
+        nSamples = 200
+
+        llList = np.random.random_sample(nSamples)*2.0*np.pi
+        bbList = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testSl, testSb = pal.galsupVector(llList, bbList)
+
+        for ii in range(nSamples):
+            controlSl, controlSb = pal.galsup(llList[ii], bbList[ii])
+            self.assertEqual(controlSl, testSl[ii])
+            self.assertEqual(controlSb, testSb[ii])
+
+        # test that an exception is raised if you pass in arrays with
+        # different lengths
+        with self.assertRaises(ValueError) as context:
+            testSl, testSb = pal.galsupVector(llList[:55], bbList)
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of " \
+                         + "Galactic longitudes as Galactic latitudes " \
+                         + "into galsupVector")
+
+
     def test_geoc(self):
         lat = 19.822838905884 * pal.DD2R
         alt = 4120.0
