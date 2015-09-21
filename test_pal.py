@@ -978,6 +978,11 @@ class TestPAL(unittest.TestCase) :
             self.assertEqual(testDr[ii], controlDr)
             self.assertEqual(testDd[ii], controlDd)
 
+        # test hfk5zVector anf fk5hzVector invert each other
+        ra5, dec5 = pal.fk5hzVector(testRa, testDec, 2000.0)
+        np.testing.assert_array_almost_equal(ra5, raList, 11)
+        np.testing.assert_array_almost_equal(dec5, decList, 11)
+
         # test that an exception is raised if raList and decList are
         # of different lengths
         with self.assertRaises(ValueError) as context:
