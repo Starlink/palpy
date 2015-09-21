@@ -487,10 +487,10 @@ class TestPAL(unittest.TestCase) :
 
         # test that dcs2cVector and dcc2sVector do, in fact, invert one another
         aTest, bTest = pal.dcc2sVector(vTest)
-        np.testing.assert_array_almost_equal(np.cos(ra), np.cos(aTest), 9)
-        np.testing.assert_array_almost_equal(np.sin(ra), np.sin(aTest), 9)
-        np.testing.assert_array_almost_equal(np.cos(dec), np.cos(bTest), 9)
-        np.testing.assert_array_almost_equal(np.sin(dec), np.sin(bTest), 9)
+        np.testing.assert_array_almost_equal(np.cos(ra), np.cos(aTest), 12)
+        np.testing.assert_array_almost_equal(np.sin(ra), np.sin(aTest), 12)
+        np.testing.assert_array_almost_equal(np.cos(dec), np.cos(bTest), 12)
+        np.testing.assert_array_almost_equal(np.sin(dec), np.sin(bTest), 12)
 
         # test that an exception is raised if you pass in arrays of different lengths
         with self.assertRaises(ValueError) as context:
@@ -980,8 +980,8 @@ class TestPAL(unittest.TestCase) :
 
         # test hfk5zVector anf fk5hzVector invert each other
         ra5, dec5 = pal.fk5hzVector(testRa, testDec, 2000.0)
-        np.testing.assert_array_almost_equal(ra5, raList, 11)
-        np.testing.assert_array_almost_equal(dec5, decList, 11)
+        np.testing.assert_array_almost_equal(ra5, raList, 12)
+        np.testing.assert_array_almost_equal(dec5, decList, 12)
 
         # test that an exception is raised if raList and decList are
         # of different lengths
@@ -1276,10 +1276,10 @@ class TestPAL(unittest.TestCase) :
         # (also make sure that x_in and y_in were not changed
         # by pcdVector)
         with self.assertRaises(AssertionError) as context:
-            np.testing.assert_array_almost_equal(xTestList, x_in, 9)
+            np.testing.assert_array_almost_equal(xTestList, x_in, 12)
 
         with self.assertRaises(AssertionError) as context:
-            np.testing.assert_array_almost_equal(yTestList, y_in, 9)
+            np.testing.assert_array_almost_equal(yTestList, y_in, 12)
 
         # make sure that an exceptoion is raised if you pass in
         # mismatched x and y vectors
@@ -1309,16 +1309,16 @@ class TestPAL(unittest.TestCase) :
 
         # make sure that xTestList and yTestList are different from x_in and y_in
         with self.assertRaises(AssertionError) as context:
-            np.testing.assert_array_almost_equal(xTestList, x_in, 9)
+            np.testing.assert_array_almost_equal(xTestList, x_in, 12)
 
         with self.assertRaises(AssertionError) as context:
-            np.testing.assert_array_almost_equal(yTestList, y_in ,9)
+            np.testing.assert_array_almost_equal(yTestList, y_in, 12)
 
         # use pcdVector to transform back into the distorted coordinates and
         # verify that those are equivalent to x_in and y_in
         xDistorted, yDistorted = pal.pcdVector(disco, xTestList, yTestList)
-        np.testing.assert_array_almost_equal(xDistorted, x_in, 9)
-        np.testing.assert_array_almost_equal(yDistorted, y_in, 9)
+        np.testing.assert_array_almost_equal(xDistorted, x_in, 12)
+        np.testing.assert_array_almost_equal(yDistorted, y_in, 12)
 
         # test that an exception is raised if you pass in different numbers
         # of x and y coordinates
@@ -1613,8 +1613,8 @@ class TestPAL(unittest.TestCase) :
         # angles normalized to the 0-2pi ranges
         self.assertTrue(testAngle.min()>0.0)
         self.assertTrue(testAngle.max()<2.0*np.pi)
-        np.testing.assert_array_almost_equal(np.cos(testAngle), np.cos(angle_in), 9)
-        np.testing.assert_array_almost_equal(np.sin(testAngle), np.sin(angle_in), 9)
+        np.testing.assert_array_almost_equal(np.cos(testAngle), np.cos(angle_in), 12)
+        np.testing.assert_array_almost_equal(np.sin(testAngle), np.sin(angle_in), 12)
 
         for ii in range(nSamples):
             controlAngle = pal.dranrm(angle_in[ii])
