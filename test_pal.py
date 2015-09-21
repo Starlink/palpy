@@ -1951,6 +1951,36 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dl, 3.798775860769474, 12 )
         self.assertAlmostEqual( db,  -0.1397070490669407, 12 )
 
+    def test_supgalVector(self):
+        """
+        Test that supgalVector returns results consistent with supgal
+        """
+
+        np.random.seed(134)
+        nSamples = 200
+        dslList = np.random.random_sample(nSamples)*2.0*np.pi
+        dsbList = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testDl, testDb = pal.supgalVector(dslList, dsbList)
+
+        for ii in range(nSamples):
+            controlDl, controlDb = pal.supgal(dslList[ii], dsbList[ii])
+            self.assertEqual(controlDl, testDl[ii])
+            self.assertEqual(controlDb, testDb[ii])
+
+        # test that supgalVector and galsupVector invert each other
+        testDsl, testDsb = pal.galsupVector(testDl, testDb)
+        np.testing.assert_array_almost_equal(testDsl, dslList, 9)
+        np.testing.assert_array_almost_equal(testDsb, dsbList, 9)
+
+        # test that an exception is raised if the input arrays are of
+        # different length
+        with self.assertRaises(ValueError) as context:
+            testDl, testDb = pal.supgalVector(dslList[:16], dsbList)
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of " \
+                         + "longitudes as latitudes into supgalVector")
+
     def test_tp(self):
         dr0 = 3.1
         dd0 = -0.9

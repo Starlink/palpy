@@ -2946,6 +2946,40 @@ def supgal( double dsl, double dsb ):
      cpal.palSupgal( dsl, dsb, &dl, &db )
      return (dl, db)
 
+def supgalVector(np.ndarray[double, ndim=1] dsl not None,
+                 np.ndarray[double, ndim=1] dsb not None):
+    """
+    (dl, db) = supgalVector( dsl, dsb )
+
+    where dsl, dsb, dl, and db are all numpy arrays
+
+    @palSupgal@
+
+    Raises
+    ------
+    ValueError if input arrays are of different lengths
+    """
+
+    cdef int length=len(dsl)
+
+    if len(dsb)!=length:
+        raise ValueError("You did not pass the same number of " \
+                         + "longitudes as latitudes into supgalVector")
+
+    cdef np.ndarray dl_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray db_out = np.empty(length, dtype=np.float64)
+
+    cdef double dl
+    cdef double db
+
+    for ii in range(length):
+        cpal.palSupgal(dsl[ii], dsb[ii], &dl, &db)
+        dl_out[ii] = dl
+        db_out[ii] = db
+
+    return (dl_out, db_out)
+
+
 def ue2el(np.ndarray[double, ndim=1] u not None, int jformr ):
     """
     (jform, epoch, orbinc, anode, perih, aorq, e, aorl, dm) = ue2el( u, jformr )
