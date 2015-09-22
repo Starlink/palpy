@@ -1174,6 +1174,40 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( r2000, 1.2097812228966762227, 11 )
         self.assertAlmostEqual( d2000, -0.29826111711331398935, 12 )
 
+    def test_fk45zVector(self):
+        """
+        Test that fk45zVector produces results consistent with fk45z
+        """
+        epoch = 1960
+        np.random.seed(136)
+        nSamples = 200
+        r1950 = np.random.random_sample(nSamples)*2.0*np.pi
+        d1950 = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testR2000, testD2000 = pal.fk45zVector(r1950, d1950, epoch)
+
+        for ii in range(nSamples):
+            controlR2000, controlD2000 = pal.fk45z(r1950[ii], d1950[ii], epoch)
+            self.assertEqual(controlR2000, testR2000[ii])
+            self.assertEqual(controlD2000, testD2000[ii])
+
+        # test that fk45zVector and fk54zVector invert each other
+        testR1950, testD1950, \
+        testDR1950, testDD1950 = pal.fk54zVector(testR2000, testD2000, epoch)
+
+        distance = pal.dsepVector(testR1950, testD1950, r1950, d1950)
+        arcsecPerRadians = 3600.0*np.degrees(1.0)
+        np.testing.assert_array_almost_equal(distance*arcsecPerRadians, \
+                                             np.zeros(len(distance)), 4)
+
+        # test that an exception is raised if the input arrays are of different
+        # lengths
+        with self.assertRaises(ValueError) as context:
+            results = pal.fk45zVector(r1950, d1950[:8], epoch)
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of Decs as RAs to " \
+                         + "fk45zVector")
+
     def test_fk52h(self):
         inr5 = 1.234
         ind5 = -0.987

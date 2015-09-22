@@ -1756,6 +1756,40 @@ def fk45z( double r1950, double d1950, double bepoch ):
      cpal.palFk45z( r1950, d1950, bepoch, &r2000, &d2000 )
      return (r2000, d2000)
 
+def fk45zVector(np.ndarray[double, ndim=1] r1950 not None,
+                np.ndarray[double, ndim=1] d1950 not None,
+                double bepoch):
+    """
+    (r2000, d2000) = fk45zVector(r1950, d1950, bepoch)
+
+    where r1950, d1950, r2000, d2000 are numpy arrays
+
+    @palFk45z@
+
+    Raises
+    ------
+    ValueError if input arrays are not of the same length
+    """
+
+    cdef int length = len(r1950)
+
+    if len(d1950)!=length:
+        raise ValueError("You did not pass the same number of Decs as " \
+                         + "RAs to fk45zVector")
+
+    cdef np.ndarray r2000_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray d2000_out = np.empty(length, dtype=np.float64)
+
+    cdef double r2000
+    cdef double d2000
+
+    for ii in range(length):
+        cpal.palFk45z(r1950[ii], d1950[ii], bepoch, &r2000, &d2000)
+        r2000_out[ii] = r2000
+        d2000_out[ii] = d2000
+
+    return (r2000_out, d2000_out)
+
 def fk524( double r2000, double d2000, double dr2000,
            double dd2000, double p2000, double v2000 ):
      """
