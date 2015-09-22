@@ -1109,6 +1109,66 @@ class TestPAL(unittest.TestCase) :
             self.assertTrue(dpx<0.001)
             self.assertTrue(dvr<0.01)
 
+    def test_Fk524Vectors(self):
+        """
+        Test that fk524Vector returns results consistent with
+        fk524
+        """
+        np.random.seed(135)
+        nSamples = 200
+        ra5 = np.random.random_sample(nSamples)*2.0*np.pi
+        dec5 = (np.random.random_sample(nSamples)-0.5)*np.pi
+        mura5 = 0.01*(np.random.random_sample(nSamples)-0.5)*200.0*np.radians(1.0/3600.0)
+        mudec5 = 0.01*(np.random.random_sample(nSamples)-0.5)*200.0*np.radians(1.0/3600.0)
+        px5 = np.random.random_sample(nSamples)
+        vr5 = (np.random.random_sample(nSamples)-0.5)*200.0
+
+        testRa, testDec, \
+        testMura, testMudec, \
+        testPx, testVr = pal.fk524Vector(ra5, dec5, mura5, mudec5, px5, vr5)
+
+        for ii in range(nSamples):
+            controlRa, controlDec, \
+            controlMura, controlMudec, \
+            controlPx, controlVr = pal.fk524(ra5[ii], dec5[ii], mura5[ii], \
+                                             mudec5[ii], px5[ii], vr5[ii])
+
+            self.assertEqual(controlRa, testRa[ii])
+            self.assertEqual(controlDec, testDec[ii])
+            self.assertEqual(controlMura, testMura[ii])
+            self.assertEqual(controlMudec, testMudec[ii])
+            self.assertEqual(controlPx, testPx[ii])
+            self.assertEqual(controlVr, testVr[ii])
+
+        # test that exceptions are raised when the input arrays are
+        # of different lengths
+        with self.assertRaises(ValueError) as context:
+            results = pal.fk524Vector(ra5, dec5[:6], mura5, mudec5, px5, vr5)
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many Decs as RAs into fk524Vector")
+
+        with self.assertRaises(ValueError) as context:
+            results = pal.fk524Vector(ra5, dec5, mura5[:8], mudec5, px5, vr5)
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many RA proper motions as RAs into fk524Vector")
+
+        with self.assertRaises(ValueError) as context:
+            results = pal.fk524Vector(ra5, dec5, mura5, mudec5[:6], px5, vr5)
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many Dec proper motions as RAs into fk524Vector")
+
+        with self.assertRaises(ValueError) as context:
+            results = pal.fk524Vector(ra5, dec5, mura5, mudec5, px5[:9], vr5)
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many parallaxes as RAs into fk524Vector")
+
+        with self.assertRaises(ValueError) as context:
+            results = pal.fk524Vector(ra5, dec5, mura5, mudec5, px5, vr5[:9])
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many radial velocities as RAs into fk524Vector")
+
+
+
     def test_fk45z(self):
         (r2000, d2000) = pal.fk45z( 1.2, -0.3, 1960 )
         self.assertAlmostEqual( r2000, 1.2097812228966762227, 11 )

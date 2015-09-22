@@ -1774,6 +1774,77 @@ def fk524( double r2000, double d2000, double dr2000,
                     &p1950, &v1950 )
      return (r1950, d1950, dr1950, dd1950, p1950, v1950 )
 
+def fk524Vector(np.ndarray[double, ndim=1] r2000 not None,
+                np.ndarray[double, ndim=1] d2000 not None,
+                np.ndarray[double, ndim=1] dr2000 not None,
+                np.ndarray[double, ndim=1] dd2000 not None,
+                np.ndarray[double, ndim=1] p2000 not None,
+                np.ndarray[double, ndim=1] v2000 not None):
+    """
+    (r1950, d1950, dr1950, dd1950, p1950, v1950) = fk524( r2000, d2000, dr2000, dd2000, p2000, v2000 )
+
+    where r2000, d2000, dr2000, dd2000, p2000, v2000,
+    r1950, d1950, dr1950, dd1950, p1950, and v1950 are
+    all numpy arrays
+
+    @palFk524@
+
+    Raises
+    ------
+    ValueError if input arrays do not all of the same length
+    """
+    cdef int length = len(r2000)
+
+    if len(d2000)!= length:
+        raise ValueError("You did not pass as many Decs as RAs into " \
+                         + "fk524Vector")
+
+    if len(dr2000)!= length:
+        raise ValueError("You did not pass as many RA proper motions as RAs into " \
+                         + "fk524Vector")
+
+    if len(dd2000)!= length:
+        raise ValueError("You did not pass as many Dec proper motions as RAs into " \
+                         + "fk524Vector")
+
+    if len(p2000)!= length:
+        raise ValueError("You did not pass as many parallaxes as RAs into " \
+                         + "fk524Vector")
+
+    if len(v2000)!= length:
+        raise ValueError("You did not pass as many radial velocities as RAs into " \
+                         + "fk524Vector")
+
+
+    cdef np.ndarray r1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray d1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dr1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dd1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray p1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray v1950_out = np.empty(length, dtype=np.float64)
+
+    cdef double r1950
+    cdef double d1950
+    cdef double dr1950
+    cdef double dd1950
+    cdef double p1950
+    cdef double v1950
+
+    for ii in range(length):
+        cpal.palFk524(r2000[ii], d2000[ii], dr2000[ii], dd2000[ii],
+                      p2000[ii], v2000[ii], &r1950, &d1950,
+                      &dr1950, &dd1950, &p1950, &v1950)
+
+        r1950_out[ii] = r1950
+        d1950_out[ii] = d1950
+        dr1950_out[ii] = dr1950
+        dd1950_out[ii] = dd1950
+        p1950_out[ii] = p1950
+        v1950_out[ii] = v1950
+
+    return (r1950_out, d1950_out, dr1950_out, dd1950_out,
+            p1950_out, v1950_out)
+
 def fk54z(double r2000, double d2000, double bepoch):
      """
      (r1950, d1950, dr1950, dd1950) = fk54z( r2000, d2000, bepoch )
