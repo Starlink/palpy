@@ -1095,6 +1095,20 @@ def drange( double angle ):
      """
      return cpal.palDrange( angle )
 
+def drangeVector(np.ndarray[double, ndim=1] angle not None):
+     """
+     a = drange(angle)
+
+     where angle and a are numpy arrays
+
+     @palDrange@
+     """
+     cdef int length = len(angle)
+     cdef np.ndarray angle_out = np.empty(length, dtype=np.float64)
+     for ii in range(length):
+         angle_out[ii] = cpal.palDrange(angle[ii])
+     return angle_out
+
 def dranrm( double angle ):
      """
      a = dranrm( angle )

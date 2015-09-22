@@ -2014,6 +2014,23 @@ class TestPAL(unittest.TestCase) :
     def test_range(self):
         self.assertAlmostEqual( pal.drange( -4 ), 2.283185307179586, 12 )
 
+    def test_drangeVector(self):
+        """
+        Test that drangeVector returns results consistent with drange
+        """
+        np.random.seed(140)
+        nSamples = 1000
+        angle_in = np.random.random_sample(nSamples)*10.0*np.pi+2.0*np.pi
+        angle_in = np.append(angle_in, np.random.random_sample(nSamples)*(-10.0)*np.pi)
+
+        test_angle = pal.drangeVector(angle_in)
+
+        for ii in range(len(angle_in)):
+            control_angle = pal.drange(angle_in[ii])
+            self.assertEqual(control_angle, test_angle[ii])
+            self.assertAlmostEqual(np.sin(angle_in[ii]), np.sin(test_angle[ii]), 10)
+            self.assertAlmostEqual(np.cos(angle_in[ii]), np.cos(test_angle[ii]), 10)
+
     def test_ranorm(self):
         self.assertAlmostEqual( pal.dranrm( -0.1 ), 6.183185307179587, 12 )
 
