@@ -992,6 +992,123 @@ class TestPAL(unittest.TestCase) :
         np.testing.assert_allclose( dvh, vhex2, atol=1e-12 )
         np.testing.assert_allclose( dph, phex2, atol=1e-12 )
 
+    def test_fk524(self):
+        """
+        Test that fk524 gives results consistent with data published
+        in:
+
+        'Explanatory Supplement to The Astronomical Almanac'
+        Seidelmann, P. Kenneth (1992)
+        University Science Books
+
+        Table 3.58.1
+        """
+
+        # fk4 ra
+        hr_in = np.array([0, 3, 6, 14, 21, 1, 20, 11, 14])
+        min_in = np.array([17, 17, 11, 36, 4, 48, 15, 50, 54])
+        sec_in = np.array([28.774, 55.847, 43.975, 11.250, 39.935, \
+                           48.784, 3.004, 6.172, 59.224])
+
+        fk4_ra = pal.dtf2rVector(hr_in, min_in, sec_in)
+
+        # fk4 dec
+        sgn = np.array([-1.0, -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0])
+        deg_in = np.array([65, 43, 74, 60, 38, 89, 89, 38, 0])
+        amin_in = np.array([10, 15, 44, 37, 29, 1, 8, 4, 1])
+        asec_in = np.array([6.70, 35.74, 12.46, 48.85, 59.10, 43.74, 18.48, \
+                            39.15, 58.08])
+
+        fk4_dec = sgn*pal.daf2rVector(deg_in, amin_in, asec_in)
+
+        # fk4 mura
+        sgn = np.array([1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0 , 1.0])
+        hr_in = np.zeros(9, dtype=np.int)
+        min_in = np.zeros(9, dtype=np.int)
+        sec_in = np.array([27.141, 27.827, 3.105, 49.042, \
+                           35.227, 18.107, 11.702, 33.873, 0.411])
+
+        fk4_mura = 0.01*sgn*pal.dtf2rVector(hr_in, min_in, sec_in)
+
+        # fk4 mudec
+        radPerArcsec = np.radians(1.0/3600.0)
+        fk4_mudec = 0.01*radPerArcsec*np.array([116.74, 74.76, -21.12, 71.20, \
+                                         318.47, -0.43, -0.09, -580.57,
+                                         -2.73])
+
+        fk4_px = np.array([0.134, 0.156, 0.115, 0.751, 0.292, 0.000, \
+                           0.000, 0.116, 0.000])
+
+        fk4_vr = np.array([8.70, 86.80, 35.00, -22.20, -64.00, 0.00, \
+                           0.00, -98.30, 0.00])
+
+        # fk5 ra
+        hr_in = np.array([0, 3, 6, 14, 21, 2, 21, 11, 14])
+        min_in = np.array([20, 19, 10, 39, 6, 31, 8, 52, 57])
+        sec_in = np.array([4.3100, 55.6785, 14.5196, 36.1869, \
+                           54.5901, 49.8131, 46.0652, 58.7461, \
+                           33.2650])
+
+        fk5_ra = pal.dtf2rVector(hr_in, min_in, sec_in)
+
+        # fk5 dec
+        sgn = np.array([-1.0, -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0])
+        deg_in = np.array([64, 43, 74, 60, 38, 89, 88, 37, 0])
+        amin_in = np.array([52, 4, 45, 50, 44, 15, 57, 43, 10])
+        asec_in = np.array([29.332, 10.830, 11.036, 7.393, 44.969, \
+                            50.661, 23.667, 7.456, 3.240])
+
+        fk5_dec = sgn*pal.daf2rVector(deg_in, amin_in, asec_in)
+
+        # fk5 mura
+        sgn = np.array([1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0 , 1.0])
+        hr_in = np.zeros(9, dtype=np.int)
+        min_in = np.zeros(9, dtype=np.int)
+        sec_in = np.array([26.8649, 27.7694, 3.1310, 49.5060, \
+                           35.3528, 21.7272, 8.4469, 33.7156, \
+                           0.4273])
+
+        fk5_mura = 0.01*sgn*pal.dtf2rVector(hr_in, min_in, sec_in)
+
+        # fk5 mudec
+        fk5_mudec = 0.01*radPerArcsec*np.array([116.285, 73.050, -21.304, \
+                                                69.934, 320.206, -1.571, \
+                                                0.171, -581.216, \
+                                                -2.402])
+
+        fk5_px = np.array([0.1340, 0.1559, 0.1150, 0.7516, \
+                           0.2923, 0.0000, 0.0000, \
+                           0.1161, 0.0000])
+
+        fk5_vr = np.array([8.74, 86.87, 35.00, -22.18, -63.89, 0.00, \
+                           0.00, -97.81, 0.00])
+
+        arcsecPerRad = np.degrees(1.0)*3600.0
+
+        for ra5, dec5, mura5, mudec5, px5, vr5, \
+            ra4, dec4, mura4, mudec4, px4, vr4 in \
+            zip(fk5_ra, fk5_dec, fk5_mura, fk5_mudec, fk5_px, fk5_vr, \
+                fk4_ra, fk4_dec, fk4_mura, fk4_mudec, fk4_px, fk4_vr):
+
+            ra, dec, mura, \
+            mudec, px, vr = pal.fk524(ra5, dec5, mura5, mudec5, px5, vr5)
+
+            # dpos is the angular separation (in arcsec) between
+            # the result of pal.fk524 and the true fk4 coordinates
+            # of the sample point
+            dpos = arcsecPerRad*pal.dsep(ra4, dec4, ra, dec)
+
+            dmura = arcsecPerRad*np.abs(mura-mura4)
+            dmudec = arcsecPerRad*np.abs(mudec-mudec4)
+            dpx = np.abs(px-px4)
+            dvr = np.abs(vr-vr4)
+
+            self.assertTrue(dpos<0.001)
+            self.assertTrue(dmura<0.01)
+            self.assertTrue(dmudec<0.01)
+            self.assertTrue(dpx<0.001)
+            self.assertTrue(dvr<0.01)
+
     def test_fk45z(self):
         (r2000, d2000) = pal.fk45z( 1.2, -0.3, 1960 )
         self.assertAlmostEqual( r2000, 1.2097812228966762227, 11 )
