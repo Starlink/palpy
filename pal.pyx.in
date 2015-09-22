@@ -1504,6 +1504,40 @@ def ecleq( double dl, double db, double date ):
      cpal.palEcleq( dl, db, date, &dr, &dd )
      return (dr, dd)
 
+def ecleqVector(np.ndarray[double, ndim=1] dl not None,
+                np.ndarray[double, ndim=1] db not None,
+                double date):
+    """
+    (dr, dd) = ecleqVector(dl, db, date)
+
+    where dl, db, dr, and dd are all numpy arrays
+
+    @palEcleq@
+
+    Raises
+    ------
+    ValueError if input arrays are of different lengths
+    """
+
+    cdef int length = len(dl)
+
+    if len(db)!=length:
+        raise ValueError("You did not pass the same number of " \
+                         + "longitudes as latitudes to ecleqVector")
+
+    cdef np.ndarray rr_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dd_out = np.empty(length, dtype=np.float64)
+
+    cdef double rr
+    cdef double dd
+
+    for ii in range(length):
+        cpal.palEcleq(dl[ii], db[ii], date, &rr, &dd)
+        rr_out[ii] = rr
+        dd_out[ii] = dd
+
+    return (rr_out, dd_out)
+
 def ecmat( double date ):
      """
      rmat = ecmat( date )

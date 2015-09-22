@@ -853,6 +853,41 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dr, 1.229910118208851, 5 )
         self.assertAlmostEqual( dd, 0.2638461400411088, 5 )
 
+    def test_ecleqVector(self):
+        """
+        Test that ecleqVector produces results consistent with
+        ecleq
+        """
+        mjd = 58734.2
+        np.random.seed(138)
+        nSamples = 200
+        dl = np.random.random_sample(nSamples)*2.0*np.pi
+        db = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testRa, testDec = pal.ecleqVector(dl, db, mjd)
+
+        for ii in range(nSamples):
+            controlRa, controlDec = pal.ecleq(dl[ii], db[ii], mjd)
+            self.assertEqual(controlRa, testRa[ii])
+            self.assertEqual(controlDec, testDec[ii])
+
+        # test that ecleqVector and eqeclVector invert
+        # one another
+        testDl, testDb = pal.eqeclVector(testRa, testDec, mjd)
+        arcsecPerRadian = 3600.0*np.degrees(1.0)
+        distance = arcsecPerRadian*pal.dsepVector(testDl, testDb, dl, db)
+        np.testing.assert_array_almost_equal(distance,
+                                             np.zeros(len(distance)), 4)
+
+        # test that an exception is raised if input arrays are
+        # of different lenghts
+        with self.assertRaises(ValueError) as context:
+            results = pal.ecleqVector(dl[:4], db, mjd)
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of " \
+                         + "longitudes as latitudes to ecleqVector")
+
+
     def test_ecmat(self):
         expected = np.array( [
             [ 1.0,                    0.0,                   0.0 ],
