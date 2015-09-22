@@ -1659,6 +1659,40 @@ def eqecl( double dr, double dd, double date ):
      cpal.palEqecl( dr, dd, date, &dl, &db )
      return (dl, db)
 
+def eqeclVector(np.ndarray[double, ndim=1] dr not None,
+                np.ndarray[double, ndim=1] dd not None,
+                double date):
+    """
+    (dl, db) = eqeclVector(dr, dd, date)
+
+    where dr, dd, dl, and db are all numpy arrays
+
+    @palEqEcl@
+
+    Raises
+    ------
+    ValueError if input arrays have different lengths
+    """
+
+    cdef int length = len(dr)
+
+    if len(dd)!=length:
+        raise ValueError("You did not pass the same number of Decs " \
+                         + "as RAs to eqeclVector")
+
+    cdef np.ndarray dl_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray db_out = np.empty(length, dtype=np.float64)
+
+    cdef double dl
+    cdef double db
+
+    for ii in range(length):
+        cpal.palEqecl(dr[ii], dd[ii], date, &dl, &db)
+        dl_out[ii] = dl
+        db_out[ii] = db
+
+    return (dl_out, db_out)
+
 def eqeqx( double date ):
      """
      eq = eqeqx( date )

@@ -910,6 +910,31 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dl, 0.7036566430349022, 6 )
         self.assertAlmostEqual( db, -0.4036047164116848, 6 )
 
+    def test_eqeclVector(self):
+        """
+        Test that eqeclVector produces results consistent with
+        eqecl
+        """
+        mjd = 53000.0
+        np.random.seed(137)
+        nSamples = 200
+        ra = np.random.random_sample(nSamples)*2.0*np.pi
+        dec = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testDb, testDl = pal.eqeclVector(ra, dec, mjd)
+        for ii in range(nSamples):
+            controlDb, controlDl = pal.eqecl(ra[ii], dec[ii], mjd)
+            self.assertEqual(controlDb, testDb[ii])
+            self.assertEqual(controlDl, testDl[ii])
+
+        # test that an exception is raised if inpu arrays are of
+        # different lengths
+        with self.assertRaises(ValueError) as context:
+            results = pal.eqeclVector(ra, dec[:8], mjd)
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of Decs " \
+                         + "as RAs to eqeclVector")
+
     def test_eqeqx(self):
         self.assertAlmostEqual( pal.eqeqx( 53736 ), -0.8834195072043790156e-5, 15 )
 
