@@ -485,6 +485,59 @@ class TestPAL(unittest.TestCase) :
         self.assertRaises( ValueError, pal.caldj, 1970, 13, 1 )
         self.assertRaises( ValueError, pal.caldj, 1970, 1, 32 )
 
+    def test_caldjVector(self):
+        """
+        Test that caldjVector gives results consistent with cadj
+        """
+        np.random.seed(143)
+        nSamples = 200
+        iy = np.random.random_integers(1000, 10000, nSamples)
+        im = np.random.random_integers(1, 11, nSamples)
+        iday = np.random.random_integers(1, 20, nSamples)
+
+        testMjd = pal.caldjVector(iy, im, iday)
+
+        for ii in range(nSamples):
+            controlMjd = pal.caldj(iy[ii], im[ii], iday[ii])
+            self.assertEqual(controlMjd, testMjd[ii])
+
+        # test that caldjVector and djcalVector invert each other
+        iyTest, imTest, idTest, fracTest = pal.djcalVector(5, testMjd)
+        np.testing.assert_array_equal(iyTest, iy)
+        np.testing.assert_array_equal(imTest, im)
+        np.testing.assert_array_equal(idTest, iday)
+
+        # test that bad values are handled properly
+        iy[5] = -4800
+        im[9] = 13
+        im[11] = 0
+        iday[17] = 33
+
+        testMjd = pal.caldjVector(iy, im, iday)
+        for ii in range(nSamples):
+            if ii==5 or ii==9 or ii==11 or ii==17:
+                self.assertTrue(np.isnan(testMjd[ii]))
+                self.assertRaises(ValueError, pal.caldj, iy[ii], im[ii], \
+                                  iday[ii])
+            else:
+                controlMjd = pal.caldj(iy[ii], im[ii], iday[ii])
+                self.assertEqual(controlMjd, testMjd[ii])
+
+        # test that exceptions are raised when the input arrays are
+        # of different lengths
+        with self.assertRaises(ValueError) as context:
+            results = pal.caldjVector(iy, im[:11], iday)
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many months as " \
+                         + "years to caldjVector")
+
+        with self.assertRaises(ValueError) as context:
+            results = pal.caldjVector(iy, im, iday[:8])
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many days as " \
+                         + "years to caldjVector")
+
+
     def test_daf2r(self):
         dr = pal.daf2r( 76, 54, 32.1 )
         self.assertAlmostEqual( dr, 1.342313819975276, 12 )

@@ -297,6 +297,53 @@ def caldj( int iy, int im, int id ):
                bad = "day"
           raise ValueError( "Julian date not computed. Bad {}".format(bad) )
 
+
+def caldjVector(np.ndarray[long, ndim=1] iy not None,
+                np.ndarray[long, ndim=1] im not None,
+                np.ndarray[long, ndim=1] id not None):
+     """
+     djm = caldjVector( iy, im, id )
+
+     where iy, im, id and djm are vectors
+
+     @palCaldj@
+
+     Raises
+     ------
+     ValueError if input arrays have different lengths
+
+     Bad input dates result in numpy.NaN for djm.
+
+     Note: This algorithm does not work for dates before
+     -4799 January 1
+
+     Note: If you pass in a two-digit year, this algorithm will
+     interpret it as being between 1949 and 2049
+     """
+
+     cdef int length = len(iy)
+
+     if len(im)!=length:
+         raise ValueError("You did not pass as many months as years " \
+                           + "to caldjVector")
+
+     if len(id)!=length:
+         raise ValueError("You did not pass as many days as years " \
+                           + "to caldjVector")
+
+     cdef np.ndarray mjd_out = np.empty(length, dtype=np.float64)
+     cdef double mjd
+     cdef int flag
+
+     for ii in range(length):
+         cpal.palCaldj(iy[ii], im[ii], id[ii], &mjd, &flag)
+         if flag == 0:
+             mjd_out[ii] = mjd
+         else:
+             mjd_out[ii] = np.NaN
+
+     return mjd_out
+
 def cldj( int iy, int im, int id ):
      """
      djm = cldj( iy, im, id )
