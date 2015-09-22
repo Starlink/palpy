@@ -894,6 +894,42 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(a1,a2,12)
             self.assertAlmostEqual(e1,e2,12)
 
+
+    def test_dh2eVector(self):
+        """
+        Test that dh2eVector gives results consistent with dh2e
+        """
+        np.random.seed(142)
+        nSamples = 200
+        phi = 1.432
+        az = np.random.random_sample(nSamples)*2.0*np.pi
+        el = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testHa, testDec = pal.dh2eVector(az, el, phi)
+
+        for ii in range(nSamples):
+            controlHa, controlDec = pal.dh2e(az[ii], el[ii], phi)
+            self.assertEqual(controlHa, testHa[ii])
+            self.assertEqual(controlDec, testDec[ii])
+            self.assertFalse(np.isnan(testHa[ii]))
+            self.assertFalse(np.isnan(testDec[ii]))
+
+        # test that dh2eVector and de2hVector invert each other
+        testAz, testEl = pal.de2hVector(testHa, testDec, phi)
+        arcsecPerRadians = 3600.0*np.degrees(1.0)
+        distance = arcsecPerRadians*pal.dsepVector(testAz, testEl, az, el)
+        np.testing.assert_array_almost_equal(distance,
+                                             np.zeros(nSamples), 9)
+
+        # test that an exception is raised when the input arrays
+        # are of different lengths
+        with self.assertRaises(ValueError) as context:
+            results = pal.dh2eVector(az[:40], el, phi)
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many elevations " \
+                         + "as azimuths to dh2eVector")
+
+
     def test_ecleq(self):
         (dr,dd) = pal.ecleq( 1.234, -0.123, 43210.0)
         self.assertAlmostEqual( dr, 1.229910118208851, 5 )

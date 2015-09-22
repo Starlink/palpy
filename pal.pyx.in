@@ -725,6 +725,40 @@ def dh2e( double az, double el, double phi ):
      cpal.palDh2e( az, el, phi, &ha, &dec )
      return (ha, dec)
 
+def dh2eVector(np.ndarray[double, ndim=1] az not None,
+               np.ndarray[double, ndim=1] el not None,
+               double phi):
+     """
+     (ha, dec) = dh2e( az, el, phi)
+
+     where az, el, ha, and dec are all numpy arrays
+
+     @palDh2e@
+
+     Raises
+     ------
+     ValueError if the input arrays are of different lengths
+     """
+
+     cdef int length = len(az)
+
+     if len(el)!=length:
+         raise ValueError("You did not pass as many elevations as " \
+                          + "azimuths to dh2eVector")
+
+     cdef np.ndarray ha_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray dec_out = np.empty(length, dtype=np.float64)
+
+     cdef double ha
+     cdef double dec
+
+     for ii in range(length):
+         cpal.palDh2e(az[ii], el[ii], phi, &ha, &dec)
+         ha_out[ii] = ha
+         dec_out[ii] = dec
+
+     return (ha_out, dec_out)
+
 def dimxv( np.ndarray[double, ndim=2] dm not None, np.ndarray[double, ndim=1] va not None):
      """
      vb = dimxv( dm, va )
