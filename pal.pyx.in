@@ -865,6 +865,36 @@ def dmoon( double date ):
           pv[i] = cpv[i]
      return pv
 
+
+def dmoonVector(np.ndarray[double, ndim=1] date):
+     """
+     (x, y, z, xd, yd, zd) = dmoon(date)
+
+     where date and all of the outputs are numpy arrays
+
+     @palDmoon@
+     """
+
+     cdef int length = len(date)
+     cdef np.ndarray x_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray y_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray z_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray xd_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray yd_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray zd_out = np.empty(length, dtype=np.float64)
+     cdef double cpv [6]
+
+     for ii in range(length):
+         cpal.palDmoon(date[ii], cpv)
+         x_out[ii] = cpv[0]
+         y_out[ii] = cpv[1]
+         z_out[ii] = cpv[2]
+         xd_out[ii] = cpv[3]
+         yd_out[ii] = cpv[4]
+         zd_out[ii] = cpv[5]
+
+     return (x_out, y_out, z_out, xd_out, yd_out, zd_out)
+
 def dmxm(np.ndarray[double, ndim=2] a not None, np.ndarray[double, ndim=2] b not None):
     """
     c = dmxm( a, b )

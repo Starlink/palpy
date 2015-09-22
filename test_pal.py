@@ -1619,6 +1619,25 @@ class TestPAL(unittest.TestCase) :
         pv = pal.dmoon( 48634.4687174074 )
         np.testing.assert_array_almost_equal( pv, expected, decimal=12 )
 
+
+    def test_dmoonVector(self):
+       """
+       Test that dmoonVector returns results consistent with dmoon
+       """
+       np.random.seed(141)
+       nSamples = 1000
+       date = np.random.random_sample(nSamples)*10000.0 + 43000.0
+       testX, testY, testZ, testXd, testYd, testZd = pal.dmoonVector(date)
+
+       for ii in range(nSamples):
+           x, y, z, xd, yd, zd = pal.dmoon(date[ii])
+           self.assertEqual(x, testX[ii])
+           self.assertEqual(y, testY[ii])
+           self.assertEqual(z, testZ[ii])
+           self.assertEqual(xd, testXd[ii])
+           self.assertEqual(yd, testYd[ii])
+           self.assertEqual(zd, testZd[ii])
+
     def test_nut(self):
         expected = np.array( [
             [  9.999999969492166e-1, 7.166577986249302e-5,  3.107382973077677e-5 ],
