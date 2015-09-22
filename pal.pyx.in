@@ -1425,6 +1425,42 @@ def dtp2s( double xi, double eta, double raz, double decz):
      cpal.palDtp2s( xi, eta, raz, decz, &ra, &dec )
      return (ra,dec)
 
+def dtp2sVector(np.ndarray[double, ndim=1] xi not None,
+                np.ndarray[double, ndim=1] eta not None,
+                double raz, double decz):
+     """
+     (ra, dec) = dtp2sVector( xi, eta, raz, decz)
+
+     where xi, eta, ra, and dex (NOT raz, decz) are numpy arrays
+
+     @palDtp2s@
+
+     Raises
+     ------
+     ValueError if input arrays are of different lengths
+     """
+
+     cdef int length = len(xi)
+
+     if len(eta)!=length:
+          raise ValueError("The arrays of tangent plane coordinates " \
+                           + "you passed to dtp2sVector are of " \
+                           + "different lengths")
+
+     cdef np.ndarray ra_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray dec_out = np.empty(length, dtype=np.float64)
+
+     cdef double ra
+     cdef double dec
+
+     for ii in range(length):
+         cpal.palDtp2s(xi[ii], eta[ii], raz, decz, &ra, &dec)
+         ra_out[ii] = ra
+         dec_out[ii] = dec
+
+     return (ra_out, dec_out)
+
+
 def dtps2c( double xi, double eta, double ra, double dec ):
      """
      (raz1, decz1, raz2, decz2) = dtps2c( xi, eta, ra, dec )

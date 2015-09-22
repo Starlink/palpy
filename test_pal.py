@@ -2323,6 +2323,42 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(x1,x2,12)
             self.assertAlmostEqual(e1,e2,12)
 
+    def test_dtp2sVector(self):
+        """
+        Test that dtp2sVector produces results consistent with
+        dtp2s
+        """
+
+        np.random.seed(139)
+        nSamples = 200
+        raz = 0.9
+        decz = -0.3
+
+        xi = np.random.random_sample(nSamples)*5.0
+        eta = np.random.random_sample(nSamples)*5.0
+        testRa, testDec = pal.dtp2sVector(xi, eta, raz, decz)
+
+        for ii in range(nSamples):
+            controlRa, controlDec = pal.dtp2s(xi[ii], eta[ii], raz, decz)
+            self.assertEqual(testRa[ii], controlRa)
+            self.assertEqual(testDec[ii], controlDec)
+            self.assertFalse(np.isnan(testRa[ii]))
+            self.assertFalse(np.isnan(testDec[ii]))
+
+        # test that dtp2sVector and ds2tpVector invert each other
+        testXi, testEta = pal.ds2tpVector(testRa, testDec, raz, decz)
+        np.testing.assert_array_almost_equal(testXi, xi, 12)
+        np.testing.assert_array_almost_equal(testEta, eta, 12)
+
+        # test that an exception is raised if input arrays are of
+        # different sizes
+        with self.assertRaises(ValueError) as context:
+            results = pal.dtp2sVector(xi, eta[:20], raz, decz)
+        self.assertEqual(context.exception.message,
+                         "The arrays of tangent plane coordinates " \
+                         + "you passed to dtp2sVector are of " \
+                         + "different lengths")
+
     def test_vecmat(self):
         # Not everything is implemented here
         dav = np.array( [ -0.123, 0.0987, 0.0654 ] )
