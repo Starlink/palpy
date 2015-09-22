@@ -1859,6 +1859,48 @@ def fk54z(double r2000, double d2000, double bepoch):
                     &dr1950, &dd1950 )
      return (r1950, d1950, dr1950, dd1950 )
 
+def fk54zVector(np.ndarray[double, ndim=1] r2000 not None,
+                np.ndarray[double, ndim=1] d2000 not None,
+                double bepoch):
+    """
+    (r1950, d1950, dr1950, dd1950) = fk45zVector( r2000, d2000, bepoch )
+
+    where r2000, d2000, and the outputs are numpy arrays
+
+    @palFk54z@
+
+    Raises
+    ------
+    Value error if input arrays have different lengths
+    """
+
+    cdef int length = len(r2000)
+
+    if len(d2000)!=length:
+        raise ValueError("You did not pass the same number of Decs as " \
+                         + "RAs to fk54zVector")
+
+    cdef np.ndarray r1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray d1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dr1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dd1950_out = np.empty(length, dtype=np.float64)
+
+    cdef double r1950
+    cdef double d1950
+    cdef double dr1950
+    cdef double dd1950
+
+    for ii in range(length):
+        cpal.palFk54z(r2000[ii], d2000[ii], bepoch, \
+                      &r1950, &d1950, &dr1950, &dd1950)
+
+        r1950_out[ii] = r1950
+        d1950_out[ii] = d1950
+        dr1950_out[ii] = dr1950
+        dd1950_out[ii] = dd1950
+
+    return (r1950_out, d1950_out, dr1950_out, dd1950_out)
+
 def fk5hz( double r5, double d5, double epoch):
      """
      (rh, dh) = fk5hz( r5, d5, epoch )

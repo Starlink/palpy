@@ -1250,6 +1250,35 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dr1950, -1.7830874775952945507e-08, 12 )
         self.assertAlmostEqual( dd1950, 7.196059425334821089e-09, 12 )
 
+    def test_fk54zVector(self):
+        """
+        Test that fk54zVector returns results consistent with fk54z
+        """
+        epoch = 1960
+        np.random.seed(136)
+        nSamples = 200
+        r2000 = np.random.random_sample(nSamples)*2.0*np.pi
+        d2000 = (np.random.random_sample(nSamples)-0.5)*np.pi
+        testR1950, testD1950, \
+        testDr1950, testDd1950 = pal.fk54zVector(r2000, d2000, epoch)
+
+        for ii in range(nSamples):
+            controlR1950, controlD1950, \
+            controlDr1950, controlDd1950 = pal.fk54z(r2000[ii], d2000[ii], epoch)
+
+            self.assertEqual(controlR1950, testR1950[ii])
+            self.assertEqual(controlD1950, testD1950[ii])
+            self.assertEqual(controlDr1950, testDr1950[ii])
+            self.assertEqual(controlDd1950, testDd1950[ii])
+
+        # test that an exception is raised if input arrays are of
+        # different lengths
+        with self.assertRaises(ValueError) as context:
+            results = pal.fk54zVector(r2000[:11], d2000, epoch)
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of Decs as " \
+                         +"RAs to fk54zVector")
+
     def test_flotin(self):
         pass
 
