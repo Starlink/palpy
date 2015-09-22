@@ -1495,7 +1495,7 @@ def dvxv( np.ndarray[double, ndim=1] va not None, np.ndarray[double, ndim=1] vb 
 
 def ecleq( double dl, double db, double date ):
      """
-     (dr, dd) = eqecl( dl, db, date )
+     (dr, dd) = ecleq( dl, db, date )
 
      @palEcleq@
      """
