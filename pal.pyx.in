@@ -763,6 +763,48 @@ def djcal( int ndp, double djm ):
      else:
           raise ValueError( "Unacceptable date" )
 
+
+def djcalVector(int ndp, np.ndarray[double, ndim=1] djm not None):
+     """
+     (iy, im, id, frac) = djcalVector( ndp, djm)
+
+     where djm and outputs are numpy arrays
+
+     @palDjcal@
+
+     Raises
+     ------
+     Does not raise any exceptions; unacceptable dates (mjd<-2468570
+     or mjd>1e9) result in -1 in iy, im, id and frac.
+
+     Note: -1 is a valid result of iy (not for im, id, or frac), so
+     any filters on unacceptable dates should examine the other
+     outputs.
+     """
+
+     cdef int length = len(djm)
+     cdef np.ndarray iy_out = np.empty(length, dtype=np.int)
+     cdef np.ndarray im_out = np.empty(length, dtype=np.int)
+     cdef np.ndarray id_out = np.empty(length, dtype=np.int)
+     cdef np.ndarray frac_out = np.empty(length, dtype=np.int)
+     cdef int output[4]
+     cdef int flag
+
+     for ii in range(length):
+          cpal.palDjcal(ndp, djm[ii], output, &flag)
+          if flag==0:
+              iy_out[ii] = output[0]
+              im_out[ii] = output[1]
+              id_out[ii] = output[2]
+              frac_out[ii] = output[3]
+          else:
+              iy_out[ii] = -1
+              im_out[ii] = -1
+              id_out[ii] = -1
+              frac_out[ii] = -1
+
+     return (iy_out, im_out, id_out, frac_out)
+
 def djcl( double djm ):
      """
      (iy, im, id, frac) = djcl( djm )

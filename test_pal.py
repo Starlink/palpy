@@ -797,6 +797,52 @@ class TestPAL(unittest.TestCase) :
         self.assertEqual( d, 10 )
         self.assertAlmostEqual( f, 0.9999, 7 )
 
+    def test_djcalVector(self):
+        """
+        Test that djcalVector returns results consistent with djcal
+        """
+        np.random.seed(142)
+        nSamples = 200
+        mjd = (np.random.random_sample(nSamples)-0.5)*100000.0
+
+        for ndp in [2,3,4,5]:
+
+            testY, testM, \
+            testD, testFrac = pal.djcalVector(ndp, mjd)
+
+            for ii in range(nSamples):
+                controlY, controlM, \
+                controlD, controlFrac = pal.djcal(ndp, mjd[ii])
+
+                self.assertEqual(controlY, testY[ii])
+                self.assertEqual(controlM, testM[ii])
+                self.assertEqual(controlD, testD[ii])
+                self.assertEqual(controlFrac, testFrac[ii])
+
+
+        ndp = 4
+        # test that unacceptable dates result in -1 being placed in all
+        # of the output slots
+        mjd[4] = -2468570
+        mjd[5] = -2468571
+        mjd[9] = 1.0e8
+        mjd[10] = 1.0e9
+        testY, testM, testD, testFrac = pal.djcalVector(ndp, mjd)
+        for ii in range(nSamples):
+            if ii==5 or ii==10:
+                self.assertEqual(testY[ii], -1)
+                self.assertEqual(testM[ii], -1)
+                self.assertEqual(testD[ii], -1)
+                self.assertEqual(testFrac[ii], -1)
+                self.assertRaises(ValueError, pal.djcal, ndp, mjd[ii])
+            else:
+                controlY, controlM, \
+                controlD, controlFrac = pal.djcal(ndp, mjd[ii])
+                self.assertEqual(controlY, testY[ii])
+                self.assertEqual(controlM, testM[ii])
+                self.assertEqual(controlD, testD[ii])
+                self.assertEqual(controlFrac, testFrac[ii])
+
     def test_dmat(self):
         da = np.array(
            [ [ 2.22,     1.6578,     1.380522 ],
