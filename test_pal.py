@@ -2334,8 +2334,8 @@ class TestPAL(unittest.TestCase) :
         raz = 0.9
         decz = -0.3
 
-        xi = np.random.random_sample(nSamples)*5.0
-        eta = np.random.random_sample(nSamples)*5.0
+        xi = (np.random.random_sample(nSamples)-0.5)*10.0
+        eta = (np.random.random_sample(nSamples)-0.5)*10.0
         testRa, testDec = pal.dtp2sVector(xi, eta, raz, decz)
 
         for ii in range(nSamples):
