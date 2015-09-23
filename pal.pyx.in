@@ -74,7 +74,7 @@ def airmas( double zd ):
 
 def airmasVector(np.ndarray[double, ndim=1] zd not None):
      """
-     airmass = airmas( zd )
+     airmass = airmasVector( zd )
 
      where zd and airmass are numpy arrays
 
@@ -109,7 +109,7 @@ def altazVector(np.ndarray[double, ndim=1] ha not None,
                 np.ndarray[double, ndim=1] dec not None,
                 double phi):
      """
-     (az, azd, azdd, el, eld, eldd, pa, pad, padd) = altaz( ha, dec, phi )
+     (az, azd, azdd, el, eld, eldd, pa, pad, padd) = altazVector( ha, dec, phi )
 
      where ha, dec and all outputs are numpy arrays
 
@@ -302,7 +302,7 @@ def aopqkVector(np.ndarray[double, ndim=1] rap not None,
                 np.ndarray[double, ndim=1] dap not None,
                 np.ndarray[double, ndim=1] aoprms not None):
     """
-    (aob, zob, hob, dob, rob) = aopqk( rap, dap, aoprms )
+    (aob, zob, hob, dob, rob) = aopqkVector( rap, dap, aoprms )
 
     where rap, dap and all outputs are numpy arrays
 
@@ -613,7 +613,7 @@ def daf2rVector(np.ndarray[long, ndim=1] ideg_in not None,
                 np.ndarray[long, ndim=1] iamin_in not None,
                 np.ndarray[double, ndim=1] asec_in not None):
     """
-    ang = daf2r( ideg, iamin, asec)
+    ang = daf2rVector( ideg, iamin, asec)
 
     where ideg, iamin, and asec are numpy arrays of degrees,
     minutes, and seconds.  ideg and iamin are arrays of ints.  asec
@@ -764,7 +764,7 @@ def dd2tf( int ndp, double days ):
 
 def dd2tfVector( int ndp, np.ndarray[double, ndim=1] days not None):
     """
-    (sign, ih, im, is ,frac) = ddtf( ndp, dayList)
+    (sign, ih, im, is ,frac) = ddtfVector( ndp, dayList)
 
     where ndp is an integer denoting the resolution to which the
     fraction of seconds should be taken and dayList is a numpy
@@ -810,7 +810,7 @@ def de2hVector( np.ndarray[double, ndim=1] ha not None,
                 np.ndarray[double, ndim=1] dec not None,
                 double phi ):
      """
-     (az, el) = de2h( ha, dec, phi )
+     (az, el) = de2hVector( ha, dec, phi )
 
      where ha, dec, az, and el are numpy arrays
 
@@ -872,7 +872,7 @@ def dh2eVector(np.ndarray[double, ndim=1] az not None,
                np.ndarray[double, ndim=1] el not None,
                double phi):
      """
-     (ha, dec) = dh2e( az, el, phi)
+     (ha, dec) = dh2eVector( az, el, phi)
 
      where az, el, ha, and dec are all numpy arrays
 
@@ -1087,7 +1087,7 @@ def dmoon( double date ):
 
 def dmoonVector(np.ndarray[double, ndim=1] date):
      """
-     (x, y, z, xd, yd, zd) = dmoon(date)
+     (x, y, z, xd, yd, zd) = dmoonVector(date)
 
      where date and all of the outputs are numpy arrays
 
@@ -1346,7 +1346,7 @@ def drange( double angle ):
 
 def drangeVector(np.ndarray[double, ndim=1] angle not None):
      """
-     a = drange(angle)
+     a = drangeVector(angle)
 
      where angle and a are numpy arrays
 
@@ -1407,7 +1407,7 @@ def ds2tpVector( np.ndarray[double, ndim=1] ra not None,
                  np.ndarray[double, ndim=1] dec not None,
                  double raz, double decz ):
      """
-     (xi, eta) = ds2tp( ra, dec, raz, decz )
+     (xi, eta) = ds2tpVector( ra, dec, raz, decz )
 
      @palDs2tp@
 
@@ -1452,7 +1452,7 @@ def dsep( double a1, double b1, double a2, double b2 ):
 
 def dsepVector(np.ndarray a1, np.ndarray b1, np.ndarray a2, np.ndarray b2):
      """
-     s = dsep( a1, b1, a2, b2 )
+     s = dsepVector( a1, b1, a2, b2 )
 
      where a1, b1, a2, b2, and s are numpy arrays
 
