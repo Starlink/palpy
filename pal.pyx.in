@@ -2538,7 +2538,11 @@ def gmst( double ut1 ):
 
 def gmstVector(np.ndarray ut1):
      """
-     this is gmst, except that it accepts and returns vectors
+     t = gmstVector( ut1 )
+
+     where ut1 and t are both numpy arrays
+
+     @palGmst@
      """
      cdef int length = len(ut1)
      cdef np.ndarray gmout = np.zeros(length, dtype=np.float64)
