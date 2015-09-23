@@ -72,6 +72,21 @@ def airmas( double zd ):
      """
      return cpal.palAirmas( zd )
 
+def airmasVector(np.ndarray[double, ndim=1] zd not None):
+     """
+     airmass = airmas( zd )
+
+     where zd and airmass are numpy arrays
+
+     @palAirmas@
+     """
+     cdef int length = len(zd)
+     cdef np.ndarray airmass_out = np.empty(length, dtype=np.float64)
+     for ii in range(length):
+         airmass_out[ii] = cpal.palAirmas(zd[ii])
+     return airmass_out
+
+
 def altaz(double ha, double dec, double phi):
      """
      (az, azd, azdd, el, eld, eldd, pa, pad, padd) = altaz( ha, dec, phi )

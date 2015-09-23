@@ -68,6 +68,19 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( pal.airmas( 1.2354 ),
                                 3.015698990074724, 11 );
 
+    def test_airmassVector(self):
+        """
+        Test that airmassVector gives results consistent with airmass
+        """
+        np.random.seed(145)
+        nSamples = 1000
+        zd = np.random.random_sample(nSamples)*0.5*np.pi
+        testAm = pal.airmasVector(zd)
+        for ii in range(nSamples):
+            controlAm = pal.airmas(zd[ii])
+            self.assertEqual(controlAm, testAm[ii])
+            self.assertFalse(np.isnan(testAm[ii]))
+
     def test_altaz(self):
         (az, azd, azdd, el, eld, eldd, pa, pad, padd) = pal.altaz( 0.7, -0.7, -0.65 )
         self.assertAlmostEqual( az, 4.400560746660174, 12 )
