@@ -2224,7 +2224,7 @@ def fk524Vector(np.ndarray[double, ndim=1] r2000 not None,
                 np.ndarray[double, ndim=1] p2000 not None,
                 np.ndarray[double, ndim=1] v2000 not None):
     """
-    (r1950, d1950, dr1950, dd1950, p1950, v1950) = fk524( r2000, d2000, dr2000, dd2000, p2000, v2000 )
+    (r1950, d1950, dr1950, dd1950, p1950, v1950) = fk524Vector( r2000, d2000, dr2000, dd2000, p2000, v2000 )
 
     where r2000, d2000, dr2000, dd2000, p2000, v2000,
     r1950, d1950, dr1950, dd1950, p1950, and v1950 are
