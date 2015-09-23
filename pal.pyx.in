@@ -2060,7 +2060,11 @@ def eqeqx( double date ):
 
 def eqeqxVector(np.ndarray date):
      """
-     this is eqeqx except that it accepts and returns vectors
+     eq = eqeqxVector( date )
+
+     where date and eq are numpy arrays
+
+     @palEqeqx@
      """
      cdef int length=len(date)
      cdef np.ndarray eqout = np.zeros(length, dtype=np.float64)
