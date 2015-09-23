@@ -132,6 +132,41 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( rm, 1.2335120411026936349, 11 )
         self.assertAlmostEqual( dm, -0.56702908706930343907, 11 )
 
+    def test_ampqkVector(self):
+        """
+        Test that ampqkVector produces results consistent with ampqk
+        """
+        np.random.seed(144)
+        nSamples = 200
+        amprms = pal.mappa( 2010.0, 55927.0 )
+        ra_in = np.random.random_sample(nSamples)*2.0*np.pi
+        dec_in = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testRa, testDec = pal.ampqkVector(ra_in, dec_in, amprms)
+
+        for ii in range(nSamples):
+            controlRa, controlDec = pal.ampqk(ra_in[ii], dec_in[ii], amprms)
+            self.assertEqual(controlRa, testRa[ii])
+            self.assertEqual(controlDec, testDec[ii])
+            self.assertFalse(np.isnan(testRa[ii]))
+            self.assertFalse(np.isnan(testDec[ii]))
+
+        # test that ampqkVector and mapqkzVector invert each other
+        ra_roundtrip, dec_roundtrip = pal.mapqkzVector(testRa, testDec, amprms)
+        arcsecPerRadian = 3600.0*np.degrees(1.0)
+        distance = arcsecPerRadian*pal.dsepVector(ra_roundtrip, dec_roundtrip, \
+                                                  ra_in, dec_in)
+        np.testing.assert_array_almost_equal(distance, np.zeros(nSamples), 9)
+
+        # test that exceptions are raised when input arrays are not of the same
+        # length
+        with self.assertRaises(ValueError) as context:
+            results = pal.ampqkVector(ra_in[:17], dec_in, amprms)
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many Decs as RAs to " \
+                         + "ampqkVector")
+
+
     def test_aopqkVector(self):
         date = 51000.1
         dut = 25.0

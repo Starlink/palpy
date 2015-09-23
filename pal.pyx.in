@@ -154,6 +154,46 @@ def ampqk( double ra, double da, np.ndarray[double, ndim=1] amprms not None ):
      cpal.palAmpqk( ra, da, camprms, &rm, &dm )
      return (rm, dm)
 
+
+def ampqkVector(np.ndarray[double, ndim=1] ra not None,
+                np.ndarray[double, ndim=1] dec not None,
+                np.ndarray[double, ndim=1] amprms not None):
+     """
+     (rm, dm) = ampqkVector( ra, dec, amprms )
+
+     where ra, dec, rm, and dm are all numpy arrays
+
+     @palAmpqk@
+
+     Raises
+     ------
+     ValueError if input arrays of RA and Dec are not of the same
+     length
+     """
+
+     cdef int length = len(ra)
+
+     if len(dec)!=length:
+         raise ValueError("You did not pass as many Decs as RAs to " \
+                          + "ampqkVector")
+
+     cdef np.ndarray rm_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray dm_out = np.empty(length, dtype=np.float64)
+
+     cdef double rm
+     cdef double dm
+     cdef double camprms[21]
+
+     for ii in range(21):
+          camprms[ii] = amprms[ii]
+
+     for ii in range(length):
+          cpal.palAmpqk(ra[ii], dec[ii], camprms, &rm, &dm)
+          rm_out[ii] = rm
+          dm_out[ii] = dm
+
+     return (rm_out, dm_out)
+
 def aop( double rap, double dap, double date, double dut,
          double elongm, double phim, double hm, double xp,
          double yp, double tdk, double pmb, double rh,
