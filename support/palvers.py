@@ -42,12 +42,12 @@ def read_pal_version():
     and patchlevel version integers
 
     """
-    verfile = os.path.join( "cextern", "pal", "configure.ac" )
+    verfile = os.path.join("cextern", "pal", "configure.ac")
     verstring = "-1.-1.-1"
     for line in open(verfile):
         if line.startswith("AC_INIT"):
             # Version will be in string [nn.mm.pp]
-            match = re.search( r"\[(\d+\.\d+\.\d+)\]", line)
+            match = re.search(r"\[(\d+\.\d+\.\d+)\]", line)
             if match:
                 verstring = match.group(1)
             break
@@ -55,5 +55,5 @@ def read_pal_version():
     return (verstring, major, minor, patch)
 
 if __name__ == "__main__":
-    (v,maj,min,p) = read_pal_version()
-    print(v,maj,min,p)
+    v, maj, min, p = read_pal_version()
+    print(v, maj, min, p)

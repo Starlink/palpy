@@ -30,7 +30,8 @@ License along with this program.  If not, see
 
 import re
 
-def read_prologs( filename ):
+
+def read_prologs(filename):
     """
     Given a filename, search for SST prologues
     and returns a dict where the keys are the name of the

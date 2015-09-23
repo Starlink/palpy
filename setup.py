@@ -80,18 +80,18 @@ pal_c = (
 )
 
 # Build up source file list
-sources = [ "cpal.pxd", "pal.pyx" ]
+sources = ["cpal.pxd", "pal.pyx"]
 
 # Sort out path to the C files
 for cfile in erfa_c:
-    sources.append( os.path.join( 'cextern', 'erfa', 'src', cfile ) )
+    sources.append(os.path.join('cextern', 'erfa', 'src', cfile))
 
 # Also read in prologues
 palprologs = {}
 for cfile in pal_c:
-    palfile = os.path.join( 'cextern', 'pal', cfile )
-    sources.append( palfile )
-    prologs = sst.read_prologs( palfile )
+    palfile = os.path.join('cextern', 'pal', cfile)
+    sources.append(palfile)
+    prologs = sst.read_prologs(palfile)
     palprologs.update(prologs)
 
 # And the version of the C PAL library
@@ -109,26 +109,26 @@ with codecs.open('pal.pyx.in', 'r', 'utf8') as file:
             palpyname = funcname[3:].lower()
             if funcname in palprologs:
                 info = palprologs[funcname]
-                lines.append( info['purpose'] )
-                lines += ( "Arguments", "---------", info['arguments'] )
+                lines.append(info['purpose'])
+                lines += ("Arguments", "---------", info['arguments'])
                 if "returned value" in info:
-                    lines += ( "", "Returned Value", "--------------",
-                                  info['returned value'] )
+                    lines += ("", "Returned Value", "--------------",
+                              info['returned value'])
                 if "notes" in info:
-                    lines += ( "", "Notes", "-----",
-                                  info['notes'] )
+                    lines += ("", "Notes", "-----",
+                              info['notes'])
                 line = "\n".join(lines)
             else:
                 continue
-        elif line.count( "@"):
-            if line.count( "@VERSTRING@" ):
-                line = line.replace( "@VERSTRING@", '"'+verstring+'"')
-            if line.count( "@MAJOR_VERSION" ):
-                line = line.replace( "@MAJOR_VERSION@", str(major) )
-            if line.count( "@MINOR_VERSION@" ):
-                line = line.replace( "@MINOR_VERSION@", str(minor))
-            if line.count( "@PATCH_VERSION@" ):
-                line = line.replace( "@PATCH_VERSION@", str(patch))
+        elif line.count("@"):
+            if line.count("@VERSTRING@"):
+                line = line.replace("@VERSTRING@", '"'+verstring+'"')
+            if line.count("@MAJOR_VERSION"):
+                line = line.replace("@MAJOR_VERSION@", str(major))
+            if line.count("@MINOR_VERSION@"):
+                line = line.replace("@MINOR_VERSION@", str(minor))
+            if line.count("@PATCH_VERSION@"):
+                line = line.replace("@PATCH_VERSION@", str(patch))
         outfh.write(line)
 
 outfh.close()
@@ -138,21 +138,21 @@ with open('README.rst') as file:
     long_description = file.read()
 
 setup(
-    name = "palpy",
-    version = "1.6.0",
-    author = "Tim Jenness",
-    author_email = "tim.jenness@gmail.com",
+    name="palpy",
+    version="1.6.0",
+    author="Tim Jenness",
+    author_email="tim.jenness@gmail.com",
     license="GPL",
     url='https://github.com/Starlink/palpy',
-    description = "PAL -- A Positional Astronomy Library",
-    long_description = long_description,
-    cmdclass = { 'build_ext': build_ext },
-    ext_modules = [ Extension(
+    description="PAL -- A Positional Astronomy Library",
+    long_description=long_description,
+    cmdclass={'build_ext': build_ext},
+    ext_modules=[Extension(
         name="palpy",
         sources=sources,
-        include_dirs=['cextern/erfa/src', 'cextern/pal', numpy.get_include() ],
-        language="c")
-    ],
+        include_dirs=['cextern/erfa/src', 'cextern/pal', numpy.get_include()],
+        language="c"
+        )],
     requires=[
         'numpy',
         'Cython'
@@ -169,4 +169,3 @@ setup(
         'Topic :: Scientific/Engineering :: Astronomy'
         ]
 )
-
