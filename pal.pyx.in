@@ -1403,15 +1403,29 @@ def ds2tp( double ra, double dec, double raz, double decz ):
      else:
           raise ValueError( "Antistart too far from axis" )
 
-def ds2tpVector( np.ndarray ra, np.ndarray dec, double raz, double decz ):
+def ds2tpVector( np.ndarray[double, ndim=1] ra not None,
+                 np.ndarray[double, ndim=1] dec not None,
+                 double raz, double decz ):
      """
-     This is just ds2tp, except that it takes an array of ra and array
-     of dec and calculates xi and eta for each relative to the scalar
-     raz and decz
+     (xi, eta) = ds2tp( ra, dec, raz, decz )
+
+     @palDs2tp@
+
+     Raises
+     ------
+     ValueError in input arrays are not of the same length
+
+     If bad input values are given, NaNs will be placed in
+     the output arrays
      """
      cdef int i
      cdef int j
      cdef int length=len(ra)
+
+     if len(dec)!=length:
+         raise ValueError("You did not pass as many RAs as Decs " \
+                          + "to ds2tpVector")
+
      cdef double xi
      cdef double eta
      cdef np.ndarray xiout=np.zeros(length,dtype=np.float64)
@@ -1422,12 +1436,9 @@ def ds2tpVector( np.ndarray ra, np.ndarray dec, double raz, double decz ):
           if j==0:
                xiout[i] = xi
                etaout[i] = eta
-          elif j==1:
-               raise ValueError( "Star too far from axis" )
-          elif j==2:
-               raise ValueError( "Antistar on tangent plane" )
           else:
-               raise ValueError( "Antistart too far from axis" )
+              xiout[i] = np.NaN
+              etaout[i] = np.NaN
 
      return xiout, etaout
 

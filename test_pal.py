@@ -2564,6 +2564,28 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(x1,x2,12)
             self.assertAlmostEqual(e1,e2,12)
 
+        # test that bad input values get mapped to NaNs
+        raIn[5] = raz + np.pi
+        decIn[7] = decz + np.pi
+        xiTest, etaTest = pal.ds2tpVector(raIn, decIn, raz, decz)
+        for ii in range(len(raIn)):
+            if ii==5 or ii==7:
+                self.assertTrue(np.isnan(xiTest[ii]))
+                self.assertTrue(np.isnan(etaTest[ii]))
+                self.assertRaises(ValueError, pal.ds2tp, raIn[ii], decIn[ii], raz, decz)
+            else:
+                self.assertEqual(xiTest[ii], xiControl[ii])
+                self.assertEqual(etaTest[ii], etaControl[ii])
+
+        # test that an exception is raised if input arrays
+        # are not of the same shape
+        with self.assertRaises(ValueError) as context:
+            results = pal.ds2tpVector(raIn[:3], decIn, raz, decz)
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many RAs as Decs " \
+                         + "to ds2tpVector")
+
+
     def test_dtp2sVector(self):
         """
         Test that dtp2sVector produces results consistent with
