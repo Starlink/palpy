@@ -2399,11 +2399,25 @@ def galeq( double dl, double db ):
      cpal.palGaleq( dl, db, &dr, &dd )
      return (dr, dd)
 
-def galeqVector(np.ndarray dl, np.ndarray db):
+def galeqVector(np.ndarray[double, ndim=1] dl not None,
+                np.ndarray [double, ndim=1] db not None):
      """
-     this is galeq, but it accepts and returns vectors
+     (dr, dd) = galeqVector( dl, db )
+
+     where dl, db, dr, and dd are numpy arrays
+
+     @palGaleq@
+
+     Raises
+     ------
+     ValueError if input arrays are of different lengths
      """
      cdef int length=len(dl)
+
+     if len(db)!=length:
+         raise ValueError("You did not pass the same number of " \
+                          + "longitudes as latitudes to galeqVector")
+
      cdef np.ndarray drout = np.zeros(length, dtype=np.float64)
      cdef np.ndarray ddout = np.zeros(length, dtype=np.float64)
      cdef double dr

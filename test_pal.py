@@ -1610,6 +1610,15 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(drt, drc, 12)
             self.assertAlmostEqual(ddt, ddc, 12)
 
+        # test that an exception is raise if input arrays
+        # are of different lengths
+        with self.assertRaises(ValueError) as context:
+            results = pal.galeqVector(dlIn[:3], dbIn)
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of longitudes " \
+                         + "as latitudes to galeqVector")
+
+
     def test_galsup(self):
         (dsl, dsb) = pal.galsup( 6.1, -1.4 )
         self.assertAlmostEqual( dsl, 4.567933268859171, 12 )
