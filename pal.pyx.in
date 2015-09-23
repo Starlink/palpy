@@ -2563,9 +2563,22 @@ def gmsta( double date, double ut1 ):
 
 def gmstaVector(np.ndarray date, np.ndarray ut1):
      """
-     this is gmsta except that it accepts and returns vectors
+     t = gmsta( date, ut1 )
+
+     where date, ut1, and t are all numpy arrays
+
+     @palGmsta@
+
+     Raises
+     ------
+     ValueError if input arrays are of different lengths
      """
      cdef int length = len(date)
+
+     if len(ut1)!=length:
+         raise ValueError("The arrays you passed into gmstaVector " \
+                          + "are of different lengths")
+
      cdef np.ndarray gmout = np.zeros(length, dtype=np.float)
      cdef int i
      for i in range(length):

@@ -1714,6 +1714,14 @@ class TestPAL(unittest.TestCase) :
         for gt, gc in zip(gmTest, gmControl):
             self.assertAlmostEqual(gt, gc, 12)
 
+        # test that an exception is raised if input arrays are
+        # of different lengths
+        with self.assertRaises(ValueError) as context:
+            results = pal.gmstaVector(dateIn[:8], utIn)
+        self.assertEqual(context.exception.message,
+                         "The arrays you passed into gmstaVector " \
+                         + "are of different lengths")
+
     def test_intin(self):
         s = "  -12345, , -0  2000  +     "
         i = 1
