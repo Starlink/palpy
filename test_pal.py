@@ -527,7 +527,7 @@ class TestPAL(unittest.TestCase):
 
         testMjd = pal.caldjVector(iy, im, iday)
         for ii in range(nSamples):
-            if ii == 5 or ii == 9 or ii == 11 or ii == 17:
+            if ii in (5, 9, 11, 17):
                 self.assertTrue(np.isnan(testMjd[ii]))
                 self.assertRaises(ValueError, pal.caldj, iy[ii], im[ii],
                                   iday[ii])
@@ -567,7 +567,7 @@ class TestPAL(unittest.TestCase):
 
         radianTest = pal.daf2rVector(deg, imin, asec)
         for ii, rad in enumerate(radianTest):
-            if ii == 9 or ii == 17 or ii == 21:
+            if ii in (9, 17, 21):
                 self.assertTrue(np.isnan(rad))
             else:
                 self.assertFalse(np.isnan(rad))
@@ -742,7 +742,7 @@ class TestPAL(unittest.TestCase):
         sec[19] = 60.001
         testDays = pal.dtf2dVector(iHour, iMin, sec)
         for ii in range(nSamples):
-            if ii != 5 and ii != 7 and ii != 19:
+            if ii not in (5, 7, 19):
                 controlDays = pal.dtf2d(iHour[ii], iMin[ii], sec[ii])
                 self.assertEqual(testDays[ii], controlDays)
                 self.assertFalse(np.isnan(testDays[ii]))
@@ -785,7 +785,7 @@ class TestPAL(unittest.TestCase):
         sec[19] = 60.001
         testRad = pal.dtf2rVector(iHour, iMin, sec)
         for ii in range(nSamples):
-            if ii != 5 and ii != 7 and ii != 19:
+            if ii not in (5, 7, 19):
                 controlRad = pal.dtf2r(iHour[ii], iMin[ii], sec[ii])
                 self.assertEqual(testRad[ii], controlRad)
                 self.assertFalse(np.isnan(testRad[ii]))
@@ -850,7 +850,7 @@ class TestPAL(unittest.TestCase):
         mjd[10] = 1.0e9
         testY, testM, testD, testFrac = pal.djcalVector(ndp, mjd)
         for ii in range(nSamples):
-            if ii == 5 or ii == 10:
+            if ii in (5, 10):
                 self.assertEqual(testY[ii], -1)
                 self.assertEqual(testM[ii], -1)
                 self.assertEqual(testD[ii], -1)
@@ -1258,11 +1258,11 @@ class TestPAL(unittest.TestCase):
             dpx = np.abs(px-px4)
             dvr = np.abs(vr-vr4)
 
-            self.assertTrue(dpos < 0.001)
-            self.assertTrue(dmura < 0.01)
-            self.assertTrue(dmudec < 0.01)
-            self.assertTrue(dpx < 0.001)
-            self.assertTrue(dvr < 0.01)
+            self.assertLess(dpos, 0.001)
+            self.assertLess(dmura, 0.01)
+            self.assertLess(dmudec, 0.01)
+            self.assertLess(dpx, 0.001)
+            self.assertLess(dvr, 0.01)
 
     def test_Fk524Vectors(self):
         """
@@ -2178,8 +2178,8 @@ class TestPAL(unittest.TestCase):
 
         # verify that the resulting angles are equivalent to the input
         # angles normalized to the 0-2pi ranges
-        self.assertTrue(testAngle.min() > 0.0)
-        self.assertTrue(testAngle.max() < 2.0 * np.pi)
+        self.assertGreater(testAngle.min(), 0.0)
+        self.assertLess(testAngle.max(), 2.0 * np.pi)
         np.testing.assert_array_almost_equal(np.cos(testAngle), np.cos(angle_in), 12)
         np.testing.assert_array_almost_equal(np.sin(testAngle), np.sin(angle_in), 12)
 
@@ -2453,7 +2453,7 @@ class TestPAL(unittest.TestCase):
         decIn[7] = decz + np.pi
         xiTest, etaTest = pal.ds2tpVector(raIn, decIn, raz, decz)
         for ii in range(len(raIn)):
-            if ii == 5 or ii == 7:
+            if ii in (5, 7):
                 self.assertTrue(np.isnan(xiTest[ii]))
                 self.assertTrue(np.isnan(etaTest[ii]))
                 self.assertRaises(ValueError, pal.ds2tp, raIn[ii], decIn[ii], raz, decz)
