@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
 import unittest
 import palpy as pal
 import numpy as np
@@ -67,6 +68,19 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( pal.airmas( 1.2354 ),
                                 3.015698990074724, 11 );
 
+    def test_airmassVector(self):
+        """
+        Test that airmassVector gives results consistent with airmass
+        """
+        np.random.seed(145)
+        nSamples = 1000
+        zd = np.random.random_sample(nSamples)*0.5*np.pi
+        testAm = pal.airmasVector(zd)
+        for ii in range(nSamples):
+            controlAm = pal.airmas(zd[ii])
+            self.assertEqual(controlAm, testAm[ii])
+            self.assertFalse(np.isnan(testAm[ii]))
+
     def test_altaz(self):
         (az, azd, azdd, el, eld, eldd, pa, pad, padd) = pal.altaz( 0.7, -0.7, -0.65 )
         self.assertAlmostEqual( az, 4.400560746660174, 12 )
@@ -117,6 +131,11 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(padC[i], padT[i], 12)
             self.assertAlmostEqual(paddC[i], paddT[i], 12)
 
+        # test that an exception is raised if input arrays have
+        # different lengths
+        self.assertRaises(ValueError, pal.altazVector, haIn[:10], decIn, phi)
+
+
     def test_amp(self):
         (rm, dm) = pal.amp( 2.345, -1.234, 50100., 1990. )
         self.assertAlmostEqual( rm, 2.344472180027961, 6 )
@@ -130,6 +149,36 @@ class TestPAL(unittest.TestCase) :
         (rm, dm) = pal.ampqk( 1.234, -0.567, amprms )
         self.assertAlmostEqual( rm, 1.2335120411026936349, 11 )
         self.assertAlmostEqual( dm, -0.56702908706930343907, 11 )
+
+    def test_ampqkVector(self):
+        """
+        Test that ampqkVector produces results consistent with ampqk
+        """
+        np.random.seed(144)
+        nSamples = 200
+        amprms = pal.mappa( 2010.0, 55927.0 )
+        ra_in = np.random.random_sample(nSamples)*2.0*np.pi
+        dec_in = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testRa, testDec = pal.ampqkVector(ra_in, dec_in, amprms)
+
+        for ii in range(nSamples):
+            controlRa, controlDec = pal.ampqk(ra_in[ii], dec_in[ii], amprms)
+            self.assertEqual(controlRa, testRa[ii])
+            self.assertEqual(controlDec, testDec[ii])
+            self.assertFalse(np.isnan(testRa[ii]))
+            self.assertFalse(np.isnan(testDec[ii]))
+
+        # test that ampqkVector and mapqkzVector invert each other
+        ra_roundtrip, dec_roundtrip = pal.mapqkzVector(testRa, testDec, amprms)
+        arcsecPerRadian = 3600.0*np.degrees(1.0)
+        distance = arcsecPerRadian*pal.dsepVector(ra_roundtrip, dec_roundtrip, \
+                                                  ra_in, dec_in)
+        np.testing.assert_array_almost_equal(distance, np.zeros(nSamples), 9)
+
+        # test that exceptions are raised when input arrays are not of the same
+        # length
+        self.assertRaises(ValueError, pal.ampqkVector,ra_in[:17], dec_in, amprms)
 
     def test_aopqkVector(self):
         date = 51000.1
@@ -179,6 +228,10 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(h1,h2,12)
             self.assertAlmostEqual(d1,d2,12)
             self.assertAlmostEqual(r1,r2,12)
+
+        # test that an exception is raised if input arrays have
+        # different lengths
+        self.assertRaises(ValueError, pal.aopqkVector, raIn[:6], decIn, obsrms)
 
     def test_aop(self):
         dap = -0.1234
@@ -283,6 +336,76 @@ class TestPAL(unittest.TestCase) :
         aoprms = pal.aoppat( date + pal.DS2R, aoprms )
         self.assertAlmostEqual( aoprms[13], 7.602374979243502, 8 )
 
+    def test_oapqkVector(self):
+        """
+        Test that oapqkVector gives results consistent with oapqk
+        """
+
+        dap = -0.1234
+        date = 51000.1
+        dut = 25.0
+        elongm = 2.1
+        phim = 0.5
+        hm = 3000.0
+        xp = -0.5e-6
+        yp = 1.0e-6
+        tdk = 280.0
+        pmb = 550.0
+        rh = 0.6
+        tlr = 0.006
+        wl = 0.45
+        aoprms = pal.aoppa( date, dut, elongm, phim, hm, xp, yp, tdk, pmb,
+                            rh, wl, tlr )
+
+        np.random.seed(133)
+        nSamples = 200
+        ob1 = np.random.random_sample(nSamples)*2.0*np.pi
+        ob2 = np.random.random_sample(nSamples)*0.5*np.pi
+        # restrict ob2 to 0 < ob2 < pi/2 because we will also be testing az-zenith distance
+        # coordinate pairs
+
+        for typeFlag in ['r', 'a', 'h']:
+            testRa, testDec = pal.oapqkVector(typeFlag, ob1, ob2, aoprms)
+            for ii in range(nSamples):
+                controlRa, controlDec = pal.oapqk(typeFlag, ob1[ii], ob2[ii], aoprms)
+                self.assertEqual(testRa[ii], controlRa)
+                self.assertEqual(testDec[ii], controlDec)
+
+        # verify that pal.aopqkVector and pal.oapqkVector invert each other;
+        # we limit our test raApparent, decApparent values to be within 75 degrees
+        # of zenith, because of the limited accuracy of these routines at
+        # large zenith distance (even though we approximate the sky as a flat
+        # surface and demand that all of the sample points be within 50 degrees
+        # of zenith in this gross approximation, heuristically, this causes
+        # the actual maximum zenith distance to be 74.1 degrees).
+        raApCenter, decApCenter = pal.oapqk('h', 0.0, 0.0, aoprms)
+
+        rr = np.random.random_sample(nSamples)*np.radians(50.0)
+        theta = np.random.random_sample(nSamples)*2.0*np.pi
+
+        raApList = raApCenter + rr*np.cos(theta)
+        decApList = decApCenter + rr*np.sin(theta)
+
+        azList, zdList, haList, \
+        decObList, raObList = pal.aopqkVector(raApList, decApList, aoprms)
+
+        testRa, testDec = pal.oapqkVector('r', raObList, decObList, aoprms)
+        np.testing.assert_array_almost_equal(testRa, raApList, 12)
+        np.testing.assert_array_almost_equal(testDec, decApList, 12)
+
+        testRa, testDec = pal.oapqkVector('h', haList, decObList, aoprms)
+        np.testing.assert_array_almost_equal(testRa, raApList, 12)
+        np.testing.assert_array_almost_equal(testDec, decApList, 12)
+
+        testRa, testDec = pal.oapqkVector('a', azList, zdList, aoprms)
+        np.testing.assert_array_almost_equal(testRa, raApList, 12)
+        np.testing.assert_array_almost_equal(testDec, decApList, 12)
+
+        # test that an exception is thrown if the input arrays do not
+        # have the same length
+        self.assertRaises(ValueError, pal.oapqkVector, 'a', \
+                          azList, zdList[:17], aoprms)
+
     def test_bear(self):
         a1 = 1.234
         b1 = -0.123
@@ -294,6 +417,81 @@ class TestPAL(unittest.TestCase) :
         d2 = pal.dcs2c( a2, b2 )
         self.assertAlmostEqual( pal.dpav( d1, d2 ), 0.7045970341781791, 12 )
 
+    def test_dbearVector(self):
+        """
+        Test that dbearVector gives the same
+        results as dbear
+        """
+        np.random.seed(122)
+        nSamples = 100
+        a1_in = np.random.random_sample(nSamples)*2.0*np.pi
+        b1_in = (np.random.random_sample(nSamples)-0.5)*np.pi
+        a2_in = np.random.random_sample(nSamples)*2.0*np.pi
+        b2_in = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        # test case where a2, b2 have the same number of elements
+        # as a1, b1
+        bTest = pal.dbearVector(a1_in, b1_in, a2_in, b2_in)
+        for i in range(len(a1_in)):
+            bControl = pal.dbear(a1_in[i], b1_in[i], a2_in[i], b2_in[i])
+            self.assertEqual(bTest[i], bControl)
+
+        # test case where a2, b2 have only one element
+        bTest = pal.dbearVector(a1_in, b1_in, a2_in[7:8], b2_in[7:8])
+        for i in range(len(a1_in)):
+            bControl = pal.dbear(a1_in[i], b1_in[i], a2_in[7], b2_in[7])
+            self.assertEqual(bTest[i], bControl)
+
+        # test that exceptions are raied when the numpy arrays are of
+        # incorrect size
+        self.assertRaises(ValueError, pal.dbearVector, a1_in, b1_in[:9], a2_in, b2_in)
+
+        self.assertRaises(ValueError, pal.dbearVector, a1_in, b1_in, a2_in, b2_in[:8])
+
+        self.assertRaises(ValueError, pal.dbearVector, a1_in, b1_in, a2_in[:9], b2_in[:9])
+
+    def test_dpavVector(self):
+        """
+        Test that dpavVector is consistent with dpav
+        """
+        np.random.seed(127)
+        nSamples = 200
+        phi = np.random.random_sample(nSamples)*2.0*np.pi
+        theta = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        v1 = np.array([[np.cos(th), np.sin(th)*np.cos(ph), np.sin(th)*np.sin(ph)] \
+                        for th, ph in zip(theta, phi)])
+
+        phi = np.random.random_sample(nSamples)*2.0*np.pi
+        theta = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        v2 = np.array([[np.cos(th), np.sin(th)*np.cos(ph), np.sin(th)*np.sin(ph)] \
+                          for th, ph in zip(theta, phi)])
+
+        testPa = pal.dpavVector(v1, v2)
+        for ii in range(nSamples):
+            paControl = pal.dpav(v1[ii], v2[ii])
+            self.assertEqual(paControl, testPa[ii])
+            self.assertFalse(np.isnan(paControl))
+
+        # test the case where we only feed one point in as v2
+        testPa = pal.dpavVector(v1, v2[4])
+        for ii in range(nSamples):
+            paControl = pal.dpav(v1[ii], v2[4])
+            self.assertEqual(paControl, testPa[ii])
+            self.assertFalse(np.isnan(paControl))
+
+        # test that exceptions are raised when they should be
+        self.assertRaises(ValueError, pal.dpavVector, v1, v2[:19])
+
+        v3 = np.random.random_sample((nSamples, 6))
+        self.assertRaises(ValueError, pal.dpavVector, v3, v2)
+
+        self.assertRaises(ValueError, pal.dpavVector, v1, v3)
+
+        self.assertRaises(ValueError, pal.dpavVector, v1, \
+                          np.random.random_sample(9))
+
     def test_caldj(self):
         djm = pal.caldj( 1999, 12, 31 )
         self.assertEqual( djm, 51543 )
@@ -302,14 +500,126 @@ class TestPAL(unittest.TestCase) :
         self.assertRaises( ValueError, pal.caldj, 1970, 13, 1 )
         self.assertRaises( ValueError, pal.caldj, 1970, 1, 32 )
 
-    def test_caf2r(self):
+    def test_caldjVector(self):
+        """
+        Test that caldjVector gives results consistent with cadj
+        """
+        np.random.seed(143)
+        nSamples = 200
+        iy = np.random.random_integers(1000, 10000, nSamples)
+        im = np.random.random_integers(1, 11, nSamples)
+        iday = np.random.random_integers(1, 20, nSamples)
+
+        testMjd = pal.caldjVector(iy, im, iday)
+
+        for ii in range(nSamples):
+            controlMjd = pal.caldj(iy[ii], im[ii], iday[ii])
+            self.assertEqual(controlMjd, testMjd[ii])
+
+        # test that caldjVector and djcalVector invert each other
+        iyTest, imTest, idTest, fracTest = pal.djcalVector(5, testMjd)
+        np.testing.assert_array_equal(iyTest, iy)
+        np.testing.assert_array_equal(imTest, im)
+        np.testing.assert_array_equal(idTest, iday)
+
+        # test that bad values are handled properly
+        iy[5] = -4800
+        im[9] = 13
+        im[11] = 0
+        iday[17] = 33
+
+        testMjd = pal.caldjVector(iy, im, iday)
+        for ii in range(nSamples):
+            if ii==5 or ii==9 or ii==11 or ii==17:
+                self.assertTrue(np.isnan(testMjd[ii]))
+                self.assertRaises(ValueError, pal.caldj, iy[ii], im[ii], \
+                                  iday[ii])
+            else:
+                controlMjd = pal.caldj(iy[ii], im[ii], iday[ii])
+                self.assertEqual(controlMjd, testMjd[ii])
+
+        # test that exceptions are raised when the input arrays are
+        # of different lengths
+        self.assertRaises(ValueError, pal.caldjVector, iy, im[:11], iday)
+
+        self.assertRaises(ValueError, pal.caldjVector, iy, im, iday[:8])
+
+    def test_daf2r(self):
         dr = pal.daf2r( 76, 54, 32.1 )
         self.assertAlmostEqual( dr, 1.342313819975276, 12 )
+
+    def test_daf2rVector(self):
+        """
+        Test that daf2rVector returns the same results as daf2r
+        """
+        np.random.seed(123)
+        nSamples = 100
+        deg = np.random.random_integers(0, 359, nSamples)
+        imin = np.random.random_integers(0, 59, nSamples)
+        asec = np.random.random_sample(nSamples)*60.0
+
+        radianTest = pal.daf2rVector(deg, imin, asec)
+        for ii in range(len(deg)):
+            radianControl = pal.daf2r(deg[ii], imin[ii], asec[ii])
+            self.assertEqual(radianControl, radianTest[ii])
+
+        # test that bad values get set to np.NaN
+        deg[9] = 360
+        imin[17] = 60
+        asec[21] = 60.0
+
+        radianTest = pal.daf2rVector(deg, imin, asec)
+        for ii, rad in enumerate(radianTest):
+            if ii==9 or ii==17 or ii==21:
+                self.assertTrue(np.isnan(rad))
+            else:
+                self.assertFalse(np.isnan(rad))
+
 
     def test_cc2s(self):
         (da, db) = pal.dcc2s( np.array( [100., -50., 25. ] ) )
         self.assertAlmostEqual( da, -0.4636476090008061, 12 )
         self.assertAlmostEqual( db, 0.2199879773954594, 12 )
+
+    def test_dcc2sVector(self):
+        """
+        Test that dcc2sVector returns the same results as dcc2s
+        """
+        np.random.seed(124)
+        inputData = np.random.random_sample((20,3))*10.0
+        aTest, bTest = pal.dcc2sVector(inputData)
+        for ix in range(inputData.shape[0]):
+            aControl, bControl = pal.dcc2s(inputData[ix])
+            self.assertEqual(aControl, aTest[ix])
+            self.assertEqual(bControl, bTest[ix])
+
+        # test that an exception is raised if you don't pass in
+        # 3-D cartesian points
+        dummyData = np.random.random_sample((20, 5))*10.0
+        self.assertRaises(ValueError, pal.dcc2sVector, dummyData)
+
+    def test_dcs2cVector(self):
+        """
+        Test that dcs2cVector returns the same results as dcs2c
+        """
+        np.random.seed(125)
+        nSamples = 100
+        ra = np.random.random_sample(nSamples)*2.0*np.pi
+        dec = (np.random.random_sample(nSamples)-0.5)*np.pi
+        vTest = pal.dcs2cVector(ra, dec)
+        for ii in range(nSamples):
+            vControl = pal.dcs2c(ra[ii], dec[ii])
+            np.testing.assert_array_equal(vControl, vTest[ii])
+
+        # test that dcs2cVector and dcc2sVector do, in fact, invert one another
+        aTest, bTest = pal.dcc2sVector(vTest)
+        np.testing.assert_array_almost_equal(np.cos(ra), np.cos(aTest), 12)
+        np.testing.assert_array_almost_equal(np.sin(ra), np.sin(aTest), 12)
+        np.testing.assert_array_almost_equal(np.cos(dec), np.cos(bTest), 12)
+        np.testing.assert_array_almost_equal(np.sin(dec), np.sin(bTest), 12)
+
+        # test that an exception is raised if you pass in arrays of different lengths
+        self.assertRaises(ValueError, pal.dcs2cVector, ra, dec[:16])
 
     def test_cd2tf(self):
         ( sign, hours, minutes, seconds, fraction ) = pal.dd2tf( 4, -0.987654321 )
@@ -319,6 +629,27 @@ class TestPAL(unittest.TestCase) :
         self.assertEqual( seconds, 13 )
         self.assertEqual( fraction, 3333 )
 
+    def test_dd2tfVector(self):
+        """
+        Test that dd2tfVector gives the same results as dd2tf
+        """
+        np.random.seed(126)
+        nSamples = 100
+        daysList = (np.random.sample(nSamples)-0.5)*1200.0
+
+        for ndp in [2, 3, 4, 5]:
+            testSign, testIh, testIm, testIs, testFrac = pal.dd2tfVector(ndp, daysList)
+            for ix, days in enumerate(daysList):
+                controlSign, controlIh,\
+                controlIm, controlIs,\
+                controlFrac = pal.dd2tf(ndp, days)
+
+                self.assertEqual(controlSign, testSign[ix])
+                self.assertEqual(controlIm, testIm[ix])
+                self.assertEqual(controlIs, testIs[ix])
+                self.assertEqual(controlFrac, testFrac[ix])
+
+
     def test_cldj(self):
         d = pal.cldj( 1899, 12, 31 )
         self.assertEqual( d, 15019 )
@@ -326,7 +657,7 @@ class TestPAL(unittest.TestCase) :
         self.assertRaises( ValueError, pal.cldj, 1970, 13, 1 )
         self.assertRaises( ValueError, pal.cldj, 1970, 1, 32 )
 
-    def test_cr2af(self):
+    def test_dr2af(self):
         (sign, deg, min, sec, f) = pal.dr2af( 4, 2.345 )
         self.assertEqual( sign, "+" )
         self.assertEqual( deg, 134 )
@@ -334,7 +665,30 @@ class TestPAL(unittest.TestCase) :
         self.assertEqual( sec, 30 )
         self.assertEqual( f, 9706 )
 
-    def test_cr2tf(self):
+    def test_dr2afVector(self):
+        """
+        Test that dr2afVector produces the same results as
+        dr2af
+        """
+        np.random.seed(128)
+        nSamples = 200
+        angleList = (np.random.random_sample(nSamples)-0.5)*4.0*np.pi
+        for npd in [2, 3, 4, 5]:
+            testSign, testDeg, \
+            testMin, testSec, testFrac = pal.dr2afVector(npd, angleList)
+
+            for ii in range(nSamples):
+                controlSign, controlDeg, \
+                controlMin, controlSec, controlFrac = pal.dr2af(npd, angleList[ii])
+
+                self.assertEqual(controlSign, testSign[ii])
+                self.assertEqual(controlDeg, testDeg[ii])
+                self.assertEqual(controlMin, testMin[ii])
+                self.assertEqual(controlSec, testSec[ii])
+                self.assertEqual(controlFrac, testFrac[ii])
+
+
+    def test_dr2tf(self):
         (sign, hr, min, sec, f) = pal.dr2tf( 4, -3.01234 )
         self.assertEqual( sign, "-" )
         self.assertEqual( hr, 11 )
@@ -342,19 +696,113 @@ class TestPAL(unittest.TestCase) :
         self.assertEqual( sec, 22 )
         self.assertEqual( f, 6484 )
 
-    def test_ctf2d(self):
+    def test_dr2tfVector(self):
+        """
+        Test that dr2tfVector produces the same results as
+        dr2tf
+        """
+        np.random.seed(128)
+        nSamples = 200
+        angleList = (np.random.random_sample(nSamples)-0.5)*4.0*np.pi
+        for npd in [2, 3, 4, 5]:
+            testSign, testHr, \
+            testMin, testSec, testFrac = pal.dr2tfVector(npd, angleList)
+
+            for ii in range(nSamples):
+                controlSign, controlHr, \
+                controlMin, controlSec, controlFrac = pal.dr2tf(npd, angleList[ii])
+
+                self.assertEqual(controlSign, testSign[ii])
+                self.assertEqual(controlHr, testHr[ii])
+                self.assertEqual(controlMin, testMin[ii])
+                self.assertEqual(controlSec, testSec[ii])
+                self.assertEqual(controlFrac, testFrac[ii])
+
+    def test_dtf2d(self):
         dd = pal.dtf2d( 23, 56, 59.1 )
         self.assertAlmostEqual( dd, 0.99790625, 12 )
         self.assertRaises( ValueError, pal.dtf2d, 24, 1, 32 )
         self.assertRaises( ValueError, pal.dtf2d, 23, -1, 32 )
         self.assertRaises( ValueError, pal.dtf2d, 23, 1, 60 )
 
-    def test_ctf2r(self):
+    def test_dtf2dVector(self):
+        """
+        Test that dtf2dVector gives results consistent with
+        dtf2d
+        """
+        np.random.seed(131)
+        nSamples = 100
+        iHour = np.random.random_integers(0, 23, nSamples)
+        iMin = np.random.random_integers(0, 59, nSamples)
+        sec = np.random.random_sample(nSamples)*60.0
+
+        testDays = pal.dtf2dVector(iHour, iMin, sec)
+        for ii in range(nSamples):
+            controlDays = pal.dtf2d(iHour[ii], iMin[ii], sec[ii])
+            self.assertEqual(testDays[ii], controlDays)
+            self.assertFalse(np.isnan(testDays[ii]))
+
+        # test that NaN's are produced when bad inputs are given
+        iHour[5] = 24
+        iMin[7] = 60
+        sec[19] = 60.001
+        testDays = pal.dtf2dVector(iHour, iMin, sec)
+        for ii in range(nSamples):
+            if ii!=5 and ii!=7 and ii!=19:
+                controlDays = pal.dtf2d(iHour[ii], iMin[ii], sec[ii])
+                self.assertEqual(testDays[ii], controlDays)
+                self.assertFalse(np.isnan(testDays[ii]))
+            else:
+                self.assertTrue(np.isnan(testDays[ii]))
+
+        # test that exceptions are raised when you pass in
+        # mis-matched input arrays
+        self.assertRaises(ValueError, pal.dtf2dVector, iHour, iMin[:19], sec)
+
+        self.assertRaises(ValueError, pal.dtf2dVector, iHour, iMin, sec[:19])
+
+    def test_dtf2r(self):
         dr = pal.dtf2r( 23, 56, 59.1 )
         self.assertAlmostEqual( dr, 6.270029887942679, 12 )
         self.assertRaises( ValueError, pal.dtf2r, 24, 1, 32 )
         self.assertRaises( ValueError, pal.dtf2r, 23, -1, 32 )
         self.assertRaises( ValueError, pal.dtf2r, 23, 1, 60 )
+
+    def test_dtf2rVector(self):
+        """
+        Test that dtf2rVector gives results consistent with
+        dtf2r
+        """
+        np.random.seed(131)
+        nSamples = 100
+        iHour = np.random.random_integers(0, 23, nSamples)
+        iMin = np.random.random_integers(0, 59, nSamples)
+        sec = np.random.random_sample(nSamples)*60.0
+
+        testRad = pal.dtf2rVector(iHour, iMin, sec)
+        for ii in range(nSamples):
+            controlRad = pal.dtf2r(iHour[ii], iMin[ii], sec[ii])
+            self.assertEqual(testRad[ii], controlRad)
+            self.assertFalse(np.isnan(testRad[ii]))
+
+        # test that NaN's are produced when bad inputs are given
+        iHour[5] = 24
+        iMin[7] = 60
+        sec[19] = 60.001
+        testRad = pal.dtf2rVector(iHour, iMin, sec)
+        for ii in range(nSamples):
+            if ii!=5 and ii!=7 and ii!=19:
+                controlRad = pal.dtf2r(iHour[ii], iMin[ii], sec[ii])
+                self.assertEqual(testRad[ii], controlRad)
+                self.assertFalse(np.isnan(testRad[ii]))
+            else:
+                self.assertTrue(np.isnan(testRad[ii]))
+
+        # test that exceptions are raised when you pass in
+        # mis-matched input arrays
+        self.assertRaises(ValueError, pal.dtf2rVector, iHour, iMin[:19], sec)
+
+        self.assertRaises(ValueError, pal.dtf2rVector, iHour, iMin, sec[:19])
 
     def test_dat(self):
         self.assertEqual( pal.dat( 43900 ), 18 )
@@ -376,6 +824,52 @@ class TestPAL(unittest.TestCase) :
         self.assertEqual( m, 2 )
         self.assertEqual( d, 10 )
         self.assertAlmostEqual( f, 0.9999, 7 )
+
+    def test_djcalVector(self):
+        """
+        Test that djcalVector returns results consistent with djcal
+        """
+        np.random.seed(142)
+        nSamples = 200
+        mjd = (np.random.random_sample(nSamples)-0.5)*100000.0
+
+        for ndp in [2,3,4,5]:
+
+            testY, testM, \
+            testD, testFrac = pal.djcalVector(ndp, mjd)
+
+            for ii in range(nSamples):
+                controlY, controlM, \
+                controlD, controlFrac = pal.djcal(ndp, mjd[ii])
+
+                self.assertEqual(controlY, testY[ii])
+                self.assertEqual(controlM, testM[ii])
+                self.assertEqual(controlD, testD[ii])
+                self.assertEqual(controlFrac, testFrac[ii])
+
+
+        ndp = 4
+        # test that unacceptable dates result in -1 being placed in all
+        # of the output slots
+        mjd[4] = -2468570
+        mjd[5] = -2468571
+        mjd[9] = 1.0e8
+        mjd[10] = 1.0e9
+        testY, testM, testD, testFrac = pal.djcalVector(ndp, mjd)
+        for ii in range(nSamples):
+            if ii==5 or ii==10:
+                self.assertEqual(testY[ii], -1)
+                self.assertEqual(testM[ii], -1)
+                self.assertEqual(testD[ii], -1)
+                self.assertEqual(testFrac[ii], -1)
+                self.assertRaises(ValueError, pal.djcal, ndp, mjd[ii])
+            else:
+                controlY, controlM, \
+                controlD, controlFrac = pal.djcal(ndp, mjd[ii])
+                self.assertEqual(controlY, testY[ii])
+                self.assertEqual(controlM, testM[ii])
+                self.assertEqual(controlD, testD[ii])
+                self.assertEqual(controlFrac, testFrac[ii])
 
     def test_dmat(self):
         da = np.array(
@@ -410,12 +904,12 @@ class TestPAL(unittest.TestCase) :
         nTests = 100
         phi = 0.35
         np.random.seed(32)
-        raIn = np.random.random_sample(nTests)*np.pi*2.0
+        haIn = np.random.random_sample(nTests)*np.pi*2.0
         decIn = (np.random.random_sample(nTests)-0.5)*np.pi
         azControl = None
         elControl = None
-        for (rr,dd) in zip (raIn,decIn):
-            az, el = pal.de2h(rr, dd, phi)
+        for (ha,dd) in zip (haIn,decIn):
+            az, el = pal.de2h(ha, dd, phi)
             if azControl is None:
                 azControl = np.array([az])
                 elControl = np.array([el])
@@ -423,15 +917,79 @@ class TestPAL(unittest.TestCase) :
                 azControl = np.append(azControl,az)
                 elControl = np.append(elControl,el)
 
-        azTest, elTest = pal.de2hVector(raIn, decIn, phi)
+        azTest, elTest = pal.de2hVector(haIn, decIn, phi)
         for (a1,e1,a2,e2) in zip (azControl,elControl,azTest,elTest):
             self.assertAlmostEqual(a1,a2,12)
             self.assertAlmostEqual(e1,e2,12)
+
+        # test that an exception is raised if inputs are not
+        # of the same length
+        self.assertRaises(ValueError, pal.de2hVector, haIn[:10], decIn, phi)
+
+    def test_dh2eVector(self):
+        """
+        Test that dh2eVector gives results consistent with dh2e
+        """
+        np.random.seed(142)
+        nSamples = 200
+        phi = 1.432
+        az = np.random.random_sample(nSamples)*2.0*np.pi
+        el = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testHa, testDec = pal.dh2eVector(az, el, phi)
+
+        for ii in range(nSamples):
+            controlHa, controlDec = pal.dh2e(az[ii], el[ii], phi)
+            self.assertEqual(controlHa, testHa[ii])
+            self.assertEqual(controlDec, testDec[ii])
+            self.assertFalse(np.isnan(testHa[ii]))
+            self.assertFalse(np.isnan(testDec[ii]))
+
+        # test that dh2eVector and de2hVector invert each other
+        testAz, testEl = pal.de2hVector(testHa, testDec, phi)
+        arcsecPerRadians = 3600.0*np.degrees(1.0)
+        distance = arcsecPerRadians*pal.dsepVector(testAz, testEl, az, el)
+        np.testing.assert_array_almost_equal(distance,
+                                             np.zeros(nSamples), 9)
+
+        # test that an exception is raised when the input arrays
+        # are of different lengths
+        self.assertRaises(ValueError, pal.dh2eVector, az[:40], el, phi)
 
     def test_ecleq(self):
         (dr,dd) = pal.ecleq( 1.234, -0.123, 43210.0)
         self.assertAlmostEqual( dr, 1.229910118208851, 5 )
         self.assertAlmostEqual( dd, 0.2638461400411088, 5 )
+
+    def test_ecleqVector(self):
+        """
+        Test that ecleqVector produces results consistent with
+        ecleq
+        """
+        mjd = 58734.2
+        np.random.seed(138)
+        nSamples = 200
+        dl = np.random.random_sample(nSamples)*2.0*np.pi
+        db = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testRa, testDec = pal.ecleqVector(dl, db, mjd)
+
+        for ii in range(nSamples):
+            controlRa, controlDec = pal.ecleq(dl[ii], db[ii], mjd)
+            self.assertEqual(controlRa, testRa[ii])
+            self.assertEqual(controlDec, testDec[ii])
+
+        # test that ecleqVector and eqeclVector invert
+        # one another
+        testDl, testDb = pal.eqeclVector(testRa, testDec, mjd)
+        arcsecPerRadian = 3600.0*np.degrees(1.0)
+        distance = arcsecPerRadian*pal.dsepVector(testDl, testDb, dl, db)
+        np.testing.assert_array_almost_equal(distance,
+                                             np.zeros(len(distance)), 4)
+
+        # test that an exception is raised if input arrays are
+        # of different lenghts
+        self.assertRaises(ValueError, pal.ecleqVector, dl[:4], db, mjd)
 
     def test_ecmat(self):
         expected = np.array( [
@@ -456,13 +1014,60 @@ class TestPAL(unittest.TestCase) :
     def test_epj(self):
         self.assertAlmostEqual( pal.epj(42999), 1976.603696098563, 7)
 
+    def test_epjVector(self):
+        """
+        Test that epjVector returns results consistent with epj
+        """
+        np.random.seed(45738)
+        nSamples = 300
+        date = 43000.0 + np.random.random_sample(nSamples)*10000.0
+        testEpj = pal.epjVector(date)
+        for ii in range(nSamples):
+            controlEpj = pal.epj(date[ii])
+            self.assertEqual(controlEpj, testEpj[ii])
+            self.assertFalse(np.isnan(testEpj[ii]))
+
     def test_epj2d(self):
         self.assertAlmostEqual( pal.epj2d(2010.077), 55225.124250, 6 )
+
+    def test_epj2dVector(self):
+        """
+        Test that epj2dVector returns results consistent with epj
+        """
+        np.random.seed(45367)
+        nSamples = 300
+        epj = 2000.0 + np.random.random_sample(nSamples)*50.0
+        testMjd = pal.epj2dVector(epj)
+        for ii in range(nSamples):
+            controlMjd = pal.epj2d(epj[ii])
+            self.assertEqual(controlMjd, testMjd[ii])
+            self.assertFalse(np.isnan(testMjd[ii]))
 
     def test_eqecl(self):
         (dl, db) = pal.eqecl( 0.789, -0.123, 46555 )
         self.assertAlmostEqual( dl, 0.7036566430349022, 6 )
         self.assertAlmostEqual( db, -0.4036047164116848, 6 )
+
+    def test_eqeclVector(self):
+        """
+        Test that eqeclVector produces results consistent with
+        eqecl
+        """
+        mjd = 53000.0
+        np.random.seed(137)
+        nSamples = 200
+        ra = np.random.random_sample(nSamples)*2.0*np.pi
+        dec = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testDb, testDl = pal.eqeclVector(ra, dec, mjd)
+        for ii in range(nSamples):
+            controlDb, controlDl = pal.eqecl(ra[ii], dec[ii], mjd)
+            self.assertEqual(controlDb, testDb[ii])
+            self.assertEqual(controlDl, testDl[ii])
+
+        # test that an exception is raised if inpu arrays are of
+        # different lengths
+        self.assertRaises(ValueError, pal.eqeclVector, ra, dec[:8], mjd)
 
     def test_eqeqx(self):
         self.assertAlmostEqual( pal.eqeqx( 53736 ), -0.8834195072043790156e-5, 15 )
@@ -500,6 +1105,10 @@ class TestPAL(unittest.TestCase) :
         for (dlt, dbt, dlc, dbc) in zip(dlTest, dbTest, dlControl, dbControl):
             self.assertAlmostEqual(dlt, dlc, 12)
             self.assertAlmostEqual(dbt, dbc, 12)
+
+        # test that an exception is raised when the input
+        # arrays are of different lengths
+        self.assertRaises(ValueError, pal.eqgalVector, raIn[:2], decIn)
 
     def test_etrms(self):
         ev = pal.etrms( 1976.9 )
@@ -546,10 +1155,205 @@ class TestPAL(unittest.TestCase) :
         np.testing.assert_allclose( dvh, vhex2, atol=1e-12 )
         np.testing.assert_allclose( dph, phex2, atol=1e-12 )
 
+    def test_fk524(self):
+        """
+        Test that fk524 gives results consistent with data published
+        in:
+
+        'Explanatory Supplement to The Astronomical Almanac'
+        Seidelmann, P. Kenneth (1992)
+        University Science Books
+
+        Table 3.58.1
+        """
+
+        # fk4 ra
+        hr_in = np.array([0, 3, 6, 14, 21, 1, 20, 11, 14])
+        min_in = np.array([17, 17, 11, 36, 4, 48, 15, 50, 54])
+        sec_in = np.array([28.774, 55.847, 43.975, 11.250, 39.935, \
+                           48.784, 3.004, 6.172, 59.224])
+
+        fk4_ra = pal.dtf2rVector(hr_in, min_in, sec_in)
+
+        # fk4 dec
+        sgn = np.array([-1.0, -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0])
+        deg_in = np.array([65, 43, 74, 60, 38, 89, 89, 38, 0])
+        amin_in = np.array([10, 15, 44, 37, 29, 1, 8, 4, 1])
+        asec_in = np.array([6.70, 35.74, 12.46, 48.85, 59.10, 43.74, 18.48, \
+                            39.15, 58.08])
+
+        fk4_dec = sgn*pal.daf2rVector(deg_in, amin_in, asec_in)
+
+        # fk4 mura
+        sgn = np.array([1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0 , 1.0])
+        hr_in = np.zeros(9, dtype=np.int)
+        min_in = np.zeros(9, dtype=np.int)
+        sec_in = np.array([27.141, 27.827, 3.105, 49.042, \
+                           35.227, 18.107, 11.702, 33.873, 0.411])
+
+        fk4_mura = 0.01*sgn*pal.dtf2rVector(hr_in, min_in, sec_in)
+
+        # fk4 mudec
+        radPerArcsec = np.radians(1.0/3600.0)
+        fk4_mudec = 0.01*radPerArcsec*np.array([116.74, 74.76, -21.12, 71.20, \
+                                         318.47, -0.43, -0.09, -580.57,
+                                         -2.73])
+
+        fk4_px = np.array([0.134, 0.156, 0.115, 0.751, 0.292, 0.000, \
+                           0.000, 0.116, 0.000])
+
+        fk4_vr = np.array([8.70, 86.80, 35.00, -22.20, -64.00, 0.00, \
+                           0.00, -98.30, 0.00])
+
+        # fk5 ra
+        hr_in = np.array([0, 3, 6, 14, 21, 2, 21, 11, 14])
+        min_in = np.array([20, 19, 10, 39, 6, 31, 8, 52, 57])
+        sec_in = np.array([4.3100, 55.6785, 14.5196, 36.1869, \
+                           54.5901, 49.8131, 46.0652, 58.7461, \
+                           33.2650])
+
+        fk5_ra = pal.dtf2rVector(hr_in, min_in, sec_in)
+
+        # fk5 dec
+        sgn = np.array([-1.0, -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0])
+        deg_in = np.array([64, 43, 74, 60, 38, 89, 88, 37, 0])
+        amin_in = np.array([52, 4, 45, 50, 44, 15, 57, 43, 10])
+        asec_in = np.array([29.332, 10.830, 11.036, 7.393, 44.969, \
+                            50.661, 23.667, 7.456, 3.240])
+
+        fk5_dec = sgn*pal.daf2rVector(deg_in, amin_in, asec_in)
+
+        # fk5 mura
+        sgn = np.array([1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0 , 1.0])
+        hr_in = np.zeros(9, dtype=np.int)
+        min_in = np.zeros(9, dtype=np.int)
+        sec_in = np.array([26.8649, 27.7694, 3.1310, 49.5060, \
+                           35.3528, 21.7272, 8.4469, 33.7156, \
+                           0.4273])
+
+        fk5_mura = 0.01*sgn*pal.dtf2rVector(hr_in, min_in, sec_in)
+
+        # fk5 mudec
+        fk5_mudec = 0.01*radPerArcsec*np.array([116.285, 73.050, -21.304, \
+                                                69.934, 320.206, -1.571, \
+                                                0.171, -581.216, \
+                                                -2.402])
+
+        fk5_px = np.array([0.1340, 0.1559, 0.1150, 0.7516, \
+                           0.2923, 0.0000, 0.0000, \
+                           0.1161, 0.0000])
+
+        fk5_vr = np.array([8.74, 86.87, 35.00, -22.18, -63.89, 0.00, \
+                           0.00, -97.81, 0.00])
+
+        arcsecPerRad = np.degrees(1.0)*3600.0
+
+        for ra5, dec5, mura5, mudec5, px5, vr5, \
+            ra4, dec4, mura4, mudec4, px4, vr4 in \
+            zip(fk5_ra, fk5_dec, fk5_mura, fk5_mudec, fk5_px, fk5_vr, \
+                fk4_ra, fk4_dec, fk4_mura, fk4_mudec, fk4_px, fk4_vr):
+
+            ra, dec, mura, \
+            mudec, px, vr = pal.fk524(ra5, dec5, mura5, mudec5, px5, vr5)
+
+            # dpos is the angular separation (in arcsec) between
+            # the result of pal.fk524 and the true fk4 coordinates
+            # of the sample point
+            dpos = arcsecPerRad*pal.dsep(ra4, dec4, ra, dec)
+
+            dmura = arcsecPerRad*np.abs(mura-mura4)
+            dmudec = arcsecPerRad*np.abs(mudec-mudec4)
+            dpx = np.abs(px-px4)
+            dvr = np.abs(vr-vr4)
+
+            self.assertTrue(dpos<0.001)
+            self.assertTrue(dmura<0.01)
+            self.assertTrue(dmudec<0.01)
+            self.assertTrue(dpx<0.001)
+            self.assertTrue(dvr<0.01)
+
+    def test_Fk524Vectors(self):
+        """
+        Test that fk524Vector returns results consistent with
+        fk524
+        """
+        np.random.seed(135)
+        nSamples = 200
+        ra5 = np.random.random_sample(nSamples)*2.0*np.pi
+        dec5 = (np.random.random_sample(nSamples)-0.5)*np.pi
+        mura5 = 0.01*(np.random.random_sample(nSamples)-0.5)*200.0*np.radians(1.0/3600.0)
+        mudec5 = 0.01*(np.random.random_sample(nSamples)-0.5)*200.0*np.radians(1.0/3600.0)
+        px5 = np.random.random_sample(nSamples)
+        vr5 = (np.random.random_sample(nSamples)-0.5)*200.0
+
+        testRa, testDec, \
+        testMura, testMudec, \
+        testPx, testVr = pal.fk524Vector(ra5, dec5, mura5, mudec5, px5, vr5)
+
+        for ii in range(nSamples):
+            controlRa, controlDec, \
+            controlMura, controlMudec, \
+            controlPx, controlVr = pal.fk524(ra5[ii], dec5[ii], mura5[ii], \
+                                             mudec5[ii], px5[ii], vr5[ii])
+
+            self.assertEqual(controlRa, testRa[ii])
+            self.assertEqual(controlDec, testDec[ii])
+            self.assertEqual(controlMura, testMura[ii])
+            self.assertEqual(controlMudec, testMudec[ii])
+            self.assertEqual(controlPx, testPx[ii])
+            self.assertEqual(controlVr, testVr[ii])
+
+        # test that exceptions are raised when the input arrays are
+        # of different lengths
+        self.assertRaises(ValueError, pal.fk524Vector, ra5, dec5[:6], mura5, \
+                          mudec5, px5, vr5)
+
+        self.assertRaises(ValueError, pal.fk524Vector, ra5, dec5, mura5[:8], \
+                          mudec5, px5, vr5)
+
+        self.assertRaises(ValueError, pal.fk524Vector, ra5, dec5, mura5, \
+                          mudec5[:6], px5, vr5)
+
+        self.assertRaises(ValueError, pal.fk524Vector, ra5, dec5, mura5, \
+                          mudec5, px5[:9], vr5)
+
+        self.assertRaises(ValueError, pal.fk524Vector, ra5, dec5, mura5, \
+                          mudec5, px5, vr5[:9])
+
     def test_fk45z(self):
         (r2000, d2000) = pal.fk45z( 1.2, -0.3, 1960 )
         self.assertAlmostEqual( r2000, 1.2097812228966762227, 11 )
         self.assertAlmostEqual( d2000, -0.29826111711331398935, 12 )
+
+    def test_fk45zVector(self):
+        """
+        Test that fk45zVector produces results consistent with fk45z
+        """
+        epoch = 1960
+        np.random.seed(136)
+        nSamples = 200
+        r1950 = np.random.random_sample(nSamples)*2.0*np.pi
+        d1950 = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testR2000, testD2000 = pal.fk45zVector(r1950, d1950, epoch)
+
+        for ii in range(nSamples):
+            controlR2000, controlD2000 = pal.fk45z(r1950[ii], d1950[ii], epoch)
+            self.assertEqual(controlR2000, testR2000[ii])
+            self.assertEqual(controlD2000, testD2000[ii])
+
+        # test that fk45zVector and fk54zVector invert each other
+        testR1950, testD1950, \
+        testDR1950, testDD1950 = pal.fk54zVector(testR2000, testD2000, epoch)
+
+        distance = pal.dsepVector(testR1950, testD1950, r1950, d1950)
+        arcsecPerRadians = 3600.0*np.degrees(1.0)
+        np.testing.assert_array_almost_equal(distance*arcsecPerRadians, \
+                                             np.zeros(len(distance)), 4)
+
+        # test that an exception is raised if the input arrays are of different
+        # lengths
+        self.assertRaises(ValueError, pal.fk45zVector, r1950, d1950[:8], epoch)
 
     def test_fk52h(self):
         inr5 = 1.234
@@ -564,12 +1368,86 @@ class TestPAL(unittest.TestCase) :
         self.assertAlmostEqual( dr5, 0.000000006822074, 13 )
         self.assertAlmostEqual( dd5, -0.000000002334012, 13 )
 
+    def test_fk5hzVector(self):
+        """
+        Test that fk5hzVector returns results consistent with
+        fk5hz
+        """
+        np.random.seed(132)
+        nSamples = 200
+        raList = np.random.random_sample(nSamples)*2.0*np.pi
+        decList = (np.random.random_sample(nSamples)-0.5)*np.pi
+        testRa, testDec = pal.fk5hzVector(raList, decList, 2000.0)
+
+        for ii in range(nSamples):
+            controlRa, controlDec = pal.fk5hz(raList[ii], decList[ii], 2000.0)
+            self.assertEqual(controlRa, testRa[ii])
+            self.assertEqual(controlDec, testDec[ii])
+
+        # test that an exception is raised if the input raList and decList
+        # are of different sizes
+        self.assertRaises(ValueError, pal.fk5hzVector, raList, decList[:24], \
+                          2000.0)
+
+    def test_hkf5zVector(self):
+        """
+        Test that hkf5zVector produces results consistent with
+        hkf5z
+        """
+        np.random.seed(133)
+        nSamples = 200
+        raList = np.random.random_sample(nSamples)*2.0*np.pi
+        decList = (np.random.random_sample(nSamples)-0.5)*np.pi
+        testRa, testDec, testDr, testDd = pal.hfk5zVector(raList, decList, 2000.0)
+        for ii in range(nSamples):
+            controlRa, controlDec, \
+            controlDr, controlDd = pal.hfk5z(raList[ii], decList[ii], 2000.0)
+            self.assertEqual(testRa[ii], controlRa)
+            self.assertEqual(testDec[ii], controlDec)
+            self.assertEqual(testDr[ii], controlDr)
+            self.assertEqual(testDd[ii], controlDd)
+
+        # test hfk5zVector anf fk5hzVector invert each other
+        ra5, dec5 = pal.fk5hzVector(testRa, testDec, 2000.0)
+        np.testing.assert_array_almost_equal(ra5, raList, 12)
+        np.testing.assert_array_almost_equal(dec5, decList, 12)
+
+        # test that an exception is raised if raList and decList are
+        # of different lengths
+        self.assertRaises(ValueError, pal.hfk5zVector,raList, decList[:77], \
+                          2000.0)
+
     def test_fk54z(self):
         (r1950, d1950, dr1950, dd1950) = pal.fk54z( 1.2, -0.3, 1960 )
         self.assertAlmostEqual( r1950, 1.1902221805755279771, 12 )
         self.assertAlmostEqual( d1950, -0.30178317645793828472, 12 )
         self.assertAlmostEqual( dr1950, -1.7830874775952945507e-08, 12 )
         self.assertAlmostEqual( dd1950, 7.196059425334821089e-09, 12 )
+
+    def test_fk54zVector(self):
+        """
+        Test that fk54zVector returns results consistent with fk54z
+        """
+        epoch = 1960
+        np.random.seed(136)
+        nSamples = 200
+        r2000 = np.random.random_sample(nSamples)*2.0*np.pi
+        d2000 = (np.random.random_sample(nSamples)-0.5)*np.pi
+        testR1950, testD1950, \
+        testDr1950, testDd1950 = pal.fk54zVector(r2000, d2000, epoch)
+
+        for ii in range(nSamples):
+            controlR1950, controlD1950, \
+            controlDr1950, controlDd1950 = pal.fk54z(r2000[ii], d2000[ii], epoch)
+
+            self.assertEqual(controlR1950, testR1950[ii])
+            self.assertEqual(controlD1950, testD1950[ii])
+            self.assertEqual(controlDr1950, testDr1950[ii])
+            self.assertEqual(controlDd1950, testDd1950[ii])
+
+        # test that an exception is raised if input arrays are of
+        # different lengths
+        self.assertRaises(ValueError, pal.fk54zVector, r2000[:11], d2000, epoch)
 
     def test_flotin(self):
         pass
@@ -594,10 +1472,35 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(drt, drc, 12)
             self.assertAlmostEqual(ddt, ddc, 12)
 
+        # test that an exception is raise if input arrays
+        # are of different lengths
+        self.assertRaises(ValueError, pal.galeqVector, dlIn[:3], dbIn)
+
     def test_galsup(self):
         (dsl, dsb) = pal.galsup( 6.1, -1.4 )
         self.assertAlmostEqual( dsl, 4.567933268859171, 12 )
         self.assertAlmostEqual( dsb, -0.01862369899731829, 12 )
+
+    def test_galsupVector(self):
+        """
+        Test that galsupVector gives results consistent with galsup
+        """
+        np.random.seed(134)
+        nSamples = 200
+
+        llList = np.random.random_sample(nSamples)*2.0*np.pi
+        bbList = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testSl, testSb = pal.galsupVector(llList, bbList)
+
+        for ii in range(nSamples):
+            controlSl, controlSb = pal.galsup(llList[ii], bbList[ii])
+            self.assertEqual(controlSl, testSl[ii])
+            self.assertEqual(controlSb, testSb[ii])
+
+        # test that an exception is raised if you pass in arrays with
+        # different lengths
+        self.assertRaises(ValueError, pal.galsupVector, llList[:55], bbList)
 
     def test_geoc(self):
         lat = 19.822838905884 * pal.DD2R
@@ -610,6 +1513,24 @@ class TestPAL(unittest.TestCase) :
         (dr, dd) = pal.ge50( 6.1, -1.55 )
         self.assertAlmostEqual( dr, 0.1966825219934508, 12 )
         self.assertAlmostEqual( dd, -0.4924752701678960, 12 )
+
+    def test_ge50Vector(self):
+        """
+        Test that ge50Vector returns results consistent with ge50
+        """
+        np.random.seed(133)
+        nSamples = 200
+        llList = np.random.random_sample(nSamples)*2.0*np.pi
+        bbList = (np.random.random_sample(nSamples)-0.5)*np.pi
+        testRa, testDec = pal.ge50Vector(llList, bbList)
+        for ii in range(nSamples):
+            controlRa, controlDec = pal.ge50(llList[ii], bbList[ii])
+            self.assertEqual(controlRa, testRa[ii])
+            self.assertEqual(controlDec, testDec[ii])
+
+        # test that an exception is raised when you pass in different
+        # numbers of longitudes as you do latitudes
+        self.assertRaises(ValueError, pal.ge50Vector, llList, bbList[:45])
 
     def test_gmst(self):
         self.assertAlmostEqual( pal.gmst( 53736 ), 1.754174971870091203, 12 )
@@ -637,6 +1558,10 @@ class TestPAL(unittest.TestCase) :
         gmTest = pal.gmstaVector(dateIn, utIn)
         for gt, gc in zip(gmTest, gmControl):
             self.assertAlmostEqual(gt, gc, 12)
+
+        # test that an exception is raised if input arrays are
+        # of different lengths
+        self.assertRaises(ValueError, pal.gmstaVector, dateIn[:8], utIn)
 
     def test_intin(self):
         s = "  -12345, , -0  2000  +     "
@@ -728,6 +1653,10 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(r1,r2,12)
             self.assertAlmostEqual(d1,d2,12)
 
+        # test that an exception is raised if the input arrays
+        # are of inconsistent lengths
+        self.assertRaises(ValueError, pal.mapqkzVector, raIn[:4], decIn, amprms)
+
     def test_mapqkVector(self):
         amprms = pal.mappa(2010, 55927)
         np.random.seed(32)
@@ -754,6 +1683,23 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(r1,r2,12)
             self.assertAlmostEqual(d1,d2,12)
 
+        # test that an exception is raised if the input arrays
+        # are of inconsistent shapes
+        self.assertRaises(ValueError, pal.mapqkVector, raIn, decIn[:10], pmr, \
+                          pmd, px, rv, amprms)
+
+        self.assertRaises(ValueError, pal.mapqkVector, raIn, decIn, pmr[:10], \
+                          pmd, px, rv, amprms)
+
+        self.assertRaises(ValueError, pal.mapqkVector, raIn, decIn, pmr, \
+                          pmd[:10], px, rv, amprms)
+
+        self.assertRaises(ValueError, pal.mapqkVector, raIn, decIn, pmr, \
+                          pmd, px[:10], rv, amprms)
+
+        self.assertRaises(ValueError, pal.mapqkVector, raIn, decIn, pmr, \
+                          pmd, px, rv[:10], amprms)
+
     def test_moon(self):
         expected = np.array( [
              0.00229161514616454,
@@ -765,6 +1711,25 @@ class TestPAL(unittest.TestCase) :
              ] )
         pv = pal.dmoon( 48634.4687174074 )
         np.testing.assert_array_almost_equal( pv, expected, decimal=12 )
+
+
+    def test_dmoonVector(self):
+       """
+       Test that dmoonVector returns results consistent with dmoon
+       """
+       np.random.seed(141)
+       nSamples = 1000
+       date = np.random.random_sample(nSamples)*10000.0 + 43000.0
+       testX, testY, testZ, testXd, testYd, testZd = pal.dmoonVector(date)
+
+       for ii in range(nSamples):
+           x, y, z, xd, yd, zd = pal.dmoon(date[ii])
+           self.assertEqual(x, testX[ii])
+           self.assertEqual(y, testY[ii])
+           self.assertEqual(z, testZ[ii])
+           self.assertEqual(xd, testXd[ii])
+           self.assertEqual(yd, testYd[ii])
+           self.assertEqual(zd, testZd[ii])
 
     def test_nut(self):
         expected = np.array( [
@@ -810,6 +1775,10 @@ class TestPAL(unittest.TestCase) :
         for pt, pc in zip(paTest, paControl):
             self.assertAlmostEqual(pt, pc, 12)
 
+        # test that an exception is raised if input arrays
+        # are of inconsistent length
+        self.assertRaises(ValueError, pal.paVector, haIn[:4], decIn, phi)
+
     def test_pcd(self):
         disco = 178.585
         REFX = 0.0123
@@ -827,6 +1796,70 @@ class TestPAL(unittest.TestCase) :
         (x, y) = pal.unpcd( -disco, x, y )
         self.assertAlmostEqual( x, REFX, 14 )
         self.assertAlmostEqual( y, REFY, 14 )
+
+    def test_pcdVector(self):
+        """
+        Test that pcdVector returns the same results as running
+        pcd on each element of the vectors
+        """
+        np.random.seed(120)
+        x_in = 2.0*(np.random.random_sample(100)-0.5)
+        y_in = 2.0*(np.random.random_sample(100)-0.5)
+        disco = 191.0
+
+        xTestList, yTestList = pal.pcdVector(disco, x_in, y_in)
+        for xTest, yTest, xx, yy in zip(xTestList, yTestList, x_in, y_in):
+           xControl, yControl = pal.pcd(disco, xx, yy)
+           self.assertEqual(xControl, xTest)
+           self.assertEqual(yControl, yTest)
+
+        # make sure that x and y were changed by applying pcd
+        # (also make sure that x_in and y_in were not changed
+        # by pcdVector)
+        with self.assertRaises(AssertionError) as context:
+            np.testing.assert_array_almost_equal(xTestList, x_in, 12)
+
+        with self.assertRaises(AssertionError) as context:
+            np.testing.assert_array_almost_equal(yTestList, y_in, 12)
+
+        # make sure that an exceptoion is raised if you pass in
+        # mismatched x and y vectors
+        self.assertRaises(ValueError, pal.pcdVector, disco, x_in, y_in[:10])
+
+    def test_unpcdVector(self):
+        """
+        Test that unpcdVector produces the same results as running unpcd
+        on each element of the input vectors
+        """
+        np.random.seed(121)
+        disco = 132.0
+        x_in = 2.0*(np.random.random_sample(120)-0.5)
+        y_in = 2.0*(np.random.random_sample(120)-0.5)
+
+        xTestList, yTestList = pal.unpcdVector(disco, x_in, y_in)
+
+        # make sure that unpcdVector and unpcd give the same results
+        for xTest, yTest, xx, yy in zip(xTestList, yTestList, x_in, y_in):
+            xControl, yControl = pal.unpcd(disco, xx, yy)
+            self.assertEqual(xTest, xControl)
+            self.assertEqual(yTest, yControl)
+
+        # make sure that xTestList and yTestList are different from x_in and y_in
+        with self.assertRaises(AssertionError) as context:
+            np.testing.assert_array_almost_equal(xTestList, x_in, 12)
+
+        with self.assertRaises(AssertionError) as context:
+            np.testing.assert_array_almost_equal(yTestList, y_in, 12)
+
+        # use pcdVector to transform back into the distorted coordinates and
+        # verify that those are equivalent to x_in and y_in
+        xDistorted, yDistorted = pal.pcdVector(disco, xTestList, yTestList)
+        np.testing.assert_array_almost_equal(xDistorted, x_in, 12)
+        np.testing.assert_array_almost_equal(yDistorted, y_in, 12)
+
+        # test that an exception is raised if you pass in different numbers
+        # of x and y coordinates
+        self.assertRaises(ValueError, pal.unpcdVector, disco, x_in, y_in[:30])
 
     def test_planet(self):
         # palEl2ue
@@ -1043,6 +2076,23 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(r1,r2,12)
             self.assertAlmostEqual(d1,d2,12)
 
+        # test that an exception is raised if input arrays are of
+        # inconsistent length
+        self.assertRaises(ValueError, pal.pmVector, raIn, decIn[:3], pmr, \
+                          pmd, px, rv, ep0, ep1)
+
+        self.assertRaises(ValueError, pal.pmVector, raIn, decIn, pmr[:3], \
+                          pmd, px, rv, ep0, ep1)
+
+        self.assertRaises(ValueError, pal.pmVector, raIn, decIn, pmr, \
+                          pmd[:3], px, rv, ep0, ep1)
+
+        self.assertRaises(ValueError, pal.pmVector, raIn, decIn, pmr, \
+                          pmd, px[:3], rv, ep0, ep1)
+
+        self.assertRaises(ValueError, pal.pmVector, raIn, decIn, pmr, \
+                          pmd, px, rv[:3], ep0, ep1)
+
     def test_polmo(self):
         (elong, phi, daz) = pal.polmo( 0.7, -0.5, 1.0e-6, -2.0e-6)
 
@@ -1089,8 +2139,53 @@ class TestPAL(unittest.TestCase) :
     def test_range(self):
         self.assertAlmostEqual( pal.drange( -4 ), 2.283185307179586, 12 )
 
+    def test_drangeVector(self):
+        """
+        Test that drangeVector returns results consistent with drange
+        """
+        np.random.seed(140)
+        nSamples = 1000
+        angle_in = np.random.random_sample(nSamples)*10.0*np.pi+2.0*np.pi
+        angle_in = np.append(angle_in, np.random.random_sample(nSamples)*(-10.0)*np.pi)
+
+        test_angle = pal.drangeVector(angle_in)
+
+        for ii in range(len(angle_in)):
+            control_angle = pal.drange(angle_in[ii])
+            self.assertEqual(control_angle, test_angle[ii])
+            self.assertAlmostEqual(np.sin(angle_in[ii]), np.sin(test_angle[ii]), 10)
+            self.assertAlmostEqual(np.cos(angle_in[ii]), np.cos(test_angle[ii]), 10)
+
     def test_ranorm(self):
         self.assertAlmostEqual( pal.dranrm( -0.1 ), 6.183185307179587, 12 )
+
+    def test_dranrmVector(self):
+        """
+        Test that dranrmVector returns the same results as dranrm
+        """
+        np.random.seed(74310)
+        nSamples = 100
+        angle_in = (np.random.random_sample(100)-0.5)*4.0*np.pi
+        angle_in = np.array([aa + 2.0*np.pi if aa>0.0 else aa for aa in angle_in])
+
+        # make sure we created input angles that are outside the
+        # 0 to 2pi range
+        for aa in angle_in:
+            if aa>0.0 and aa<2.0*np.pi:
+                raise RuntimeError("did not create correct inputs for test_dranrmVector")
+
+        testAngle = pal.dranrmVector(angle_in)
+
+        # verify that the resulting angles are equivalent to the input
+        # angles normalized to the 0-2pi ranges
+        self.assertTrue(testAngle.min()>0.0)
+        self.assertTrue(testAngle.max()<2.0*np.pi)
+        np.testing.assert_array_almost_equal(np.cos(testAngle), np.cos(angle_in), 12)
+        np.testing.assert_array_almost_equal(np.sin(testAngle), np.sin(angle_in), 12)
+
+        for ii in range(nSamples):
+            controlAngle = pal.dranrm(angle_in[ii])
+            self.assertEqual(controlAngle, testAngle[ii])
 
     def test_ref(self):
         self.assertAlmostEqual( pal.refro(1.4, 3456.7, 280, 678.9, 0.9, 0.55,
@@ -1151,6 +2246,42 @@ class TestPAL(unittest.TestCase) :
         for zt, zc in zip(zrTest, zrControl):
             self.assertAlmostEqual(zt, zc, 12)
 
+    def test_refvVector(self):
+        """
+        Test that refvVector gives the same results as iterating over
+        vectors with refv
+        """
+        np.random.seed(118)
+        inputData = np.random.random_sample((4,3))*5.0
+        ref_a = 0.02
+        ref_b = 0.05
+        outputData = pal.refvVector(inputData, ref_a, ref_b)
+        for inVector, outVector in zip(inputData, outputData):
+            controlVector = pal.refv(inVector, ref_a, ref_b)
+            np.testing.assert_array_equal(outVector, controlVector)
+
+    def test_refroVector(self):
+        """
+        Test that refroVector returns the same results as just calling
+        refro on each element of the input vector individually.
+        """
+        np.random.seed(119)
+        hm = 150.0
+        tdk = 289.0
+        pmb = 670.0
+        rh = 0.7
+        wl = 0.6
+        phi = 0.3
+        tlr = 0.008
+        eps = 1.0e-10
+        zobs = np.random.random_sample(20)*np.pi*0.5
+        testOutput = pal.refroVector(zobs, hm, tdk, pmb, rh, wl, phi, tlr, eps)
+        for zz, test in zip(zobs, testOutput):
+            control = pal.refro(zz, hm, tdk, pmb, rh, wl, phi, tlr, eps)
+            self.assertEqual(test, control)
+
+
+
     def test_refc(self): # This is the SOFA test
         (refa, refb) = pal.refcoq( 10.0+273.15, 800.0, 0.9, 0.4)
         self.assertAlmostEqual( refa, 0.2264949956241415009e-3, 15 )
@@ -1205,10 +2336,77 @@ class TestPAL(unittest.TestCase) :
         for (ddc, ddt) in zip (ddTest, ddControl):
             self.assertAlmostEqual(ddc, ddt, 12)
 
+        # test that an exception is raised if input arrays
+        # have different lengths
+        self.assertRaises(ValueError, pal.dsepVector, ra1, dec1[:5], ra2, dec2)
+
+        self.assertRaises(ValueError, pal.dsepVector, ra1, dec1, ra2[:5], dec2)
+
+        self.assertRaises(ValueError, pal.dsepVector, ra1, dec1, ra2, dec2[:5])
+
+    def test_dsepvVector(self):
+        """
+        Test that dsepvVector produces results that agree
+        with dsepv
+        """
+        np.random.seed(130)
+        nSamples = 100
+        v1 = (np.random.random_sample((nSamples, 3))-0.5)*100.0
+        v2 = (np.random.random_sample((nSamples, 3))-0.5)*100.0
+
+        testSep = pal.dsepvVector(v1, v2)
+        for ii in range(nSamples):
+            controlSep = pal.dsepv(v1[ii], v2[ii])
+            self.assertEqual(controlSep, testSep[ii])
+            self.assertFalse(np.isnan(testSep[ii]))
+
+        testSep = pal.dsepvVector(v1, v2[6])
+        for ii in range(nSamples):
+            controlSep = pal.dsepv(v1[ii], v2[6])
+            self.assertEqual(controlSep, testSep[ii])
+            self.assertFalse(np.isnan(testSep[ii]))
+
+        # test that exceptions are raised when they ought to be
+        self.assertRaises(ValueError, pal.dsepvVector, v1, v2[0:19])
+
+        v3 = np.random.random_sample((nSamples,2))
+        self.assertRaises(ValueError, pal.dsepvVector, v3, v2)
+
+        self.assertRaises(ValueError, pal.dsepvVector, v1, v3)
+
+        self.assertRaises(ValueError, pal.dsepvVector, v1, \
+                          np.random.random_sample(4))
+
     def test_supgal(self):
         (dl, db) = pal.supgal( 6.1, -1.4 )
         self.assertAlmostEqual( dl, 3.798775860769474, 12 )
         self.assertAlmostEqual( db,  -0.1397070490669407, 12 )
+
+    def test_supgalVector(self):
+        """
+        Test that supgalVector returns results consistent with supgal
+        """
+
+        np.random.seed(134)
+        nSamples = 200
+        dslList = np.random.random_sample(nSamples)*2.0*np.pi
+        dsbList = (np.random.random_sample(nSamples)-0.5)*np.pi
+
+        testDl, testDb = pal.supgalVector(dslList, dsbList)
+
+        for ii in range(nSamples):
+            controlDl, controlDb = pal.supgal(dslList[ii], dsbList[ii])
+            self.assertEqual(controlDl, testDl[ii])
+            self.assertEqual(controlDb, testDb[ii])
+
+        # test that supgalVector and galsupVector invert each other
+        testDsl, testDsb = pal.galsupVector(testDl, testDb)
+        np.testing.assert_array_almost_equal(testDsl, dslList, 9)
+        np.testing.assert_array_almost_equal(testDsb, dsbList, 9)
+
+        # test that an exception is raised if the input arrays are of
+        # different length
+        self.assertRaises(ValueError, pal.supgalVector, dslList[:16], dsbList)
 
     def test_tp(self):
         dr0 = 3.1
@@ -1251,6 +2449,55 @@ class TestPAL(unittest.TestCase) :
         for (x1,e1,x2,e2) in zip(xiControl,etaControl,xiTest,etaTest):
             self.assertAlmostEqual(x1,x2,12)
             self.assertAlmostEqual(e1,e2,12)
+
+        # test that bad input values get mapped to NaNs
+        raIn[5] = raz + np.pi
+        decIn[7] = decz + np.pi
+        xiTest, etaTest = pal.ds2tpVector(raIn, decIn, raz, decz)
+        for ii in range(len(raIn)):
+            if ii==5 or ii==7:
+                self.assertTrue(np.isnan(xiTest[ii]))
+                self.assertTrue(np.isnan(etaTest[ii]))
+                self.assertRaises(ValueError, pal.ds2tp, raIn[ii], decIn[ii], raz, decz)
+            else:
+                self.assertEqual(xiTest[ii], xiControl[ii])
+                self.assertEqual(etaTest[ii], etaControl[ii])
+
+        # test that an exception is raised if input arrays
+        # are not of the same shape
+        self.assertRaises(ValueError, pal.ds2tpVector,raIn[:3], decIn, \
+                          raz, decz)
+
+    def test_dtp2sVector(self):
+        """
+        Test that dtp2sVector produces results consistent with
+        dtp2s
+        """
+
+        np.random.seed(139)
+        nSamples = 200
+        raz = 0.9
+        decz = -0.3
+
+        xi = (np.random.random_sample(nSamples)-0.5)*10.0
+        eta = (np.random.random_sample(nSamples)-0.5)*10.0
+        testRa, testDec = pal.dtp2sVector(xi, eta, raz, decz)
+
+        for ii in range(nSamples):
+            controlRa, controlDec = pal.dtp2s(xi[ii], eta[ii], raz, decz)
+            self.assertEqual(testRa[ii], controlRa)
+            self.assertEqual(testDec[ii], controlDec)
+            self.assertFalse(np.isnan(testRa[ii]))
+            self.assertFalse(np.isnan(testDec[ii]))
+
+        # test that dtp2sVector and ds2tpVector invert each other
+        testXi, testEta = pal.ds2tpVector(testRa, testDec, raz, decz)
+        np.testing.assert_array_almost_equal(testXi, xi, 12)
+        np.testing.assert_array_almost_equal(testEta, eta, 12)
+
+        # test that an exception is raised if input arrays are of
+        # different sizes
+        self.assertRaises(ValueError, pal.dtp2sVector, xi, eta[:20], raz, decz)
 
     def test_vecmat(self):
         # Not everything is implemented here

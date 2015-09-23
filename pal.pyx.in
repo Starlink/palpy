@@ -72,6 +72,21 @@ def airmas( double zd ):
      """
      return cpal.palAirmas( zd )
 
+def airmasVector(np.ndarray[double, ndim=1] zd not None):
+     """
+     airmass = airmasVector( zd )
+
+     where zd and airmass are numpy arrays
+
+     @palAirmas@
+     """
+     cdef int length = len(zd)
+     cdef np.ndarray airmass_out = np.empty(length, dtype=np.float64)
+     for ii in range(length):
+         airmass_out[ii] = cpal.palAirmas(zd[ii])
+     return airmass_out
+
+
 def altaz(double ha, double dec, double phi):
      """
      (az, azd, azdd, el, eld, eldd, pa, pad, padd) = altaz( ha, dec, phi )
@@ -90,13 +105,26 @@ def altaz(double ha, double dec, double phi):
      cpal.palAltaz (ha, dec, phi, &az, &azd, &azdd, &el, &eld, &eldd, &pa, &pad, &padd )
      return (az, azd, azdd, el, eld, eldd, pa, pad, padd )
 
-def altazVector(np.ndarray ha, np.ndarray dec, double phi):
+def altazVector(np.ndarray[double, ndim=1] ha not None,
+                np.ndarray[double, ndim=1] dec not None,
+                double phi):
      """
-     This is just altaz, except that it accepts vectors of hour angle and declination.
-     Latitude is still a float.
-     All outputs are vectors.
+     (az, azd, azdd, el, eld, eldd, pa, pad, padd) = altazVector( ha, dec, phi )
+
+     where ha, dec and all outputs are numpy arrays
+
+     @palAltaz@
+
+     Raises
+     ------
+     ValueError if input numpy arrays are not of the same length
      """
      cdef int length = len(ha)
+
+     if len(dec)!=length:
+          raise ValueError("You did not pass as many Decs as " \
+                           + "Hour Angles to altazVector")
+
      cdef np.ndarray azout = np.zeros(length, dtype=np.float64)
      cdef double az
      cdef np.ndarray azdout = np.zeros(length, dtype=np.float64)
@@ -153,6 +181,46 @@ def ampqk( double ra, double da, np.ndarray[double, ndim=1] amprms not None ):
           camprms[i] = amprms[i]
      cpal.palAmpqk( ra, da, camprms, &rm, &dm )
      return (rm, dm)
+
+
+def ampqkVector(np.ndarray[double, ndim=1] ra not None,
+                np.ndarray[double, ndim=1] dec not None,
+                np.ndarray[double, ndim=1] amprms not None):
+     """
+     (rm, dm) = ampqkVector( ra, dec, amprms )
+
+     where ra, dec, rm, and dm are all numpy arrays
+
+     @palAmpqk@
+
+     Raises
+     ------
+     ValueError if input arrays of RA and Dec are not of the same
+     length
+     """
+
+     cdef int length = len(ra)
+
+     if len(dec)!=length:
+         raise ValueError("You did not pass as many Decs as RAs to " \
+                          + "ampqkVector")
+
+     cdef np.ndarray rm_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray dm_out = np.empty(length, dtype=np.float64)
+
+     cdef double rm
+     cdef double dm
+     cdef double camprms[21]
+
+     for ii in range(21):
+          camprms[ii] = amprms[ii]
+
+     for ii in range(length):
+          cpal.palAmpqk(ra[ii], dec[ii], camprms, &rm, &dm)
+          rm_out[ii] = rm
+          dm_out[ii] = dm
+
+     return (rm_out, dm_out)
 
 def aop( double rap, double dap, double date, double dut,
          double elongm, double phim, double hm, double xp,
@@ -230,13 +298,27 @@ def aopqk(double rap, double dap, np.ndarray[double, ndim=1] aoprms not None):
 
     return (aob,zob,hob,dob,rob)
 
-def aopqkVector(np.ndarray rap, np.ndarray dap, np.ndarray[double, ndim=1] aoprms not None):
+def aopqkVector(np.ndarray[double, ndim=1] rap not None,
+                np.ndarray[double, ndim=1] dap not None,
+                np.ndarray[double, ndim=1] aoprms not None):
     """
-    This is just aopqk, except that it accepts a vector of inputs and
-    returns a vector of outputs.
+    (aob, zob, hob, dob, rob) = aopqkVector( rap, dap, aoprms )
+
+    where rap, dap and all outputs are numpy arrays
+
+    @palAopqk@
+
+    Raises
+    ------
+    ValueError if input arrays are not of the same length
     """
     cdef int i
     cdef int length=len(rap)
+
+    if len(dap)!=length:
+         raise ValueError("You did not pass the same number of Decs " \
+                          + "as RAs to aopqkVector")
+
     cdef np.ndarray aobout = np.zeros(length,dtype=np.float64)
     cdef np.ndarray zobout = np.zeros(length,dtype=np.float64)
     cdef np.ndarray hobout = np.zeros(length,dtype=np.float64)
@@ -296,6 +378,53 @@ def caldj( int iy, int im, int id ):
           else:
                bad = "day"
           raise ValueError( "Julian date not computed. Bad {}".format(bad) )
+
+
+def caldjVector(np.ndarray[long, ndim=1] iy not None,
+                np.ndarray[long, ndim=1] im not None,
+                np.ndarray[long, ndim=1] id not None):
+     """
+     djm = caldjVector( iy, im, id )
+
+     where iy, im, id and djm are vectors
+
+     @palCaldj@
+
+     Raises
+     ------
+     ValueError if input arrays have different lengths
+
+     Bad input dates result in numpy.NaN for djm.
+
+     Note: This algorithm does not work for dates before
+     -4799 January 1
+
+     Note: If you pass in a two-digit year, this algorithm will
+     interpret it as being between 1949 and 2049
+     """
+
+     cdef int length = len(iy)
+
+     if len(im)!=length:
+         raise ValueError("You did not pass as many months as years " \
+                           + "to caldjVector")
+
+     if len(id)!=length:
+         raise ValueError("You did not pass as many days as years " \
+                           + "to caldjVector")
+
+     cdef np.ndarray mjd_out = np.empty(length, dtype=np.float64)
+     cdef double mjd
+     cdef int flag
+
+     for ii in range(length):
+         cpal.palCaldj(iy[ii], im[ii], id[ii], &mjd, &flag)
+         if flag == 0:
+             mjd_out[ii] = mjd
+         else:
+             mjd_out[ii] = np.NaN
+
+     return mjd_out
 
 def cldj( int iy, int im, int id ):
      """
@@ -402,6 +531,59 @@ def dbear( double a1, double b1, double a2, double b2 ):
      """
      return cpal.palDbear( a1, b1, a2, b2 )
 
+def dbearVector( np.ndarray[ double, ndim=1] a1 not None,
+                 np.ndarray[ double, ndim=1] b1 not None,
+                 np.ndarray[ double, ndim=1] a2 not None,
+                 np.ndarray[ double, ndim=1] b2 not None):
+    """
+    b_out = dbearVector( a1, b1, a2, b2)
+
+    where a1 and b1 are numpy arrays of longitude.  a2 and b2 are
+    also numpy arrays.  a2 and b2 can have either one element, or the
+    same number of elements as a1, b1.  If a2 and b2 have only one element,
+    b_out will  be a numpy array of the bearings from the points in a1, b1
+    to the single point in a2, b2.  If a2 and b2 have the same number
+    of elements as a1 and b1, b_out will be a numpy array of the bearings
+    between each corresponding pair of points, i.e.
+
+    b_out[0] = bearing(a1[0], b1[0], a2[0], b2[0])
+    b_out[1] = bearing(a1[1], b1[1], a2[1], b2[1])
+    ...
+    b_out[n] = bearing(a1[n], b1[n], a2[n], b2[n])
+
+    @palDbear@
+
+    Raises
+    ------
+    Value error if input arrays have inconsistent lengths
+    """
+    cdef int length1 = len(a1)
+    cdef int length2 = len(a2)
+    if len(b1) != length1:
+        raise ValueError("The first two arguments of dbearVector must " \
+                         + "be numpy arrays with the same number of elements")
+
+    if len(b2) != length2:
+        raise ValueError("The second two arguments of dbearVector must " \
+                         + "be numpy arrays with the same number of elements")
+
+    if length2!=1 and length2!=length1:
+        raise ValueError("The second two arguments of dbearVector must " \
+                         + "either have the same number of elements " \
+                         + "as the first two arguments, or they must have " \
+                         + "only one element")
+
+    cdef np.ndarray b_out = np.zeros(length1, dtype=np.float64)
+
+    if length1==length2:
+        for i in range(length1):
+            b_out[i] = cpal.palDbear(a1[i], b1[i], a2[i], b2[i])
+    else:
+        for i in range(length1):
+            b_out[i] = cpal.palDbear(a1[i], b1[i], a2[0], b2[0])
+
+    return b_out
+
 def daf2r( int ideg, int iamin, double asec ):
      """
      ang = daf2r( ideg, iamin, asec )
@@ -420,12 +602,56 @@ def daf2r( int ideg, int iamin, double asec ):
      else:
           bad = ""
           if j==1:
-               bad = "Degree argument outside range 0-369"
+               bad = "Degree argument outside range 0-359"
           elif j==2:
                bad = "Minute argument outside range 0-59"
           else:
                bad = "Arcsec argument outside range 0-59.9999..."
           raise ValueError( bad )
+
+def daf2rVector(np.ndarray[long, ndim=1] ideg_in not None,
+                np.ndarray[long, ndim=1] iamin_in not None,
+                np.ndarray[double, ndim=1] asec_in not None):
+    """
+    ang = daf2rVector( ideg, iamin, asec)
+
+    where ideg, iamin, and asec are numpy arrays of degrees,
+    minutes, and seconds.  ideg and iamin are arrays of ints.  asec
+    is an array of doubles.  ang is a numpy array of the same angles
+    converted to radians.
+
+    Bad values are mapped to numpy.NaNs in ang.
+
+    Bad values are defined as:
+
+    ideg > 359
+    iamin > 59
+    asec > 59.99999
+
+    @palDaf2r@
+
+    Raises
+    ------
+    ValueError if input arrays have inconsistent lengths
+    """
+    cdef int length = len(ideg_in)
+
+    if len(iamin_in)!=length or len(asec_in)!=length:
+        raise ValueError("You need to pass the same number of degrees as " \
+                         + "minutes and seconds to daf2rVector")
+
+    cdef np.ndarray ang_out = np.zeros(length, dtype=np.float64)
+    cdef double rad
+    cdef int flag
+
+    for i in range(length):
+       cpal.palDaf2r(ideg_in[i], iamin_in[i], asec_in[i], &rad, &flag)
+       if flag==0:
+           ang_out[i] = rad
+       else:
+           ang_out[i] = np.NaN
+
+    return ang_out
 
 def dcc2s( np.ndarray[double, ndim=1] v not None ):
      """
@@ -441,6 +667,45 @@ def dcc2s( np.ndarray[double, ndim=1] v not None ):
      cpal.palDcc2s( cv, &a, &b )
      return (a, b)
 
+def dcc2sVector( np.ndarray[double, ndim=2] v_in not None):
+    """
+    (a, b) = dcc2sVector( v )
+
+    where v is a 2-D numpy array in which each row is a different
+    point in Cartesian coordinates.  a and b will be numpy arrays
+    containing the corresponding spherical coordinates
+
+    @palDcc2s@
+
+    Raises
+    ------
+    ValueError if you do not pass in a 2-D numpy array with
+    three columns
+    """
+
+    if v_in.shape[1] != 3:
+        raise ValueError("The input to dcc2sVector should be " \
+                         + "a 2-D numpy array in which each row " \
+                         + "is a point in 3-D Cartesian coordinates." \
+                         + " The rows of your input" \
+                         + " have %d dimensions" % v_in.shape[1])
+
+    cdef int length = v_in.shape[0]
+    cdef double cv[3]
+    cdef double a
+    cdef double b
+    cdef np.ndarray a_out = np.zeros(length, dtype=np.float64)
+    cdef np.ndarray b_out = np.zeros(length, dtype=np.float64)
+
+    for row in range(length):
+        for i in range(3):
+            cv[i] = v_in[row][i]
+        cpal.palDcc2s( cv, &a, &b)
+        a_out[row] = a
+        b_out[row]= b
+
+    return (a_out, b_out)
+
 def dcs2c( double a, double b ):
      """
      v = dcs2c( a, b )
@@ -454,6 +719,37 @@ def dcs2c( double a, double b ):
           v[i] = cv[i]
      return v
 
+def dcs2cVector( np.ndarray[double, ndim=1] a_in not None,
+                 np.ndarray[double, ndim=1] b_in not None):
+    """
+    v = dcs2cVector(a, b)
+
+    where a and b are numpy arrays of spherical coordinates.
+    v is a 2-D numpy array in which each row contains the
+    directional cosines of the corresponding Cartesian coordinates
+
+    @palDcs2c@
+
+    Raises
+    ------
+    ValueError if input arrays have inconsisten lengths
+    """
+
+    cdef int length = len(a_in)
+    if len(b_in) != length:
+        raise ValueError("You did not pass as many latitudes as longitudes " \
+                         + "into dcs2sVector")
+
+    cdef double cv[3]
+    cdef np.ndarray v_out = np.zeros((length, 3), dtype=np.float64)
+    for row in range(length):
+        cpal.palDcs2c(a_in[row], b_in[row], cv)
+        for i in range(3):
+            v_out[row][i] = cv[i]
+
+    return v_out
+
+
 def dd2tf( int ndp, double days ):
      """
      (sign, ih, im, is, frac) = dd2tf( ndp, days )
@@ -466,6 +762,39 @@ def dd2tf( int ndp, double days ):
      sign = csign.decode('UTF-8')
      return ( sign, ihmsf[0], ihmsf[1], ihmsf[2], ihmsf[3] )
 
+def dd2tfVector( int ndp, np.ndarray[double, ndim=1] days not None):
+    """
+    (sign, ih, im, is ,frac) = ddtfVector( ndp, dayList)
+
+    where ndp is an integer denoting the resolution to which the
+    fraction of seconds should be taken and dayList is a numpy
+    array of values to be converted. sign, ih, im, is, and frac
+    will also be numpy arrays corresponding to the elements in
+    dayList.
+
+    @palDd2tf@
+    """
+
+    cdef int length = len(days)
+
+    cdef np.ndarray sign_out = np.empty(length, dtype = (unicode, 1))
+    cdef np.ndarray ih_out = np.empty(length, dtype = np.int)
+    cdef np.ndarray im_out = np.empty(length, dtype = np.int)
+    cdef np.ndarray is_out = np.empty(length, dtype = np.int)
+    cdef np.ndarray frac_out = np.empty(length, dtype = np.int)
+
+    cdef char * csign = " "
+    cdef int ihmsf[4]
+    for row in range(length):
+        cpal.palDd2tf( ndp, days[row], csign, ihmsf)
+        sign_out[row] = csign.decode('UTF-8')
+        ih_out[row] = ihmsf[0]
+        im_out[row] = ihmsf[1]
+        is_out[row] = ihmsf[2]
+        frac_out[row] = ihmsf[3]
+
+    return (sign_out, ih_out, im_out, is_out, frac_out)
+
 def de2h( double ha, double dec, double phi ):
      """
      (az, el) = de2h( ha, dec, phi )
@@ -477,13 +806,27 @@ def de2h( double ha, double dec, double phi ):
      cpal.palDe2h( ha, dec, phi, &az, &el )
      return (az, el)
 
-def de2hVector( np.ndarray ha, np.ndarray dec, double phi ):
+def de2hVector( np.ndarray[double, ndim=1] ha not None,
+                np.ndarray[double, ndim=1] dec not None,
+                double phi ):
      """
-     This isjust de2h, except that it accepts a vector of inputs
-     and returns a vector of outputs
+     (az, el) = de2hVector( ha, dec, phi )
+
+     where ha, dec, az, and el are numpy arrays
+
+     @palDe2h@
+
+     Raises
+     ------
+     ValueError if input arrays are not of the same length
      """
      cdef int i
      cdef int length=len(ha)
+
+     if len(dec)!=length:
+         raise ValueError("You did not pass the same number of " \
+                          + "Decs as Hour Angles to de2hVector")
+
      cdef np.ndarray azout = np.zeros(length,dtype=np.float64)
      cdef np.ndarray elout = np.zeros(length,dtype=np.float64)
      cdef double az
@@ -525,6 +868,40 @@ def dh2e( double az, double el, double phi ):
      cpal.palDh2e( az, el, phi, &ha, &dec )
      return (ha, dec)
 
+def dh2eVector(np.ndarray[double, ndim=1] az not None,
+               np.ndarray[double, ndim=1] el not None,
+               double phi):
+     """
+     (ha, dec) = dh2eVector( az, el, phi)
+
+     where az, el, ha, and dec are all numpy arrays
+
+     @palDh2e@
+
+     Raises
+     ------
+     ValueError if the input arrays are of different lengths
+     """
+
+     cdef int length = len(az)
+
+     if len(el)!=length:
+         raise ValueError("You did not pass as many elevations as " \
+                          + "azimuths to dh2eVector")
+
+     cdef np.ndarray ha_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray dec_out = np.empty(length, dtype=np.float64)
+
+     cdef double ha
+     cdef double dec
+
+     for ii in range(length):
+         cpal.palDh2e(az[ii], el[ii], phi, &ha, &dec)
+         ha_out[ii] = ha
+         dec_out[ii] = dec
+
+     return (ha_out, dec_out)
+
 def dimxv( np.ndarray[double, ndim=2] dm not None, np.ndarray[double, ndim=1] va not None):
      """
      vb = dimxv( dm, va )
@@ -562,6 +939,48 @@ def djcal( int ndp, double djm ):
           return ( iymdf[0], iymdf[1], iymdf[2], iymdf[3] )
      else:
           raise ValueError( "Unacceptable date" )
+
+
+def djcalVector(int ndp, np.ndarray[double, ndim=1] djm not None):
+     """
+     (iy, im, id, frac) = djcalVector( ndp, djm)
+
+     where djm and outputs are numpy arrays
+
+     @palDjcal@
+
+     Raises
+     ------
+     Does not raise any exceptions; unacceptable dates (mjd<-2468570
+     or mjd>1e9) result in -1 in iy, im, id and frac.
+
+     Note: -1 is a valid result of iy (not for im, id, or frac), so
+     any filters on unacceptable dates should examine the other
+     outputs.
+     """
+
+     cdef int length = len(djm)
+     cdef np.ndarray iy_out = np.empty(length, dtype=np.int)
+     cdef np.ndarray im_out = np.empty(length, dtype=np.int)
+     cdef np.ndarray id_out = np.empty(length, dtype=np.int)
+     cdef np.ndarray frac_out = np.empty(length, dtype=np.int)
+     cdef int output[4]
+     cdef int flag
+
+     for ii in range(length):
+          cpal.palDjcal(ndp, djm[ii], output, &flag)
+          if flag==0:
+              iy_out[ii] = output[0]
+              im_out[ii] = output[1]
+              id_out[ii] = output[2]
+              frac_out[ii] = output[3]
+          else:
+              iy_out[ii] = -1
+              im_out[ii] = -1
+              id_out[ii] = -1
+              frac_out[ii] = -1
+
+     return (iy_out, im_out, id_out, frac_out)
 
 def djcl( double djm ):
      """
@@ -665,6 +1084,36 @@ def dmoon( double date ):
           pv[i] = cpv[i]
      return pv
 
+
+def dmoonVector(np.ndarray[double, ndim=1] date):
+     """
+     (x, y, z, xd, yd, zd) = dmoonVector(date)
+
+     where date and all of the outputs are numpy arrays
+
+     @palDmoon@
+     """
+
+     cdef int length = len(date)
+     cdef np.ndarray x_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray y_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray z_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray xd_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray yd_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray zd_out = np.empty(length, dtype=np.float64)
+     cdef double cpv [6]
+
+     for ii in range(length):
+         cpal.palDmoon(date[ii], cpv)
+         x_out[ii] = cpv[0]
+         y_out[ii] = cpv[1]
+         z_out[ii] = cpv[2]
+         xd_out[ii] = cpv[3]
+         yd_out[ii] = cpv[4]
+         zd_out[ii] = cpv[5]
+
+     return (x_out, y_out, z_out, xd_out, yd_out, zd_out)
+
 def dmxm(np.ndarray[double, ndim=2] a not None, np.ndarray[double, ndim=2] b not None):
     """
     c = dmxm( a, b )
@@ -739,6 +1188,76 @@ def dpav( np.ndarray[double, ndim=1] v1 not None, np.ndarray[double, ndim=1] v2 
      result = cpal.palDpav( cv1, cv2 )
      return result
 
+def dpavVector( np.ndarray[double, ndim=2] v1_in not None,
+                np.ndarray v2_in not None):
+    """
+    pa = dpavVector(v1, v2)
+
+    where v1 is a 2-D numpy array in which each row is a different
+    point on the unit sphere.  v2 is either a 1-D numpy array
+    corresponding to one point on the unit sphere, in which case
+    pa is a numpy array of position angles between the points in
+    v1 and the point v2, or v2 is a 2-D numpy array of the same
+    shape as v1, in which case pa is a numpy array of position angles
+    between the points in v1 and the corresponding points in v2, i.e.
+
+    pa[0] = dpav(v1[0], v2[0])
+    pa[1] = dpav(v1[1], v2[1])
+    ...
+    pa[n] = dpav(v1[n], v2[n])
+
+    @palDpav@
+
+    Raises
+    ------
+    ValueError if the inputs are of the wrong shape
+    """
+
+    cdef nPts = v1_in.shape[0]
+    cdef nDim2 = len((<object> v2_in).shape)
+
+    if nDim2!=1 and v2_in.shape[0]!=nPts:
+        raise ValueError("In dpavVector, v2 must either be a numpy array of " \
+                         + "shape (3,) or a numpy array of shape (n, 3) "\
+                         + "where n is the number of rows in v1")
+
+    if v1_in.shape[1]!=3:
+        raise ValueError("In dpavVector, v1 must be a numpy array in which " \
+                         + "each row has 3 elements. " \
+                         + "Your rows have %d elements." % v1_in.shape[1])
+
+    if nDim2!=1 and v2_in.shape[1]!=3:
+        raise ValueError("In dpavVector, v2 must be a numpy array in which " \
+                         + "each row has 3 elements. " \
+                         + "Your rows have %d elements." % v2_in.shape[1])
+
+    if nDim2==1 and v2_in.shape[0]!=3:
+        raise ValueError("The v2 you passed into dpavVector represents a single " \
+                         "point with %d elements; it should have 3 elements" \
+                         % v2_in.shape[0])
+
+    cdef double cv1[3]
+    cdef double cv2[3]
+    cdef np.ndarray pa_out = np.ndarray(nPts, dtype=np.float)
+
+    if nDim2 == 1:
+        for j in range(3):
+            cv2[j] = v2_in[j]
+        for i in range(nPts):
+            for j in range(3):
+                cv1[j] = v1_in[i][j]
+
+            pa_out[i] = cpal.palDpav(cv1, cv2)
+    else:
+        for i in range(nPts):
+            for j in range(3):
+                cv1[j] = v1_in[i][j]
+                cv2[j] = v2_in[i][j]
+
+            pa_out[i] = cpal.palDpav(cv1, cv2)
+
+    return pa_out
+
 def dr2af( int ndp, double angle ):
      """
      (sign, id, im, is, frac) = dr2af( ndp, angle )
@@ -749,6 +1268,34 @@ def dr2af( int ndp, double angle ):
      cpal.palDr2af( ndp, angle, csign, idmsf )
      sign = csign.decode('UTF-8')
      return ( sign, idmsf[0], idmsf[1], idmsf[2], idmsf[3] )
+
+def dr2afVector( int ndp, np.ndarray[double, ndim=1] angle not None):
+    """
+    (sign, id, im, is, frac) = dr2afVector( ndp, angle)
+
+    where angle is a numpy array of angles in radians
+    and all outputs are numpy arrays of the same size
+
+    @palDr2af@
+    """
+    cdef int length = len(angle)
+    cdef np.ndarray sign_out = np.ndarray(length, dtype=(unicode, 1))
+    cdef np.ndarray id_out = np.ndarray(length, dtype=int)
+    cdef np.ndarray im_out = np.ndarray(length, dtype=int)
+    cdef np.ndarray isec_out = np.ndarray(length, dtype=int)
+    cdef np.ndarray frac_out = np.ndarray(length, dtype=int)
+    cdef char * csign = " "
+    cdef int idmsf[4]
+
+    for ii in range(length):
+        cpal.palDr2af(ndp, angle[ii], csign, idmsf)
+        sign_out[ii] = csign.decode('UTF-8')
+        id_out[ii] = idmsf[0]
+        im_out[ii] = idmsf[1]
+        isec_out[ii] = idmsf[2]
+        frac_out[ii] = idmsf[3]
+
+    return (sign_out, id_out, im_out, isec_out, frac_out)
 
 def dr2tf( int ndp, double angle ):
      """
@@ -761,6 +1308,34 @@ def dr2tf( int ndp, double angle ):
      sign = csign.decode('UTF-8')
      return ( sign, ihmsf[0], ihmsf[1], ihmsf[2], ihmsf[3] )
 
+def dr2tfVector( int ndp, np.ndarray[double, ndim=1] angle not None):
+    """
+    (sign, ih, im, is, frac) = dr2tfVector( ndp, angle)
+
+    where angle is a numpy array of angles in radians
+    and all outputs are numpy arrays of the same size
+
+    @palDr2tf@
+    """
+    cdef int length = len(angle)
+    cdef np.ndarray sign_out = np.ndarray(length, dtype=(unicode, 1))
+    cdef np.ndarray ih_out = np.ndarray(length, dtype=int)
+    cdef np.ndarray im_out = np.ndarray(length, dtype=int)
+    cdef np.ndarray isec_out = np.ndarray(length, dtype=int)
+    cdef np.ndarray frac_out = np.ndarray(length, dtype=int)
+    cdef char * csign = " "
+    cdef int idmsf[4]
+
+    for ii in range(length):
+        cpal.palDr2tf(ndp, angle[ii], csign, idmsf)
+        sign_out[ii] = csign.decode('UTF-8')
+        ih_out[ii] = idmsf[0]
+        im_out[ii] = idmsf[1]
+        isec_out[ii] = idmsf[2]
+        frac_out[ii] = idmsf[3]
+
+    return (sign_out, ih_out, im_out, isec_out, frac_out)
+
 def drange( double angle ):
      """
      a = drange( angle )
@@ -769,6 +1344,20 @@ def drange( double angle ):
      """
      return cpal.palDrange( angle )
 
+def drangeVector(np.ndarray[double, ndim=1] angle not None):
+     """
+     a = drangeVector(angle)
+
+     where angle and a are numpy arrays
+
+     @palDrange@
+     """
+     cdef int length = len(angle)
+     cdef np.ndarray angle_out = np.empty(length, dtype=np.float64)
+     for ii in range(length):
+         angle_out[ii] = cpal.palDrange(angle[ii])
+     return angle_out
+
 def dranrm( double angle ):
      """
      a = dranrm( angle )
@@ -776,6 +1365,20 @@ def dranrm( double angle ):
      @palDranrm@
      """
      return cpal.palDranrm( angle )
+
+def dranrmVector(np.ndarray[double, ndim=1] angle not None):
+    """
+    a = dranrmVector( angle )
+
+    where a and angle are numpy arrays
+
+    @palDranrm@
+    """
+    cdef int length=len(angle)
+    cdef np.ndarray angle_out = np.empty(length, dtype=np.float)
+    for ii in range(length):
+        angle_out[ii] = cpal.palDranrm(angle[ii])
+    return angle_out
 
 def ds2tp( double ra, double dec, double raz, double decz ):
      """
@@ -800,15 +1403,29 @@ def ds2tp( double ra, double dec, double raz, double decz ):
      else:
           raise ValueError( "Antistart too far from axis" )
 
-def ds2tpVector( np.ndarray ra, np.ndarray dec, double raz, double decz ):
+def ds2tpVector( np.ndarray[double, ndim=1] ra not None,
+                 np.ndarray[double, ndim=1] dec not None,
+                 double raz, double decz ):
      """
-     This is just ds2tp, except that it takes an array of ra and array
-     of dec and calculates xi and eta for each relative to the scalar
-     raz and decz
+     (xi, eta) = ds2tpVector( ra, dec, raz, decz )
+
+     @palDs2tp@
+
+     Raises
+     ------
+     ValueError in input arrays are not of the same length
+
+     If bad input values are given, NaNs will be placed in
+     the output arrays
      """
      cdef int i
      cdef int j
      cdef int length=len(ra)
+
+     if len(dec)!=length:
+         raise ValueError("You did not pass as many RAs as Decs " \
+                          + "to ds2tpVector")
+
      cdef double xi
      cdef double eta
      cdef np.ndarray xiout=np.zeros(length,dtype=np.float64)
@@ -819,12 +1436,9 @@ def ds2tpVector( np.ndarray ra, np.ndarray dec, double raz, double decz ):
           if j==0:
                xiout[i] = xi
                etaout[i] = eta
-          elif j==1:
-               raise ValueError( "Star too far from axis" )
-          elif j==2:
-               raise ValueError( "Antistar on tangent plane" )
           else:
-               raise ValueError( "Antistart too far from axis" )
+              xiout[i] = np.NaN
+              etaout[i] = np.NaN
 
      return xiout, etaout
 
@@ -838,9 +1452,22 @@ def dsep( double a1, double b1, double a2, double b2 ):
 
 def dsepVector(np.ndarray a1, np.ndarray b1, np.ndarray a2, np.ndarray b2):
      """
-     this is dsep but it accepts and returns vectors
+     s = dsepVector( a1, b1, a2, b2 )
+
+     where a1, b1, a2, b2, and s are numpy arrays
+
+     @palDsep@
+
+     Raises
+     ------
+     ValueError if input arrays have different lengths
      """
      cdef int length=len(a1)
+
+     if len(b1)!=length or len(a2)!=length or len(b2)!=length:
+         raise ValueError("The arrays you passed to dsepVector " \
+                          + "are not of the same length")
+
      cdef np.ndarray dd = np.zeros(length, dtype=np.float64)
      cdef double d
      cdef int i
@@ -863,6 +1490,73 @@ def dsepv( np.ndarray[double, ndim=1] v1 not None, np.ndarray[double, ndim=1] v2
           cv2[i] = v2[i]
      result = cpal.palDsepv( cv1, cv2 )
      return result
+
+def dsepvVector(np.ndarray[double, ndim=2] v1 not None, np.ndarray v2 not None):
+    """
+    s = dsepvVector(v1, v2)
+
+    where v1 is a 2-D numpy array in which each row is a different 3-vector.
+    v2 is either a 1-D numpy array representing a 3-vector, in which case
+    s is a numpy array of the angular separation between each row of v1 and
+    v2, or v2 is a 2-D numpy array with the same shape as v1, in which case
+    s is a numpy array ofthe separation between the points in v1 and the
+    corresponding points in v2, i.e.
+
+    s[0] = dsepv(v1[0], v2[0])
+    s[1] = dsepv(v1[1], v2[1])
+    ...
+    s[n] = dsepv(v1[n], v2[n])
+
+    @palDsepv@
+
+    Raises
+    ------
+    ValueError if the inputs are not formatted correctly
+    """
+
+    cdef int nPts = v1.shape[0]
+    cdef int nDim2 = len((<object> v2).shape)
+
+    if nDim2!=1 and v2.shape[0]!=nPts:
+        raise ValueError("In dsepvVector v2 must either have one row or " \
+                         + "n rows, where n is the number of rows in v1")
+
+    if v1.shape[1]!=3:
+        raise ValueError("In dsepvVector v1 must be a numpy array " \
+                         + "in which each row corresponds to a direction " \
+                         + "in 3-D space.  Your v1 has %d columns." % v1.shape[1])
+
+    if nDim2!=1 and v2.shape[1]!=3:
+        raise ValueError("In dsepvVector v2 must be a numpy array " \
+                         + "in which each row corresponds to a direction " \
+                         + "in 3-D space.  Your v2 has %d columns." % v2.shape[1])
+
+    if nDim2==1 and v2.shape[0]!=3:
+        raise ValueError("The v2 you passed to dsepvVector is a single point " \
+                          + "with %d elements; it should have 3 elements" % v2.shape[0])
+
+
+    cdef double cv1[3]
+    cdef double cv2[3]
+
+    cdef np.ndarray sep = np.empty(nPts, dtype=np.float64)
+
+    if nDim2==1:
+        for i in range(3):
+            cv2[i] = v2[i]
+        for i in range(nPts):
+            for j in range(3):
+                cv1[j] = v1[i][j]
+            sep[i] = cpal.palDsepv(cv1, cv2)
+    else:
+        for i in range(nPts):
+            for j in range(3):
+                cv1[j] = v1[i][j]
+                cv2[j] = v2[i][j]
+            sep[i] = cpal.palDsepv(cv1, cv2)
+
+    return sep
+
 
 def dt( double epoch ):
      """
@@ -890,12 +1584,54 @@ def dtf2d( int ihour, int imin, double sec ):
      else:
           bad = ""
           if j==1:
-               bad = "Degree argument outside range 0-369"
+               bad = "Hour argument outside range 0-23"
           elif j==2:
                bad = "Minute argument outside range 0-59"
           else:
                bad = "Arcsec argument outside range 0-59.9999..."
           raise ValueError( bad )
+
+def dtf2dVector( np.ndarray[long, ndim=1] ihour not None,
+                 np.ndarray[long, ndim=1] imin not None,
+                 np.ndarray[double, ndim=1] sec not None):
+    """
+    days = dtf2dVector(ihour, imin, sec)
+
+    where ihour, imin, sec, and days are all numpy arrays
+
+    @palDtf2d@
+
+    Raises
+    ------
+    Raises a ValueError if inputs have different sizes.
+
+    Bad values (hour outside of 0-23 range; minute outside of
+    0-59 range, or second outside of 0-59.9999 range)
+    will result in numpy.NaNs in the output.
+    """
+    cdef int length = len(ihour)
+
+    if len(imin)!=length:
+        raise ValueError("In dtf2dVector, imin does not have the same length " \
+                         + "as ihour")
+
+    if len(sec)!=length:
+        raise ValueError("In dtf2dVector, sec does not have the same length " \
+                         + "as ihour")
+
+    cdef np.ndarray days = np.empty(length, dtype=np.float64)
+    cdef int flag
+    cdef double value
+
+    for ii in range(length):
+        cpal.palDtf2d( ihour[ii], imin[ii], sec[ii], &value, &flag )
+        if flag==0:
+            days[ii] = value
+        else:
+            days[ii] = np.NaN
+
+    return days
+
 
 def dtf2r( int ihour, int imin, double sec ):
      """
@@ -915,12 +1651,55 @@ def dtf2r( int ihour, int imin, double sec ):
      else:
           bad = ""
           if j==1:
-               bad = "Degree argument outside range 0-369"
+               bad = "Hour argument outside range 0-23"
           elif j==2:
                bad = "Minute argument outside range 0-59"
           else:
                bad = "Arcsec argument outside range 0-59.9999..."
           raise ValueError( bad )
+
+def dtf2rVector(np.ndarray[long, ndim=1] ihour, np.ndarray[long, ndim=1] imin,
+                np.ndarray[double, ndim=1] sec):
+    """
+    rad = dtf2rVector(ihour, imin, sec)
+
+    where ihour, imin, sec, and rad are all numpy arrays
+
+    @palDtf2r@
+
+    Raises
+    ------
+    ValueError if input arrays do not have the same length
+
+    If bad values (ihour outside of 0-23, imin outside of 0-59,
+    sec outside of 0-59.999999) are passed in, these result in
+    numpy.NaNs in the output.
+    """
+
+    cdef int length = len(ihour)
+
+    if len(imin)!=length:
+        raise ValueError("In dtf2rVector, imin does not have the same length " \
+                         + "as ihour")
+
+    if len(sec)!=length:
+        raise ValueError("In dtf2rVector, sec does not have the same length " \
+                         + "as ihour")
+
+    cdef np.ndarray radians = np.empty(length, dtype=np.float64)
+    cdef int flag
+    cdef double value
+
+    for ii in range(length):
+        cpal.palDtf2r( ihour[ii], imin[ii], sec[ii], &value, &flag )
+        if flag==0:
+            radians[ii] = value
+        else:
+            radians[ii] = np.NaN
+
+    return radians
+
+
 
 def dtp2s( double xi, double eta, double raz, double decz):
      """
@@ -932,6 +1711,42 @@ def dtp2s( double xi, double eta, double raz, double decz):
      cdef double dec
      cpal.palDtp2s( xi, eta, raz, decz, &ra, &dec )
      return (ra,dec)
+
+def dtp2sVector(np.ndarray[double, ndim=1] xi not None,
+                np.ndarray[double, ndim=1] eta not None,
+                double raz, double decz):
+     """
+     (ra, dec) = dtp2sVector( xi, eta, raz, decz)
+
+     where xi, eta, ra, and dex (NOT raz, decz) are numpy arrays
+
+     @palDtp2s@
+
+     Raises
+     ------
+     ValueError if input arrays are of different lengths
+     """
+
+     cdef int length = len(xi)
+
+     if len(eta)!=length:
+          raise ValueError("The arrays of tangent plane coordinates " \
+                           + "you passed to dtp2sVector are of " \
+                           + "different lengths")
+
+     cdef np.ndarray ra_out = np.empty(length, dtype=np.float64)
+     cdef np.ndarray dec_out = np.empty(length, dtype=np.float64)
+
+     cdef double ra
+     cdef double dec
+
+     for ii in range(length):
+         cpal.palDtp2s(xi[ii], eta[ii], raz, decz, &ra, &dec)
+         ra_out[ii] = ra
+         dec_out[ii] = dec
+
+     return (ra_out, dec_out)
+
 
 def dtps2c( double xi, double eta, double ra, double dec ):
      """
@@ -1003,7 +1818,7 @@ def dvxv( np.ndarray[double, ndim=1] va not None, np.ndarray[double, ndim=1] vb 
 
 def ecleq( double dl, double db, double date ):
      """
-     (dr, dd) = eqecl( dl, db, date )
+     (dr, dd) = ecleq( dl, db, date )
 
      @palEcleq@
      """
@@ -1011,6 +1826,40 @@ def ecleq( double dl, double db, double date ):
      cdef double dd
      cpal.palEcleq( dl, db, date, &dr, &dd )
      return (dr, dd)
+
+def ecleqVector(np.ndarray[double, ndim=1] dl not None,
+                np.ndarray[double, ndim=1] db not None,
+                double date):
+    """
+    (dr, dd) = ecleqVector(dl, db, date)
+
+    where dl, db, dr, and dd are all numpy arrays
+
+    @palEcleq@
+
+    Raises
+    ------
+    ValueError if input arrays are of different lengths
+    """
+
+    cdef int length = len(dl)
+
+    if len(db)!=length:
+        raise ValueError("You did not pass the same number of " \
+                         + "longitudes as latitudes to ecleqVector")
+
+    cdef np.ndarray rr_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dd_out = np.empty(length, dtype=np.float64)
+
+    cdef double rr
+    cdef double dd
+
+    for ii in range(length):
+        cpal.palEcleq(dl[ii], db[ii], date, &rr, &dd)
+        rr_out[ii] = rr
+        dd_out[ii] = dd
+
+    return (rr_out, dd_out)
 
 def ecmat( double date ):
      """
@@ -1095,6 +1944,21 @@ def epj( double date ):
      """
      return cpal.palEpj(date)
 
+def epjVector( np.ndarray[double, ndim=1] date not None):
+    """
+    e = epjVector( date )
+
+    where e and date are both numpy arrays
+
+    @palEpj@
+    """
+    cdef int length = len(date)
+    cdef np.ndarray epj = np.empty(length, dtype=np.float64)
+    for ii in range(length):
+        epj[ii] = cpal.palEpj(date[ii])
+    return epj
+
+
 def epj2d( double epj ):
      """
      d = epj2d( epj )
@@ -1102,6 +1966,20 @@ def epj2d( double epj ):
      @palEpj2d@
      """
      return cpal.palEpj2d(epj)
+
+def epj2dVector(np.ndarray[double, ndim=1] epj not None):
+    """
+    d = epj2dVector(epj)
+
+    where both d and epj are numpy arrays
+
+    @palEpj2d@
+    """
+    cdef int length = len(epj)
+    cdef np.ndarray mjd = np.empty(length, dtype=np.float64)
+    for ii in range(length):
+        mjd[ii] = cpal.palEpj2d(epj[ii])
+    return mjd
 
 # epv goes here
 def epv( double date ):
@@ -1138,6 +2016,40 @@ def eqecl( double dr, double dd, double date ):
      cpal.palEqecl( dr, dd, date, &dl, &db )
      return (dl, db)
 
+def eqeclVector(np.ndarray[double, ndim=1] dr not None,
+                np.ndarray[double, ndim=1] dd not None,
+                double date):
+    """
+    (dl, db) = eqeclVector(dr, dd, date)
+
+    where dr, dd, dl, and db are all numpy arrays
+
+    @palEqEcl@
+
+    Raises
+    ------
+    ValueError if input arrays have different lengths
+    """
+
+    cdef int length = len(dr)
+
+    if len(dd)!=length:
+        raise ValueError("You did not pass the same number of Decs " \
+                         + "as RAs to eqeclVector")
+
+    cdef np.ndarray dl_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray db_out = np.empty(length, dtype=np.float64)
+
+    cdef double dl
+    cdef double db
+
+    for ii in range(length):
+        cpal.palEqecl(dr[ii], dd[ii], date, &dl, &db)
+        dl_out[ii] = dl
+        db_out[ii] = db
+
+    return (dl_out, db_out)
+
 def eqeqx( double date ):
      """
      eq = eqeqx( date )
@@ -1148,7 +2060,11 @@ def eqeqx( double date ):
 
 def eqeqxVector(np.ndarray date):
      """
-     this is eqeqx except that it accepts and returns vectors
+     eq = eqeqxVector( date )
+
+     where date and eq are numpy arrays
+
+     @palEqeqx@
      """
      cdef int length=len(date)
      cdef np.ndarray eqout = np.zeros(length, dtype=np.float64)
@@ -1170,12 +2086,26 @@ def eqgal( double dr, double dd ):
      cpal.palEqgal( dr, dd, &dl, &db )
      return (dl, db)
 
-def eqgalVector(np.ndarray dr, np.ndarray dd):
+def eqgalVector(np.ndarray[double, ndim=1] dr not None,
+                np.ndarray[double, ndim=1] dd not None):
      """
-     This is the same as eqgal, but it accepts and returns vectors
+     (dl, db) = eqgalVector( dr, dd )
+
+     where dr, dd, dl, db are all numpy arrays
+
+     @palEqgal@
+
+     Raises
+     ------
+     ValueError if input arrays are not of the same length
      """
 
      cdef int length=len(dr)
+
+     if len(dd) != length:
+         raise ValueError("You did not pass the same number of RAs " \
+                          + "as Decs to eqgalVector")
+
      cdef np.ndarray dlout = np.zeros(length, dtype=np.float64)
      cdef np.ndarray dbout = np.zeros(length, dtype=np.float64)
      cdef double dl
@@ -1235,6 +2165,40 @@ def fk45z( double r1950, double d1950, double bepoch ):
      cpal.palFk45z( r1950, d1950, bepoch, &r2000, &d2000 )
      return (r2000, d2000)
 
+def fk45zVector(np.ndarray[double, ndim=1] r1950 not None,
+                np.ndarray[double, ndim=1] d1950 not None,
+                double bepoch):
+    """
+    (r2000, d2000) = fk45zVector(r1950, d1950, bepoch)
+
+    where r1950, d1950, r2000, d2000 are numpy arrays
+
+    @palFk45z@
+
+    Raises
+    ------
+    ValueError if input arrays are not of the same length
+    """
+
+    cdef int length = len(r1950)
+
+    if len(d1950)!=length:
+        raise ValueError("You did not pass the same number of Decs as " \
+                         + "RAs to fk45zVector")
+
+    cdef np.ndarray r2000_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray d2000_out = np.empty(length, dtype=np.float64)
+
+    cdef double r2000
+    cdef double d2000
+
+    for ii in range(length):
+        cpal.palFk45z(r1950[ii], d1950[ii], bepoch, &r2000, &d2000)
+        r2000_out[ii] = r2000
+        d2000_out[ii] = d2000
+
+    return (r2000_out, d2000_out)
+
 def fk524( double r2000, double d2000, double dr2000,
            double dd2000, double p2000, double v2000 ):
      """
@@ -1253,6 +2217,77 @@ def fk524( double r2000, double d2000, double dr2000,
                     &p1950, &v1950 )
      return (r1950, d1950, dr1950, dd1950, p1950, v1950 )
 
+def fk524Vector(np.ndarray[double, ndim=1] r2000 not None,
+                np.ndarray[double, ndim=1] d2000 not None,
+                np.ndarray[double, ndim=1] dr2000 not None,
+                np.ndarray[double, ndim=1] dd2000 not None,
+                np.ndarray[double, ndim=1] p2000 not None,
+                np.ndarray[double, ndim=1] v2000 not None):
+    """
+    (r1950, d1950, dr1950, dd1950, p1950, v1950) = fk524Vector( r2000, d2000, dr2000, dd2000, p2000, v2000 )
+
+    where r2000, d2000, dr2000, dd2000, p2000, v2000,
+    r1950, d1950, dr1950, dd1950, p1950, and v1950 are
+    all numpy arrays
+
+    @palFk524@
+
+    Raises
+    ------
+    ValueError if input arrays do not all of the same length
+    """
+    cdef int length = len(r2000)
+
+    if len(d2000)!= length:
+        raise ValueError("You did not pass as many Decs as RAs into " \
+                         + "fk524Vector")
+
+    if len(dr2000)!= length:
+        raise ValueError("You did not pass as many RA proper motions as RAs into " \
+                         + "fk524Vector")
+
+    if len(dd2000)!= length:
+        raise ValueError("You did not pass as many Dec proper motions as RAs into " \
+                         + "fk524Vector")
+
+    if len(p2000)!= length:
+        raise ValueError("You did not pass as many parallaxes as RAs into " \
+                         + "fk524Vector")
+
+    if len(v2000)!= length:
+        raise ValueError("You did not pass as many radial velocities as RAs into " \
+                         + "fk524Vector")
+
+
+    cdef np.ndarray r1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray d1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dr1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dd1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray p1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray v1950_out = np.empty(length, dtype=np.float64)
+
+    cdef double r1950
+    cdef double d1950
+    cdef double dr1950
+    cdef double dd1950
+    cdef double p1950
+    cdef double v1950
+
+    for ii in range(length):
+        cpal.palFk524(r2000[ii], d2000[ii], dr2000[ii], dd2000[ii],
+                      p2000[ii], v2000[ii], &r1950, &d1950,
+                      &dr1950, &dd1950, &p1950, &v1950)
+
+        r1950_out[ii] = r1950
+        d1950_out[ii] = d1950
+        dr1950_out[ii] = dr1950
+        dd1950_out[ii] = dd1950
+        p1950_out[ii] = p1950
+        v1950_out[ii] = v1950
+
+    return (r1950_out, d1950_out, dr1950_out, dd1950_out,
+            p1950_out, v1950_out)
+
 def fk54z(double r2000, double d2000, double bepoch):
      """
      (r1950, d1950, dr1950, dd1950) = fk54z( r2000, d2000, bepoch )
@@ -1267,6 +2302,48 @@ def fk54z(double r2000, double d2000, double bepoch):
                     &dr1950, &dd1950 )
      return (r1950, d1950, dr1950, dd1950 )
 
+def fk54zVector(np.ndarray[double, ndim=1] r2000 not None,
+                np.ndarray[double, ndim=1] d2000 not None,
+                double bepoch):
+    """
+    (r1950, d1950, dr1950, dd1950) = fk45zVector( r2000, d2000, bepoch )
+
+    where r2000, d2000, and the outputs are numpy arrays
+
+    @palFk54z@
+
+    Raises
+    ------
+    Value error if input arrays have different lengths
+    """
+
+    cdef int length = len(r2000)
+
+    if len(d2000)!=length:
+        raise ValueError("You did not pass the same number of Decs as " \
+                         + "RAs to fk54zVector")
+
+    cdef np.ndarray r1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray d1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dr1950_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dd1950_out = np.empty(length, dtype=np.float64)
+
+    cdef double r1950
+    cdef double d1950
+    cdef double dr1950
+    cdef double dd1950
+
+    for ii in range(length):
+        cpal.palFk54z(r2000[ii], d2000[ii], bepoch, \
+                      &r1950, &d1950, &dr1950, &dd1950)
+
+        r1950_out[ii] = r1950
+        d1950_out[ii] = d1950
+        dr1950_out[ii] = dr1950
+        dd1950_out[ii] = dd1950
+
+    return (r1950_out, d1950_out, dr1950_out, dd1950_out)
+
 def fk5hz( double r5, double d5, double epoch):
      """
      (rh, dh) = fk5hz( r5, d5, epoch )
@@ -1277,6 +2354,39 @@ def fk5hz( double r5, double d5, double epoch):
      cdef double dh
      cpal.palFk5hz( r5, d5, epoch, &rh, &dh )
      return (rh, dh)
+
+def fk5hzVector(np.ndarray[double, ndim=1] r5 not None,
+                np.ndarray[double, ndim=1] d5 not None,
+                double epoch):
+    """
+    (rh, dh) = fk5hzVector(r5, d5, epoch)
+
+    where rh, dh, r5, and d5 are numpy arrays
+
+    @palFk5hz@
+
+    Raises
+    ------
+    ValueError if r5 and d5 have different lengths
+    """
+
+    cdef int length = len(r5)
+
+    if len(d5)!=length:
+        raise ValueError("You did not pass the same number of " \
+                         + "RAs as Decs to fk5hzVector")
+
+    cdef np.ndarray ra_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dec_out = np.empty(length, dtype=np.float64)
+    cdef double rh
+    cdef double dh
+
+    for ii in range(length):
+        cpal.palFk5hz( r5[ii], d5[ii], epoch, &rh, &dh )
+        ra_out[ii] = rh
+        dec_out[ii] = dh
+
+    return (ra_out, dec_out)
 
 def galeq( double dl, double db ):
      """
@@ -1289,11 +2399,25 @@ def galeq( double dl, double db ):
      cpal.palGaleq( dl, db, &dr, &dd )
      return (dr, dd)
 
-def galeqVector(np.ndarray dl, np.ndarray db):
+def galeqVector(np.ndarray[double, ndim=1] dl not None,
+                np.ndarray [double, ndim=1] db not None):
      """
-     this is galeq, but it accepts and returns vectors
+     (dr, dd) = galeqVector( dl, db )
+
+     where dl, db, dr, and dd are numpy arrays
+
+     @palGaleq@
+
+     Raises
+     ------
+     ValueError if input arrays are of different lengths
      """
      cdef int length=len(dl)
+
+     if len(db)!=length:
+         raise ValueError("You did not pass the same number of " \
+                          + "longitudes as latitudes to galeqVector")
+
      cdef np.ndarray drout = np.zeros(length, dtype=np.float64)
      cdef np.ndarray ddout = np.zeros(length, dtype=np.float64)
      cdef double dr
@@ -1316,6 +2440,39 @@ def galsup( double dl, double db ):
      cpal.palGalsup( dl, db, &dsl, &dsb )
      return (dsl, dsb)
 
+def galsupVector(np.ndarray[double, ndim=1] dl not None,
+                 np.ndarray[double, ndim=1] db not None):
+    """
+    (dsl, dsb) = galsupVector( dl, db )
+
+    where dl, db, dsl, and dsb are all numpy arrays
+
+    @palGalsup@
+
+    Raises
+    ------
+    ValueError if input arrays have different lengths
+    """
+
+    cdef int length=len(dl)
+
+    if len(db)!=length:
+        raise ValueError("You did not pass the same number of " \
+                         + "Galactic longitudes as Galactic latitudes " \
+                         + "into galsupVector")
+
+    cdef np.ndarray dsl_out = np.empty(length, dtype=np.float)
+    cdef np.ndarray dsb_out = np.empty(length, dtype=np.float)
+    cdef double dsl
+    cdef double dsb
+
+    for ii in range(length):
+        cpal.palGalsup(dl[ii], db[ii], &dsl, &dsb)
+        dsl_out[ii] = dsl
+        dsb_out[ii] = dsb
+
+    return (dsl_out, dsb_out)
+
 def ge50( double dl, double db ):
      """
      (rd, dd) = ge50( dl, db )
@@ -1326,6 +2483,39 @@ def ge50( double dl, double db ):
      cdef double dd
      cpal.palGe50( dl, db, &dr, &dd )
      return (dr, dd)
+
+def ge50Vector( np.ndarray[double, ndim=1] dl not None,
+                np.ndarray[double, ndim=1] db not None):
+    """
+    (rd, dd) = ge50( dl, db )
+
+    where dl, db, rd, and dd are all numpy arrays
+
+    @palGe50@
+
+    Raises
+    ------
+    ValueError if input arrays have different lengths
+    """
+
+    cdef int length = len(dl)
+
+    if len(db)!=length:
+        raise ValueError("You did not pass the same number of " \
+                         + "Galactic longitudes as Galactic latitudes " \
+                         + "into ge50Vector")
+
+    cdef np.ndarray dr_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dd_out = np.empty(length, dtype=np.float64)
+    cdef double dr
+    cdef double dd
+
+    for ii in range(length):
+        cpal.palGe50(dl[ii], db[ii], &dr, &dd)
+        dr_out[ii] = dr
+        dd_out[ii] = dd
+
+    return (dr_out, dd_out)
 
 def geoc( double p, double h ):
      """
@@ -1348,7 +2538,11 @@ def gmst( double ut1 ):
 
 def gmstVector(np.ndarray ut1):
      """
-     this is gmst, except that it accepts and returns vectors
+     t = gmstVector( ut1 )
+
+     where ut1 and t are both numpy arrays
+
+     @palGmst@
      """
      cdef int length = len(ut1)
      cdef np.ndarray gmout = np.zeros(length, dtype=np.float64)
@@ -1369,9 +2563,22 @@ def gmsta( double date, double ut1 ):
 
 def gmstaVector(np.ndarray date, np.ndarray ut1):
      """
-     this is gmsta except that it accepts and returns vectors
+     t = gmsta( date, ut1 )
+
+     where date, ut1, and t are all numpy arrays
+
+     @palGmsta@
+
+     Raises
+     ------
+     ValueError if input arrays are of different lengths
      """
      cdef int length = len(date)
+
+     if len(ut1)!=length:
+         raise ValueError("The arrays you passed into gmstaVector " \
+                          + "are of different lengths")
+
      cdef np.ndarray gmout = np.zeros(length, dtype=np.float)
      cdef int i
      for i in range(length):
@@ -1390,6 +2597,46 @@ def hfk5z( double rh, double dh, double epoch ):
      cdef double dd5
      cpal.palHfk5z( rh, dh, epoch, &r5, &d5, &dr5, &dd5 )
      return (r5, d5, dr5, dd5)
+
+def hfk5zVector(np.ndarray[double, ndim=1] rh not None,
+                np.ndarray[double, ndim=1] dh not None,
+                double epoch):
+    """
+    (r5, d5, dr5, dd5) = hfk5zVector( rh, dh, epoch)
+
+    where rh, dh, r5, d5, dr5 and dd5 are all numpy arrays
+
+    @palHfk5z@
+
+    Raises
+    ------
+    ValueError if input RA and Dec arrays do not have the same length
+    """
+
+    cdef int length = len(rh)
+
+    if len(dh)!=length:
+        raise ValueError("You did not pass the same number of RAs as " \
+                         + "Decs to hfk5zVector")
+
+    cdef np.ndarray ra_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dec_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dr_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dd_out = np.empty(length, dtype=np.float64)
+
+    cdef double r5
+    cdef double d5
+    cdef double dr5
+    cdef double dd5
+
+    for ii in range(length):
+        cpal.palHfk5z( rh[ii], dh[ii], epoch, &r5, &d5, &dr5, &dd5 )
+        ra_out[ii] = r5
+        dec_out[ii] = d5
+        dr_out[ii] = dr5
+        dd_out[ii] = dd5
+
+    return (ra_out, dec_out, dr_out, dd_out)
 
 # We need to return the sign in order to work out whether -0
 # is a negative integer (important when parsing "-0 22 33.0"
@@ -1464,14 +2711,32 @@ def mapqk( double rm, double dm, double pr, double pd, double px, double rv, np.
      cpal.palMapqk( rm, dm, pr, pd, px, rv, camprms, &ra, &da )
      return (ra, da)
 
-def mapqkVector( np.ndarray rm, np.ndarray dm, np.ndarray pr, np.ndarray pd,
-np.ndarray px, np.ndarray rv, np.ndarray[double, ndim=1] amprms not None):
+def mapqkVector( np.ndarray[double, ndim=1] rm not None,
+                 np.ndarray[double, ndim=1] dm not None,
+                 np.ndarray[double, ndim=1] pr not None,
+                 np.ndarray[double, ndim=1] pd not None,
+                 np.ndarray[double, ndim=1] px not None,
+                 np.ndarray[double, ndim=1] rv not None,
+                 np.ndarray[double, ndim=1] amprms not None):
      """
-     This is just mapqk except that it accepts a vector of inputs and
-     returns a vector of outputs
+     (ra, da) = mapqkVector( rm, dm, pr, pd, px, rv, amprms )
+
+     where rm, dm, pr, pd, px, rv, ra, and da are all numpy arrays
+
+     @palMapqk@
+
+     Raises
+     ------
+     ValueError if input arrays are not of the same length
      """
      cdef int i
      cdef int length=len(rm)
+
+     if len(dm)!=length or len(pr)!=length or len(pd)!=length \
+     or len(px)!=length or len(rv)!=length:
+         raise ValueError("The arrays you passed into mapqkVector " \
+                          + "are not of the same length")
+
      cdef np.ndarray raout=np.zeros(length,dtype=np.float64)
      cdef np.ndarray decout=np.zeros(length,dtype=np.float64)
      cdef double ra
@@ -1501,13 +2766,25 @@ def mapqkz( double rm, double dm, np.ndarray[double, ndim=1] amprms not None):
      return (ra, da)
 
 
-def mapqkzVector( np.ndarray rm, np.ndarray dm, np.ndarray[double, ndim=1] amprms not None):
+def mapqkzVector( np.ndarray[double, ndim=1] rm not None,
+                  np.ndarray[double, ndim=1] dm not None,
+                  np.ndarray[double, ndim=1] amprms not None):
      """
-     This is just mapqkz except that it accepts a vector of inputs
-     and returns a vector of outputs
+     (ra, da) = mapqkzVector( rm, dm, amprms )
+
+     @palMapqkz@
+
+     Raises
+     ------
+     ValueError if input arrays are not of the same length
      """
      cdef int i
      cdef int length=len(rm)
+
+     if len(dm)!=length:
+         raise ValueError("You did not pass as many RAs as Decs to " \
+                           + "mapqkzVector")
+
      cdef np.ndarray raout=np.zeros(length,dtype=np.float64)
      cdef np.ndarray decout=np.zeros(length,dtype=np.float64)
      cdef double ra
@@ -1581,6 +2858,48 @@ def oapqk( type, double ob1, double ob2, np.ndarray[double, ndim=1] aoprms not N
      cpal.palOapqk( ctype, ob1, ob2, caoprms, &rap, &dap )
      return ( rap, dap )
 
+def oapqkVector(type,
+                np.ndarray[double, ndim=1] ob1 not None,
+                np.ndarray[double, ndim=1] ob2 not None,
+                np.ndarray[double, ndim=1] aoprms not None):
+    """
+    (rap, dap) = oapqkVector( type, ob1, ob2, aoprms )
+
+    where ob1, ob2, rap, dap are all numpy arrays
+
+    @palOapqk@
+
+    Raises
+    ------
+    ValueError if input coordinate arrays are of different length
+    """
+
+    cdef int length = len(ob1)
+    if len(ob2)!=length:
+        raise ValueError("The observed coordinate arrays you passed into " \
+                         + "oapqkVector are of different lengths")
+
+    cdef np.ndarray ra_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dec_out = np.empty(length, dtype=np.float64)
+
+    byte_string = type.encode('ascii')
+
+    cdef char * ctype = byte_string
+    cdef double caoprms[14]
+
+    for i in range(14):
+        caoprms[i] = aoprms[i]
+
+    cdef double rap
+    cdef double dap
+
+    for ii in range(length):
+        cpal.palOapqk( ctype, ob1[ii], ob2[ii], caoprms, &rap, &dap)
+        ra_out[ii] = rap
+        dec_out[ii] = dap
+
+    return (ra_out, dec_out)
+
 # Numeric lookup is only useful when scanning through the
 # list of telescopes. The python interface does not need this.
 # Instead obs() returns a dict (which may be a bit less efficient
@@ -1634,13 +2953,26 @@ def pa( double ha, double dec, double phi):
      """
      return cpal.palPa( ha, dec, phi )
 
-def paVector(np.ndarray ha, np.ndarray dec, double phi):
+def paVector(np.ndarray[double, ndim=1] ha not None,
+             np.ndarray[double, ndim=1] dec not None,
+             double phi):
      """
-     This is pa, except that it accepts vectors of hour angle
-     and declination.  Latitude is still a double.
-     Vectors of parallactic angle are returned.
+     a = paVector( ha, dec, phi )
+
+     where ha, dec, and a are all numpy arrays
+
+     @palPa@
+
+     Raises
+     ------
+     ValueError if input arrays are not of the same length
      """
      cdef int length = len(ha)
+
+     if len(dec)!=length:
+         raise ValueError("You did not pass as many Decs as " \
+                          + "Hour Angles to paVector")
+
      cdef np.ndarray paOut = np.zeros(length, dtype=np.float64)
      cdef int i
      for i in range(length):
@@ -1649,7 +2981,7 @@ def paVector(np.ndarray ha, np.ndarray dec, double phi):
 
 def pcd( double disco, double x, double y):
     """
-    (cx, cy) = pcd( x, y )
+    (cx, cy) = pcd( disco, x, y )
 
     Returns the distorted coordinates and does not
     modify the supplied arguments.
@@ -1658,6 +2990,41 @@ def pcd( double disco, double x, double y):
     """
     cpal.palPcd( disco, &x, &y )
     return (x, y)
+
+def pcdVector( double disco, np.ndarray[ double, ndim=1] x_in not None,
+               np.ndarray[ double, ndim=1] y_in not None):
+    """
+    (cx, cy) = pcd( disco, x, y )
+
+    where x and y are numpy arrays of x, y tangent plane coordinates
+    and cx, cy are numpy arrays of tangent plane coordinates with the
+    pincushion distortion applied.
+
+    @palPcd@
+
+    Raises
+    ------
+    ValueError if input arrays have inconsistent lengths
+    """
+
+    cdef int length = len(x_in)
+    if len(y_in) != length:
+        raise ValueError("You did not pass the same number of x as y " \
+                         + "coordinates to pcdVector")
+
+    cdef np.ndarray x_out = np.zeros(length, dtype=np.float64)
+    cdef np.ndarray y_out = np.zeros(length, dtype=np.float64)
+    cdef double xx
+    cdef double yy
+
+    for i in range(length):
+        xx = x_in[i]
+        yy = y_in[i]
+        cpal.palPcd( disco, &xx, &yy)
+        x_out[i] = xx
+        y_out[i] = yy
+
+    return (x_out, y_out)
 
 def polmo( double elongm, double phim, double xp, double yp):
     """
@@ -1868,16 +3235,35 @@ def pm( double r0, double d0, double pr, double pd,
      cpal.palPm( r0, d0, pr, pd, px, rv, ep0, ep1, &r1, &d1 )
      return (r1, d1)
 
-def pmVector( np.ndarray r0, np.ndarray d0, np.ndarray pr,
-     np.ndarray pd, np.ndarray px, np.ndarray rv, double ep0,
-     double ep1):
+def pmVector( np.ndarray[double, ndim=1] r0 not None,
+              np.ndarray[double, ndim=1] d0 not None,
+              np.ndarray[double, ndim=1] pr not None,
+              np.ndarray[double, ndim=1] pd not None,
+              np.ndarray[double, ndim=1] px not None,
+              np.ndarray[double, ndim=1] rv not None,
+              double ep0, double ep1):
      """
-     This is pm (see above), except that it accepts an
-     ndarray of values for each argument
+     (r1, d1) = pmVector( r0, d0, pr, pd, px, rv, ep0, ep1 )
+
+     where r0, d0, pr, pd, px, rv, r1, and d1 are all
+     numpy arrays
+
+     @palPm@
+
+     Raises
+     ------
+     ValueError if input arrays are not of the same length
      """
 
      cdef int i
      cdef int length=len(r0)
+
+     if len(d0)!=length or len(pr)!=length or len(pd)!=length \
+     or len(px)!=length or len(rv)!=length:
+
+         raise ValueError("The arrays you passed into pmVector " \
+                          + "are not all of the same length")
+
      cdef np.ndarray r1out=np.zeros(length,dtype=np.float64)
      cdef np.ndarray d1out=np.zeros(length,dtype=np.float64)
      cdef double r1
@@ -2064,6 +3450,26 @@ def refro( double zobs, double hm, double tdk, double pmb,
     cpal.palRefro(zobs, hm, tdk, pmb, rh, wl, phi, tlr, eps, &ref)
     return ref
 
+def refroVector( np.ndarray[ double, ndim=1] zobs not None, double hm, double tdk,
+                double pmb, double rh, double wl, double phi, double tlr,
+                double eps):
+    """
+    ref = refroVector( zobs, hm, tdk, pmb, rh, wl, phi, tlr, eps )
+
+    where zobs is a numpy array of zenith distances in radians.  ref will be
+    a numpy array of refractions (zenith distance minus observed zenith distance
+    in radians)
+
+    @palRefro@
+    """
+    cdef int length = len(zobs)
+    cdef double ref
+    cdef np.ndarray refVector = np.zeros([length], dtype=np.float64)
+    for i in range(length):
+        cpal.palRefro(zobs[i], hm, tdk, pmb, rh, wl, phi, tlr, eps, &ref)
+        refVector[i] = ref
+    return refVector
+
 def refv( np.ndarray[ double, ndim=1] vu not None, double refa, double refb):
     """
     vr = refv( vu, refa, refb )
@@ -2080,6 +3486,28 @@ def refv( np.ndarray[ double, ndim=1] vu not None, double refa, double refb):
         vr[i] = cvr[i]
     return vr
 
+def refvVector(np.ndarray[double, ndim=2] vu not None, double refa, double refb):
+    """
+    vr = refvVector( vu, refa, refb )
+
+    where vu is a 2-D numpy array in which each row is a different 3-D cartesian
+    vector.  vr will be a 2-D numpy array in which each row is the
+    refraction-corrected vector corresponding to the same row in vu
+
+    @palRefv@
+    """
+    cdef double cvr[3]
+    cdef double cvu[3]
+    cdef np.ndarray vr = np.zeros( [vu.shape[0], vu.shape[1]], dtype=np.float64)
+
+    for row in range(vu.shape[0]):
+        for i in range(3):
+            cvu[i] = vu[row][i]
+        cpal.palRefv( cvu, refa, refb, cvr )
+        for i in range(3):
+            vr[row][i] = cvr[i]
+    return vr
+
 def refz( double zu, double refa, double refb ):
     """
     zr = refz( zu, refa, refb )
@@ -2090,11 +3518,14 @@ def refz( double zu, double refa, double refb ):
     cpal.palRefz(zu,refa,refb,&zr)
     return zr
 
-def refzVector(np.ndarray zu, double refa, double refb):
+def refzVector(np.ndarray[double, ndim=1] zu not None,
+               double refa, double refb):
      """
-     this is just refz, but accepts a vector of zenith distances
-     and returns a vector of corrected zenith distances (the refraction
-     coefficients must be the same for all of the sources)
+     zr = refzVector( zu, refa, refb )
+
+     where zu and zr are numpy arrays
+
+     @palRefz@
      """
      cdef int length = len(zu)
      cdef np.ndarray zrout = np.zeros(length, dtype=np.float64)
@@ -2167,6 +3598,40 @@ def supgal( double dsl, double dsb ):
      cpal.palSupgal( dsl, dsb, &dl, &db )
      return (dl, db)
 
+def supgalVector(np.ndarray[double, ndim=1] dsl not None,
+                 np.ndarray[double, ndim=1] dsb not None):
+    """
+    (dl, db) = supgalVector( dsl, dsb )
+
+    where dsl, dsb, dl, and db are all numpy arrays
+
+    @palSupgal@
+
+    Raises
+    ------
+    ValueError if input arrays are of different lengths
+    """
+
+    cdef int length=len(dsl)
+
+    if len(dsb)!=length:
+        raise ValueError("You did not pass the same number of " \
+                         + "longitudes as latitudes into supgalVector")
+
+    cdef np.ndarray dl_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray db_out = np.empty(length, dtype=np.float64)
+
+    cdef double dl
+    cdef double db
+
+    for ii in range(length):
+        cpal.palSupgal(dsl[ii], dsb[ii], &dl, &db)
+        dl_out[ii] = dl
+        db_out[ii] = db
+
+    return (dl_out, db_out)
+
+
 def ue2el(np.ndarray[double, ndim=1] u not None, int jformr ):
     """
     (jform, epoch, orbinc, anode, perih, aorq, e, aorl, dm) = ue2el( u, jformr )
@@ -2237,7 +3702,7 @@ def ue2pv( double date, np.ndarray[double, ndim=1] u not None ):
 
 def unpcd( double disco, double x, double y):
     """
-    (tx, ty) = unpcd( x, y )
+    (tx, ty) = unpcd( disco, x, y )
 
     Returns the tangent plane coordinates and does not
     modify the supplied arguments.
@@ -2246,3 +3711,38 @@ def unpcd( double disco, double x, double y):
     """
     cpal.palUnpcd( disco, &x, &y )
     return (x, y)
+
+def unpcdVector( double disco, np.ndarray[ double, ndim=1 ] x_in not None,
+                 np.ndarray[ double, ndim=1 ] y_in not None):
+    """
+    (tx, ty) = unpcdVector( disco, x, y)
+
+    where x and y are numpy arrays of x, y tangent plane coordinates and
+    tx, ty are numpy arrays of tangent plane coordinates with the
+    pincushion distortion removed
+
+    @palUnpcd@
+
+    Raises
+    ------
+    ValueError if input arrays have inconsistent lengths
+    """
+
+    cdef int length=len(x_in)
+    if len(y_in) != length:
+        raise ValueError("You did not pass the same number of x as y " \
+                         + "coordinates to unpcdVector")
+
+    cdef np.ndarray x_out = np.zeros(length, dtype=np.float64)
+    cdef np.ndarray y_out = np.zeros(length, dtype=np.float64)
+    cdef double xx
+    cdef double yy
+
+    for i in range(length):
+        xx = x_in[i]
+        yy = y_in[i]
+        cpal.palUnpcd(disco, &xx, &yy)
+        x_out[i] = xx
+        y_out[i] =yy
+
+    return (x_out,y_out)
