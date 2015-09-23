@@ -1838,6 +1838,38 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(r1,r2,12)
             self.assertAlmostEqual(d1,d2,12)
 
+        # test that an exception is raised if the input arrays
+        # are of inconsistent shapes
+        with self.assertRaises(ValueError) as context:
+            results = pal.mapqkVector(raIn, decIn[:10], pmr, pmd, px, rv, amprms)
+        self.assertEqual(context.exception.message,
+                         "The arrays you passed into mapqkVector are " \
+                         + "not of the same length")
+
+        with self.assertRaises(ValueError) as context:
+            results = pal.mapqkVector(raIn, decIn, pmr[:10], pmd, px, rv, amprms)
+        self.assertEqual(context.exception.message,
+                         "The arrays you passed into mapqkVector are " \
+                         + "not of the same length")
+
+        with self.assertRaises(ValueError) as context:
+            results = pal.mapqkVector(raIn, decIn, pmr, pmd[:10], px, rv, amprms)
+        self.assertEqual(context.exception.message,
+                         "The arrays you passed into mapqkVector are " \
+                         + "not of the same length")
+
+        with self.assertRaises(ValueError) as context:
+            results = pal.mapqkVector(raIn, decIn, pmr, pmd, px[:10], rv, amprms)
+        self.assertEqual(context.exception.message,
+                         "The arrays you passed into mapqkVector are " \
+                         + "not of the same length")
+
+        with self.assertRaises(ValueError) as context:
+            results = pal.mapqkVector(raIn, decIn, pmr, pmd, px, rv[:10], amprms)
+        self.assertEqual(context.exception.message,
+                         "The arrays you passed into mapqkVector are " \
+                         + "not of the same length")
+
     def test_moon(self):
         expected = np.array( [
              0.00229161514616454,

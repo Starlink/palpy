@@ -2711,14 +2711,32 @@ def mapqk( double rm, double dm, double pr, double pd, double px, double rv, np.
      cpal.palMapqk( rm, dm, pr, pd, px, rv, camprms, &ra, &da )
      return (ra, da)
 
-def mapqkVector( np.ndarray rm, np.ndarray dm, np.ndarray pr, np.ndarray pd,
-np.ndarray px, np.ndarray rv, np.ndarray[double, ndim=1] amprms not None):
+def mapqkVector( np.ndarray[double, ndim=1] rm not None,
+                 np.ndarray[double, ndim=1] dm not None,
+                 np.ndarray[double, ndim=1] pr not None,
+                 np.ndarray[double, ndim=1] pd not None,
+                 np.ndarray[double, ndim=1] px not None,
+                 np.ndarray[double, ndim=1] rv not None,
+                 np.ndarray[double, ndim=1] amprms not None):
      """
-     This is just mapqk except that it accepts a vector of inputs and
-     returns a vector of outputs
+     (ra, da) = mapqkVector( rm, dm, pr, pd, px, rv, amprms )
+
+     where rm, dm, pr, pd, px, rv, ra, and da are all numpy arrays
+
+     @palMapqk@
+
+     Raises
+     ------
+     ValueError if input arrays are not of the same length
      """
      cdef int i
      cdef int length=len(rm)
+
+     if len(dm)!=length or len(pr)!=length or len(pd)!=length \
+     or len(px)!=length or len(rv)!=length:
+         raise ValueError("The arrays you passed into mapqkVector " \
+                          + "are not of the same length")
+
      cdef np.ndarray raout=np.zeros(length,dtype=np.float64)
      cdef np.ndarray decout=np.zeros(length,dtype=np.float64)
      cdef double ra
