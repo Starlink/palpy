@@ -1320,6 +1320,15 @@ class TestPAL(unittest.TestCase) :
         self.assertRaises(ValueError, pal.fk524Vector, ra5, dec5, mura5, \
                           mudec5, px5, vr5[:9])
 
+    def test_fk524_original(self):
+        r1950, d1950, dr1950, dd1950, p1950, v1950 = pal.fk524(4.567, -1.23, -3e-5, 8e-6, 0.29, -35.0)
+        self.assertAlmostEqual( r1950, 4.543778603272084, 12)
+        self.assertAlmostEqual( d1950, -1.229642790187574, 12)
+        self.assertAlmostEqual( dr1950, -2.957873121769244e-5, 17)
+        self.assertAlmostEqual( dd1950, 8.117725309659079e-6, 17)
+        self.assertAlmostEqual( p1950, 0.2898494999992917, 12)
+        self.assertAlmostEqual( v1950, -35.026862824252680, 11)
+
     def test_fk45z(self):
         (r2000, d2000) = pal.fk45z( 1.2, -0.3, 1960 )
         self.assertAlmostEqual( r2000, 1.2097812228966762227, 11 )
