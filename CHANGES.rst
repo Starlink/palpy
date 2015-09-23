@@ -1,3 +1,11 @@
+1.7.0
+-----
+
+- Add test for fk524 (thanks to Scott Daniel)
+- Addition of many vectorized routines (thanks to Scott Daniel)
+- Upgrade PAL to v0.9.3
+- Upgrade ERFA to v1.2.0
+
 1.6.0
 -----
 
