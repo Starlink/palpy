@@ -131,6 +131,13 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(padC[i], padT[i], 12)
             self.assertAlmostEqual(paddC[i], paddT[i], 12)
 
+        with self.assertRaises(ValueError) as context:
+            results = pal.altazVector(haIn[:10], decIn, phi)
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many Decs as Hour Angles " \
+                         + "to altazVector")
+
+
     def test_amp(self):
         (rm, dm) = pal.amp( 2.345, -1.234, 50100., 1990. )
         self.assertAlmostEqual( rm, 2.344472180027961, 6 )
