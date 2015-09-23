@@ -2266,6 +2266,38 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(r1,r2,12)
             self.assertAlmostEqual(d1,d2,12)
 
+        # test that an exception is raised if input arrays are of
+        # inconsistent length
+        with self.assertRaises(ValueError) as context:
+            results = pal.pmVector(raIn, decIn[:3], pmr, pmd, px, rv, ep0, ep1)
+        self.assertEqual(context.exception.message,
+                         "The arrays you passed into pmVector are not all of " \
+                         + "the same length")
+
+        with self.assertRaises(ValueError) as context:
+            results = pal.pmVector(raIn, decIn, pmr[:3], pmd, px, rv, ep0, ep1)
+        self.assertEqual(context.exception.message,
+                         "The arrays you passed into pmVector are not all of " \
+                         + "the same length")
+
+        with self.assertRaises(ValueError) as context:
+            results = pal.pmVector(raIn, decIn, pmr, pmd[:3], px, rv, ep0, ep1)
+        self.assertEqual(context.exception.message,
+                         "The arrays you passed into pmVector are not all of " \
+                         + "the same length")
+
+        with self.assertRaises(ValueError) as context:
+            results = pal.pmVector(raIn, decIn, pmr, pmd, px[:3], rv, ep0, ep1)
+        self.assertEqual(context.exception.message,
+                         "The arrays you passed into pmVector are not all of " \
+                         + "the same length")
+
+        with self.assertRaises(ValueError) as context:
+            results = pal.pmVector(raIn, decIn, pmr, pmd, px, rv[:3], ep0, ep1)
+        self.assertEqual(context.exception.message,
+                         "The arrays you passed into pmVector are not all of " \
+                         + "the same length")
+
     def test_polmo(self):
         (elong, phi, daz) = pal.polmo( 0.7, -0.5, 1.0e-6, -2.0e-6)
 

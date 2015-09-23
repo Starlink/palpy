@@ -3235,16 +3235,35 @@ def pm( double r0, double d0, double pr, double pd,
      cpal.palPm( r0, d0, pr, pd, px, rv, ep0, ep1, &r1, &d1 )
      return (r1, d1)
 
-def pmVector( np.ndarray r0, np.ndarray d0, np.ndarray pr,
-     np.ndarray pd, np.ndarray px, np.ndarray rv, double ep0,
-     double ep1):
+def pmVector( np.ndarray[double, ndim=1] r0 not None,
+              np.ndarray[double, ndim=1] d0 not None,
+              np.ndarray[double, ndim=1] pr not None,
+              np.ndarray[double, ndim=1] pd not None,
+              np.ndarray[double, ndim=1] px not None,
+              np.ndarray[double, ndim=1] rv not None,
+              double ep0, double ep1):
      """
-     This is pm (see above), except that it accepts an
-     ndarray of values for each argument
+     (r1, d1) = pmVector( r0, d0, pr, pd, px, rv, ep0, ep1 )
+
+     where r0, d0, pr, pd, px, rv, r1, and d1 are all
+     numpy arrays
+
+     @palPm@
+
+     Raises
+     ------
+     ValueError if input arrays are not of the same length
      """
 
      cdef int i
      cdef int length=len(r0)
+
+     if len(d0)!=length or len(pr)!=length or len(pd)!=length \
+     or len(px)!=length or len(rv)!=length:
+
+         raise ValueError("The arrays you passed into pmVector " \
+                          + "are not all of the same length")
+
      cdef np.ndarray r1out=np.zeros(length,dtype=np.float64)
      cdef np.ndarray d1out=np.zeros(length,dtype=np.float64)
      cdef double r1
