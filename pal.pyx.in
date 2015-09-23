@@ -1452,9 +1452,22 @@ def dsep( double a1, double b1, double a2, double b2 ):
 
 def dsepVector(np.ndarray a1, np.ndarray b1, np.ndarray a2, np.ndarray b2):
      """
-     this is dsep but it accepts and returns vectors
+     s = dsep( a1, b1, a2, b2 )
+
+     where a1, b1, a2, b2, and s are numpy arrays
+
+     @palDsep@
+
+     Raises
+     ------
+     ValueError if input arrays have different lengths
      """
      cdef int length=len(a1)
+
+     if len(b1)!=length or len(a2)!=length or len(b2)!=length:
+         raise ValueError("The arrays you passed to dsepVector " \
+                          + "are not of the same length")
+
      cdef np.ndarray dd = np.zeros(length, dtype=np.float64)
      cdef double d
      cdef int i

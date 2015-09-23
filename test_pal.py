@@ -2435,6 +2435,25 @@ class TestPAL(unittest.TestCase) :
         for (ddc, ddt) in zip (ddTest, ddControl):
             self.assertAlmostEqual(ddc, ddt, 12)
 
+        # test that an exception is raised if input arrays
+        # have different lengths
+        with self.assertRaises(ValueError) as context:
+            resutls = pal.dsepVector(ra1, dec1[:5], ra2, dec2)
+        self.assertEqual(context.exception.message,
+                        "The arrays you passed to dsepVector " \
+                         + "are not of the same length")
+
+        with self.assertRaises(ValueError) as context:
+            resutls = pal.dsepVector(ra1, dec1, ra2[:5], dec2)
+        self.assertEqual(context.exception.message,
+                        "The arrays you passed to dsepVector " \
+                         + "are not of the same length")
+
+        with self.assertRaises(ValueError) as context:
+            resutls = pal.dsepVector(ra1, dec1, ra2, dec2[:5])
+        self.assertEqual(context.exception.message,
+                        "The arrays you passed to dsepVector " \
+                         + "are not of the same length")
 
     def test_dsepvVector(self):
         """
