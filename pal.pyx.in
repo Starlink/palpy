@@ -3518,11 +3518,14 @@ def refz( double zu, double refa, double refb ):
     cpal.palRefz(zu,refa,refb,&zr)
     return zr
 
-def refzVector(np.ndarray zu, double refa, double refb):
+def refzVector(np.ndarray[double, ndim=1] zu not None,
+               double refa, double refb):
      """
-     this is just refz, but accepts a vector of zenith distances
-     and returns a vector of corrected zenith distances (the refraction
-     coefficients must be the same for all of the sources)
+     zr = refzVector( zu, refa, refb )
+
+     where zu and zr are numpy arrays
+
+     @palRefz@
      """
      cdef int length = len(zu)
      cdef np.ndarray zrout = np.zeros(length, dtype=np.float64)
