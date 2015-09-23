@@ -2957,7 +2957,7 @@ def paVector(np.ndarray[double, ndim=1] ha not None,
              np.ndarray[double, ndim=1] dec not None,
              double phi):
      """
-     a = pa( ha, dec, phi )
+     a = paVector( ha, dec, phi )
 
      where ha, dec, and a are all numpy arrays
 
