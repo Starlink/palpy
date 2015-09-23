@@ -131,11 +131,9 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(padC[i], padT[i], 12)
             self.assertAlmostEqual(paddC[i], paddT[i], 12)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.altazVector(haIn[:10], decIn, phi)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many Decs as Hour Angles " \
-                         + "to altazVector")
+        # test that an exception is raised if input arrays have
+        # different lengths
+        self.assertRaises(ValueError, pal.altazVector, haIn[:10], decIn, phi)
 
 
     def test_amp(self):
@@ -180,12 +178,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that exceptions are raised when input arrays are not of the same
         # length
-        with self.assertRaises(ValueError) as context:
-            results = pal.ampqkVector(ra_in[:17], dec_in, amprms)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many Decs as RAs to " \
-                         + "ampqkVector")
-
+        self.assertRaises(ValueError, pal.ampqkVector,ra_in[:17], dec_in, amprms)
 
     def test_aopqkVector(self):
         date = 51000.1
@@ -236,12 +229,9 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(d1,d2,12)
             self.assertAlmostEqual(r1,r2,12)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.aopqkVector(raIn[:6], decIn, obsrms)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of Decs as RAs " \
-                         + "to aopqkVector")
-
+        # test that an exception is raised if input arrays have
+        # different lengths
+        self.assertRaises(ValueError, pal.aopqkVector, raIn[:6], decIn, obsrms)
 
     def test_aop(self):
         dap = -0.1234
@@ -413,12 +403,8 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is thrown if the input arrays do not
         # have the same length
-        with self.assertRaises(ValueError) as context:
-            testRa, testDec = pal.oapqkVector('a', azList, zdList[:17], aoprms)
-        self.assertEqual(context.exception.args[0],
-                         "The observed coordinate arrays you passed into " \
-                         + "oapqkVector are of different lengths")
-
+        self.assertRaises(ValueError, pal.oapqkVector, 'a', \
+                          azList, zdList[:17], aoprms)
 
     def test_bear(self):
         a1 = 1.234
@@ -458,26 +444,11 @@ class TestPAL(unittest.TestCase) :
 
         # test that exceptions are raied when the numpy arrays are of
         # incorrect size
-        with self.assertRaises(ValueError) as context:
-            bTest = pal.dbearVector(a1_in, b1_in[:9], a2_in, b2_in)
-        self.assertEqual(context.exception.args[0],
-                         "The first two arguments of dbearVector must " \
-                         + "be numpy arrays with the same number of elements")
+        self.assertRaises(ValueError, pal.dbearVector, a1_in, b1_in[:9], a2_in, b2_in)
 
-        with self.assertRaises(ValueError) as context:
-            bTest = pal.dbearVector(a1_in, b1_in, a2_in, b2_in[:8])
-        self.assertEqual(context.exception.args[0],
-                         "The second two arguments of dbearVector must " \
-                         + "be numpy arrays with the same number of elements")
+        self.assertRaises(ValueError, pal.dbearVector, a1_in, b1_in, a2_in, b2_in[:8])
 
-        with self.assertRaises(ValueError) as context:
-            bTest = pal.dbearVector(a1_in, b1_in, a2_in[:9], b2_in[:9])
-        self.assertEqual(context.exception.args[0],
-                         "The second two arguments of dbearVector must " \
-                         + "either have the same number of elements " \
-                         + "as the first two arguments, or they must have " \
-                         + "only one element")
-
+        self.assertRaises(ValueError, pal.dbearVector, a1_in, b1_in, a2_in[:9], b2_in[:9])
 
     def test_dpavVector(self):
         """
@@ -511,33 +482,15 @@ class TestPAL(unittest.TestCase) :
             self.assertFalse(np.isnan(paControl))
 
         # test that exceptions are raised when they should be
-        with self.assertRaises(ValueError) as context:
-            testPa = pal.dpavVector(v1, v2[:19])
-        self.assertEqual(context.exception.args[0],
-                         "In dpavVector, v2 must either be a numpy array of " \
-                         + "shape (3,) or a numpy array of shape (n, 3) "\
-                         + "where n is the number of rows in v1")
+        self.assertRaises(ValueError, pal.dpavVector, v1, v2[:19])
 
         v3 = np.random.random_sample((nSamples, 6))
-        with self.assertRaises(ValueError) as context:
-            testPa = pal.dpavVector(v3, v2)
-        self.assertEqual(context.exception.args[0],
-                         "In dpavVector, v1 must be a numpy array in which " \
-                         + "each row has 3 elements. " \
-                         + "Your rows have 6 elements.")
+        self.assertRaises(ValueError, pal.dpavVector, v3, v2)
 
-        with self.assertRaises(ValueError) as context:
-            testPa = pal.dpavVector(v1, v3)
-        self.assertEqual(context.exception.args[0],
-                         "In dpavVector, v2 must be a numpy array in which " \
-                         + "each row has 3 elements. " \
-                         + "Your rows have 6 elements.")
+        self.assertRaises(ValueError, pal.dpavVector, v1, v3)
 
-        with self.assertRaises(ValueError) as context:
-            testPa = pal.dpavVector(v1, np.random.random_sample(9))
-        self.assertEqual(context.exception.args[0],
-                         "The v2 you passed into dpavVector represents a single " \
-                         "point with 9 elements; it should have 3 elements")
+        self.assertRaises(ValueError, pal.dpavVector, v1, \
+                          np.random.random_sample(9))
 
     def test_caldj(self):
         djm = pal.caldj( 1999, 12, 31 )
@@ -587,18 +540,9 @@ class TestPAL(unittest.TestCase) :
 
         # test that exceptions are raised when the input arrays are
         # of different lengths
-        with self.assertRaises(ValueError) as context:
-            results = pal.caldjVector(iy, im[:11], iday)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many months as " \
-                         + "years to caldjVector")
+        self.assertRaises(ValueError, pal.caldjVector, iy, im[:11], iday)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.caldjVector(iy, im, iday[:8])
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many days as " \
-                         + "years to caldjVector")
-
+        self.assertRaises(ValueError, pal.caldjVector, iy, im, iday[:8])
 
     def test_daf2r(self):
         dr = pal.daf2r( 76, 54, 32.1 )
@@ -652,14 +596,7 @@ class TestPAL(unittest.TestCase) :
         # test that an exception is raised if you don't pass in
         # 3-D cartesian points
         dummyData = np.random.random_sample((20, 5))*10.0
-        with self.assertRaises(ValueError) as context:
-            aTest, bTest = pal.dcc2sVector(dummyData)
-        self.assertEqual(context.exception.args[0],
-                         "The input to dcc2sVector should be " \
-                         + "a 2-D numpy array in which each row " \
-                         + "is a point in 3-D Cartesian coordinates." \
-                         + " The rows of your input" \
-                         + " have 5 dimensions")
+        self.assertRaises(ValueError, pal.dcc2sVector, dummyData)
 
     def test_dcs2cVector(self):
         """
@@ -682,12 +619,7 @@ class TestPAL(unittest.TestCase) :
         np.testing.assert_array_almost_equal(np.sin(dec), np.sin(bTest), 12)
 
         # test that an exception is raised if you pass in arrays of different lengths
-        with self.assertRaises(ValueError) as context:
-            vTest = pal.dcs2cVector(ra, dec[:16])
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many latitudes as longitudes " \
-                          + "into dcs2sVector")
-
+        self.assertRaises(ValueError, pal.dcs2cVector, ra, dec[:16])
 
     def test_cd2tf(self):
         ( sign, hours, minutes, seconds, fraction ) = pal.dd2tf( 4, -0.987654321 )
@@ -825,18 +757,9 @@ class TestPAL(unittest.TestCase) :
 
         # test that exceptions are raised when you pass in
         # mis-matched input arrays
-        with self.assertRaises(ValueError) as context:
-            testDays = pal.dtf2dVector(iHour, iMin[:19], sec)
-        self.assertEqual(context.exception.args[0],
-                         "In dtf2dVector, imin does not have the " \
-                         + "same length as ihour")
+        self.assertRaises(ValueError, pal.dtf2dVector, iHour, iMin[:19], sec)
 
-        with self.assertRaises(ValueError) as context:
-            testDays = pal.dtf2dVector(iHour, iMin, sec[:19])
-        self.assertEqual(context.exception.args[0],
-                         "In dtf2dVector, sec does not have the " \
-                         + "same length as ihour")
-
+        self.assertRaises(ValueError, pal.dtf2dVector, iHour, iMin, sec[:19])
 
     def test_dtf2r(self):
         dr = pal.dtf2r( 23, 56, 59.1 )
@@ -877,19 +800,9 @@ class TestPAL(unittest.TestCase) :
 
         # test that exceptions are raised when you pass in
         # mis-matched input arrays
-        with self.assertRaises(ValueError) as context:
-            testRad = pal.dtf2rVector(iHour, iMin[:19], sec)
-        self.assertEqual(context.exception.args[0],
-                         "In dtf2rVector, imin does not have the " \
-                         + "same length as ihour")
+        self.assertRaises(ValueError, pal.dtf2rVector, iHour, iMin[:19], sec)
 
-        with self.assertRaises(ValueError) as context:
-            testRad = pal.dtf2rVector(iHour, iMin, sec[:19])
-        self.assertEqual(context.exception.args[0],
-                         "In dtf2rVector, sec does not have the " \
-                         + "same length as ihour")
-
-
+        self.assertRaises(ValueError, pal.dtf2rVector, iHour, iMin, sec[:19])
 
     def test_dat(self):
         self.assertEqual( pal.dat( 43900 ), 18 )
@@ -1011,12 +924,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if inputs are not
         # of the same length
-        with self.assertRaises(ValueError) as context:
-            results = pal.de2hVector(haIn[:10], decIn, phi)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of " \
-                         + "Decs as Hour Angles to de2hVector")
-
+        self.assertRaises(ValueError, pal.de2hVector, haIn[:10], decIn, phi)
 
     def test_dh2eVector(self):
         """
@@ -1046,12 +954,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised when the input arrays
         # are of different lengths
-        with self.assertRaises(ValueError) as context:
-            results = pal.dh2eVector(az[:40], el, phi)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many elevations " \
-                         + "as azimuths to dh2eVector")
-
+        self.assertRaises(ValueError, pal.dh2eVector, az[:40], el, phi)
 
     def test_ecleq(self):
         (dr,dd) = pal.ecleq( 1.234, -0.123, 43210.0)
@@ -1086,12 +989,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if input arrays are
         # of different lenghts
-        with self.assertRaises(ValueError) as context:
-            results = pal.ecleqVector(dl[:4], db, mjd)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of " \
-                         + "longitudes as latitudes to ecleqVector")
-
+        self.assertRaises(ValueError, pal.ecleqVector, dl[:4], db, mjd)
 
     def test_ecmat(self):
         expected = np.array( [
@@ -1169,11 +1067,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if inpu arrays are of
         # different lengths
-        with self.assertRaises(ValueError) as context:
-            results = pal.eqeclVector(ra, dec[:8], mjd)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of Decs " \
-                         + "as RAs to eqeclVector")
+        self.assertRaises(ValueError, pal.eqeclVector, ra, dec[:8], mjd)
 
     def test_eqeqx(self):
         self.assertAlmostEqual( pal.eqeqx( 53736 ), -0.8834195072043790156e-5, 15 )
@@ -1214,12 +1108,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised when the input
         # arrays are of different lengths
-        with self.assertRaises(ValueError) as context:
-            results = pal.eqgalVector(raIn[:2], decIn)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of RAs " \
-                         + "as Decs to eqgalVector")
-
+        self.assertRaises(ValueError, pal.eqgalVector, raIn[:2], decIn)
 
     def test_etrms(self):
         ev = pal.etrms( 1976.9 )
@@ -1416,32 +1305,20 @@ class TestPAL(unittest.TestCase) :
 
         # test that exceptions are raised when the input arrays are
         # of different lengths
-        with self.assertRaises(ValueError) as context:
-            results = pal.fk524Vector(ra5, dec5[:6], mura5, mudec5, px5, vr5)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many Decs as RAs into fk524Vector")
+        self.assertRaises(ValueError, pal.fk524Vector, ra5, dec5[:6], mura5, \
+                          mudec5, px5, vr5)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.fk524Vector(ra5, dec5, mura5[:8], mudec5, px5, vr5)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many RA proper motions as RAs into fk524Vector")
+        self.assertRaises(ValueError, pal.fk524Vector, ra5, dec5, mura5[:8], \
+                          mudec5, px5, vr5)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.fk524Vector(ra5, dec5, mura5, mudec5[:6], px5, vr5)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many Dec proper motions as RAs into fk524Vector")
+        self.assertRaises(ValueError, pal.fk524Vector, ra5, dec5, mura5, \
+                          mudec5[:6], px5, vr5)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.fk524Vector(ra5, dec5, mura5, mudec5, px5[:9], vr5)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many parallaxes as RAs into fk524Vector")
+        self.assertRaises(ValueError, pal.fk524Vector, ra5, dec5, mura5, \
+                          mudec5, px5[:9], vr5)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.fk524Vector(ra5, dec5, mura5, mudec5, px5, vr5[:9])
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many radial velocities as RAs into fk524Vector")
-
-
+        self.assertRaises(ValueError, pal.fk524Vector, ra5, dec5, mura5, \
+                          mudec5, px5, vr5[:9])
 
     def test_fk45z(self):
         (r2000, d2000) = pal.fk45z( 1.2, -0.3, 1960 )
@@ -1476,11 +1353,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if the input arrays are of different
         # lengths
-        with self.assertRaises(ValueError) as context:
-            results = pal.fk45zVector(r1950, d1950[:8], epoch)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of Decs as RAs to " \
-                         + "fk45zVector")
+        self.assertRaises(ValueError, pal.fk45zVector, r1950, d1950[:8], epoch)
 
     def test_fk52h(self):
         inr5 = 1.234
@@ -1513,11 +1386,8 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if the input raList and decList
         # are of different sizes
-        with self.assertRaises(ValueError) as context:
-            testRa, testDec = pal.fk5hzVector(raList, decList[:24], 2000.0)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of " \
-                         "RAs as Decs to fk5hzVector")
+        self.assertRaises(ValueError, pal.fk5hzVector, raList, decList[:24], \
+                          2000.0)
 
     def test_hkf5zVector(self):
         """
@@ -1544,12 +1414,8 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if raList and decList are
         # of different lengths
-        with self.assertRaises(ValueError) as context:
-            ra, dec, dr, dd = pal.hfk5zVector(raList, decList[:77], 2000.0)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of RAs as " \
-                         + "Decs to hfk5zVector")
-
+        self.assertRaises(ValueError, pal.hfk5zVector,raList, decList[:77], \
+                          2000.0)
 
     def test_fk54z(self):
         (r1950, d1950, dr1950, dd1950) = pal.fk54z( 1.2, -0.3, 1960 )
@@ -1581,11 +1447,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if input arrays are of
         # different lengths
-        with self.assertRaises(ValueError) as context:
-            results = pal.fk54zVector(r2000[:11], d2000, epoch)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of Decs as " \
-                         +"RAs to fk54zVector")
+        self.assertRaises(ValueError, pal.fk54zVector, r2000[:11], d2000, epoch)
 
     def test_flotin(self):
         pass
@@ -1612,12 +1474,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raise if input arrays
         # are of different lengths
-        with self.assertRaises(ValueError) as context:
-            results = pal.galeqVector(dlIn[:3], dbIn)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of longitudes " \
-                         + "as latitudes to galeqVector")
-
+        self.assertRaises(ValueError, pal.galeqVector, dlIn[:3], dbIn)
 
     def test_galsup(self):
         (dsl, dsb) = pal.galsup( 6.1, -1.4 )
@@ -1643,13 +1500,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if you pass in arrays with
         # different lengths
-        with self.assertRaises(ValueError) as context:
-            testSl, testSb = pal.galsupVector(llList[:55], bbList)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of " \
-                         + "Galactic longitudes as Galactic latitudes " \
-                         + "into galsupVector")
-
+        self.assertRaises(ValueError, pal.galsupVector, llList[:55], bbList)
 
     def test_geoc(self):
         lat = 19.822838905884 * pal.DD2R
@@ -1679,13 +1530,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised when you pass in different
         # numbers of longitudes as you do latitudes
-        with self.assertRaises(ValueError) as context:
-            testRa, testDec = pal.ge50Vector(llList, bbList[:45])
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of " \
-                         + "Galactic longitudes as Galactic latitudes " \
-                         + "into ge50Vector")
-
+        self.assertRaises(ValueError, pal.ge50Vector, llList, bbList[:45])
 
     def test_gmst(self):
         self.assertAlmostEqual( pal.gmst( 53736 ), 1.754174971870091203, 12 )
@@ -1716,11 +1561,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if input arrays are
         # of different lengths
-        with self.assertRaises(ValueError) as context:
-            results = pal.gmstaVector(dateIn[:8], utIn)
-        self.assertEqual(context.exception.args[0],
-                         "The arrays you passed into gmstaVector " \
-                         + "are of different lengths")
+        self.assertRaises(ValueError, pal.gmstaVector, dateIn[:8], utIn)
 
     def test_intin(self):
         s = "  -12345, , -0  2000  +     "
@@ -1814,11 +1655,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if the input arrays
         # are of inconsistent lengths
-        with self.assertRaises(ValueError) as context:
-            results = pal.mapqkzVector(raIn[:4], decIn, amprms)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many RAs as Decs " \
-                         + "to mapqkzVector")
+        self.assertRaises(ValueError, pal.mapqkzVector, raIn[:4], decIn, amprms)
 
     def test_mapqkVector(self):
         amprms = pal.mappa(2010, 55927)
@@ -1848,35 +1685,20 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if the input arrays
         # are of inconsistent shapes
-        with self.assertRaises(ValueError) as context:
-            results = pal.mapqkVector(raIn, decIn[:10], pmr, pmd, px, rv, amprms)
-        self.assertEqual(context.exception.args[0],
-                         "The arrays you passed into mapqkVector are " \
-                         + "not of the same length")
+        self.assertRaises(ValueError, pal.mapqkVector, raIn, decIn[:10], pmr, \
+                          pmd, px, rv, amprms)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.mapqkVector(raIn, decIn, pmr[:10], pmd, px, rv, amprms)
-        self.assertEqual(context.exception.args[0],
-                         "The arrays you passed into mapqkVector are " \
-                         + "not of the same length")
+        self.assertRaises(ValueError, pal.mapqkVector, raIn, decIn, pmr[:10], \
+                          pmd, px, rv, amprms)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.mapqkVector(raIn, decIn, pmr, pmd[:10], px, rv, amprms)
-        self.assertEqual(context.exception.args[0],
-                         "The arrays you passed into mapqkVector are " \
-                         + "not of the same length")
+        self.assertRaises(ValueError, pal.mapqkVector, raIn, decIn, pmr, \
+                          pmd[:10], px, rv, amprms)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.mapqkVector(raIn, decIn, pmr, pmd, px[:10], rv, amprms)
-        self.assertEqual(context.exception.args[0],
-                         "The arrays you passed into mapqkVector are " \
-                         + "not of the same length")
+        self.assertRaises(ValueError, pal.mapqkVector, raIn, decIn, pmr, \
+                          pmd, px[:10], rv, amprms)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.mapqkVector(raIn, decIn, pmr, pmd, px, rv[:10], amprms)
-        self.assertEqual(context.exception.args[0],
-                         "The arrays you passed into mapqkVector are " \
-                         + "not of the same length")
+        self.assertRaises(ValueError, pal.mapqkVector, raIn, decIn, pmr, \
+                          pmd, px, rv[:10], amprms)
 
     def test_moon(self):
         expected = np.array( [
@@ -1955,11 +1777,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if input arrays
         # are of inconsistent length
-        with self.assertRaises(ValueError) as context:
-            results = pal.paVector(haIn[:4], decIn, phi)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many Decs as " \
-                         + "Hour Angles to paVector")
+        self.assertRaises(ValueError, pal.paVector, haIn[:4], decIn, phi)
 
     def test_pcd(self):
         disco = 178.585
@@ -2006,11 +1824,7 @@ class TestPAL(unittest.TestCase) :
 
         # make sure that an exceptoion is raised if you pass in
         # mismatched x and y vectors
-        with self.assertRaises(ValueError) as context:
-            xTestList, yTestLIst = pal.pcdVector(disco, x_in, y_in[:10])
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of x as y " \
-                         + "coordinates to pcdVector")
+        self.assertRaises(ValueError, pal.pcdVector, disco, x_in, y_in[:10])
 
     def test_unpcdVector(self):
         """
@@ -2045,11 +1859,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if you pass in different numbers
         # of x and y coordinates
-        with self.assertRaises(ValueError) as context:
-            xTestList, yTestList = pal.unpcdVector(disco, x_in, y_in[:30])
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of x as y " \
-                         + "coordinates to unpcdVector")
+        self.assertRaises(ValueError, pal.unpcdVector, disco, x_in, y_in[:30])
 
     def test_planet(self):
         # palEl2ue
@@ -2268,35 +2078,20 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if input arrays are of
         # inconsistent length
-        with self.assertRaises(ValueError) as context:
-            results = pal.pmVector(raIn, decIn[:3], pmr, pmd, px, rv, ep0, ep1)
-        self.assertEqual(context.exception.args[0],
-                         "The arrays you passed into pmVector are not all of " \
-                         + "the same length")
+        self.assertRaises(ValueError, pal.pmVector, raIn, decIn[:3], pmr, \
+                          pmd, px, rv, ep0, ep1)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.pmVector(raIn, decIn, pmr[:3], pmd, px, rv, ep0, ep1)
-        self.assertEqual(context.exception.args[0],
-                         "The arrays you passed into pmVector are not all of " \
-                         + "the same length")
+        self.assertRaises(ValueError, pal.pmVector, raIn, decIn, pmr[:3], \
+                          pmd, px, rv, ep0, ep1)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.pmVector(raIn, decIn, pmr, pmd[:3], px, rv, ep0, ep1)
-        self.assertEqual(context.exception.args[0],
-                         "The arrays you passed into pmVector are not all of " \
-                         + "the same length")
+        self.assertRaises(ValueError, pal.pmVector, raIn, decIn, pmr, \
+                          pmd[:3], px, rv, ep0, ep1)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.pmVector(raIn, decIn, pmr, pmd, px[:3], rv, ep0, ep1)
-        self.assertEqual(context.exception.args[0],
-                         "The arrays you passed into pmVector are not all of " \
-                         + "the same length")
+        self.assertRaises(ValueError, pal.pmVector, raIn, decIn, pmr, \
+                          pmd, px[:3], rv, ep0, ep1)
 
-        with self.assertRaises(ValueError) as context:
-            results = pal.pmVector(raIn, decIn, pmr, pmd, px, rv[:3], ep0, ep1)
-        self.assertEqual(context.exception.args[0],
-                         "The arrays you passed into pmVector are not all of " \
-                         + "the same length")
+        self.assertRaises(ValueError, pal.pmVector, raIn, decIn, pmr, \
+                          pmd, px, rv[:3], ep0, ep1)
 
     def test_polmo(self):
         (elong, phi, daz) = pal.polmo( 0.7, -0.5, 1.0e-6, -2.0e-6)
@@ -2543,23 +2338,11 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if input arrays
         # have different lengths
-        with self.assertRaises(ValueError) as context:
-            resutls = pal.dsepVector(ra1, dec1[:5], ra2, dec2)
-        self.assertEqual(context.exception.args[0],
-                        "The arrays you passed to dsepVector " \
-                         + "are not of the same length")
+        self.assertRaises(ValueError, pal.dsepVector, ra1, dec1[:5], ra2, dec2)
 
-        with self.assertRaises(ValueError) as context:
-            resutls = pal.dsepVector(ra1, dec1, ra2[:5], dec2)
-        self.assertEqual(context.exception.args[0],
-                        "The arrays you passed to dsepVector " \
-                         + "are not of the same length")
+        self.assertRaises(ValueError, pal.dsepVector, ra1, dec1, ra2[:5], dec2)
 
-        with self.assertRaises(ValueError) as context:
-            resutls = pal.dsepVector(ra1, dec1, ra2, dec2[:5])
-        self.assertEqual(context.exception.args[0],
-                        "The arrays you passed to dsepVector " \
-                         + "are not of the same length")
+        self.assertRaises(ValueError, pal.dsepVector, ra1, dec1, ra2, dec2[:5])
 
     def test_dsepvVector(self):
         """
@@ -2584,33 +2367,15 @@ class TestPAL(unittest.TestCase) :
             self.assertFalse(np.isnan(testSep[ii]))
 
         # test that exceptions are raised when they ought to be
-        with self.assertRaises(ValueError) as context:
-            testSep = pal.dsepvVector(v1, v2[0:19])
-        self.assertEqual(context.exception.args[0],
-                         "In dsepvVector v2 must either have one row or " \
-                         + "n rows, where n is the number of rows in v1")
+        self.assertRaises(ValueError, pal.dsepvVector, v1, v2[0:19])
 
         v3 = np.random.random_sample((nSamples,2))
-        with self.assertRaises(ValueError) as context:
-            testSep = pal.dsepvVector(v3, v2)
-        self.assertEqual(context.exception.args[0],
-                         "In dsepvVector v1 must be a numpy array " \
-                         + "in which each row corresponds to a direction " \
-                         + "in 3-D space.  Your v1 has 2 columns.")
+        self.assertRaises(ValueError, pal.dsepvVector, v3, v2)
 
-        with self.assertRaises(ValueError) as context:
-            testSep = pal.dsepvVector(v1, v3)
-        self.assertEqual(context.exception.args[0],
-                         "In dsepvVector v2 must be a numpy array " \
-                         + "in which each row corresponds to a direction " \
-                         + "in 3-D space.  Your v2 has 2 columns.")
+        self.assertRaises(ValueError, pal.dsepvVector, v1, v3)
 
-        with self.assertRaises(ValueError) as context:
-            testSep = pal.dsepvVector(v1, np.random.random_sample(4))
-        self.assertEqual(context.exception.args[0],
-                          "The v2 you passed to dsepvVector is a single point " \
-                          + "with 4 elements; it should have 3 elements")
-
+        self.assertRaises(ValueError, pal.dsepvVector, v1, \
+                          np.random.random_sample(4))
 
     def test_supgal(self):
         (dl, db) = pal.supgal( 6.1, -1.4 )
@@ -2641,11 +2406,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if the input arrays are of
         # different length
-        with self.assertRaises(ValueError) as context:
-            testDl, testDb = pal.supgalVector(dslList[:16], dsbList)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass the same number of " \
-                         + "longitudes as latitudes into supgalVector")
+        self.assertRaises(ValueError, pal.supgalVector, dslList[:16], dsbList)
 
     def test_tp(self):
         dr0 = 3.1
@@ -2704,12 +2465,8 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if input arrays
         # are not of the same shape
-        with self.assertRaises(ValueError) as context:
-            results = pal.ds2tpVector(raIn[:3], decIn, raz, decz)
-        self.assertEqual(context.exception.args[0],
-                         "You did not pass as many RAs as Decs " \
-                         + "to ds2tpVector")
-
+        self.assertRaises(ValueError, pal.ds2tpVector,raIn[:3], decIn, \
+                          raz, decz)
 
     def test_dtp2sVector(self):
         """
@@ -2740,12 +2497,7 @@ class TestPAL(unittest.TestCase) :
 
         # test that an exception is raised if input arrays are of
         # different sizes
-        with self.assertRaises(ValueError) as context:
-            results = pal.dtp2sVector(xi, eta[:20], raz, decz)
-        self.assertEqual(context.exception.args[0],
-                         "The arrays of tangent plane coordinates " \
-                         + "you passed to dtp2sVector are of " \
-                         + "different lengths")
+        self.assertRaises(ValueError, pal.dtp2sVector, xi, eta[:20], raz, decz)
 
     def test_vecmat(self):
         # Not everything is implemented here
