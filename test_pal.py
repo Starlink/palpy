@@ -1212,6 +1212,15 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(dlt, dlc, 12)
             self.assertAlmostEqual(dbt, dbc, 12)
 
+        # test that an exception is raised when the input
+        # arrays are of different lengths
+        with self.assertRaises(ValueError) as context:
+            results = pal.eqgalVector(raIn[:2], decIn)
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of RAs " \
+                         + "as Decs to eqgalVector")
+
+
     def test_etrms(self):
         ev = pal.etrms( 1976.9 )
         self.assertAlmostEqual( ev[0], -1.621617102537041e-6, 18 )

@@ -2086,12 +2086,26 @@ def eqgal( double dr, double dd ):
      cpal.palEqgal( dr, dd, &dl, &db )
      return (dl, db)
 
-def eqgalVector(np.ndarray dr, np.ndarray dd):
+def eqgalVector(np.ndarray[double, ndim=1] dr not None,
+                np.ndarray[double, ndim=1] dd not None):
      """
-     This is the same as eqgal, but it accepts and returns vectors
+     (dl, db) = eqgalVector( dr, dd )
+
+     where dr, dd, dl, db are all numpy arrays
+
+     @palEqgal@
+
+     Raises
+     ------
+     ValueError if input arrays are not of the same length
      """
 
      cdef int length=len(dr)
+
+     if len(dd) != length:
+         raise ValueError("You did not pass the same number of RAs " \
+                          + "as Decs to eqgalVector")
+
      cdef np.ndarray dlout = np.zeros(length, dtype=np.float64)
      cdef np.ndarray dbout = np.zeros(length, dtype=np.float64)
      cdef double dl
