@@ -122,7 +122,7 @@ def altazVector(np.ndarray[double, ndim=1] ha not None,
      cdef int length = len(ha)
 
      if len(dec)!=length:
-         raise ValueError("You did not pass as many Decs as " \
+          raise ValueError("You did not pass as many Decs as " \
                            + "Hour Angles to altazVector")
 
      cdef np.ndarray azout = np.zeros(length, dtype=np.float64)
