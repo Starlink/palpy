@@ -1812,6 +1812,14 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(r1,r2,12)
             self.assertAlmostEqual(d1,d2,12)
 
+        # test that an exception is raised if the input arrays
+        # are of inconsistent lengths
+        with self.assertRaises(ValueError) as context:
+            results = pal.mapqkzVector(raIn[:4], decIn, amprms)
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many RAs as Decs " \
+                         + "to mapqkzVector")
+
     def test_mapqkVector(self):
         amprms = pal.mappa(2010, 55927)
         np.random.seed(32)
