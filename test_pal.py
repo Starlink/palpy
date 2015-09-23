@@ -1953,6 +1953,14 @@ class TestPAL(unittest.TestCase) :
         for pt, pc in zip(paTest, paControl):
             self.assertAlmostEqual(pt, pc, 12)
 
+        # test that an exception is raised if input arrays
+        # are of inconsistent length
+        with self.assertRaises(ValueError) as context:
+            results = pal.paVector(haIn[:4], decIn, phi)
+        self.assertEqual(context.exception.message,
+                         "You did not pass as many Decs as " \
+                         + "Hour Angles to paVector")
+
     def test_pcd(self):
         disco = 178.585
         REFX = 0.0123

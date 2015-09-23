@@ -2953,13 +2953,26 @@ def pa( double ha, double dec, double phi):
      """
      return cpal.palPa( ha, dec, phi )
 
-def paVector(np.ndarray ha, np.ndarray dec, double phi):
+def paVector(np.ndarray[double, ndim=1] ha not None,
+             np.ndarray[double, ndim=1] dec not None,
+             double phi):
      """
-     This is pa, except that it accepts vectors of hour angle
-     and declination.  Latitude is still a double.
-     Vectors of parallactic angle are returned.
+     a = pa( ha, dec, phi )
+
+     where ha, dec, and a are all numpy arrays
+
+     @palPa@
+
+     Raises
+     ------
+     ValueError if input arrays are not of the same length
      """
      cdef int length = len(ha)
+
+     if len(dec)!=length:
+         raise ValueError("You did not pass as many Decs as " \
+                          + "Hour Angles to paVector")
+
      cdef np.ndarray paOut = np.zeros(length, dtype=np.float64)
      cdef int i
      for i in range(length):
