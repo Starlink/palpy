@@ -806,13 +806,27 @@ def de2h( double ha, double dec, double phi ):
      cpal.palDe2h( ha, dec, phi, &az, &el )
      return (az, el)
 
-def de2hVector( np.ndarray ha, np.ndarray dec, double phi ):
+def de2hVector( np.ndarray[double, ndim=1] ha not None,
+                np.ndarray[double, ndim=1] dec not None,
+                double phi ):
      """
-     This isjust de2h, except that it accepts a vector of inputs
-     and returns a vector of outputs
+     (az, el) = de2h( ha, dec, phi )
+
+     where ha, dec, az, and el are numpy arrays
+
+     @palDe2h@
+
+     Raises
+     ------
+     ValueError if input arrays are not of the same length
      """
      cdef int i
      cdef int length=len(ha)
+
+     if len(dec)!=length:
+         raise ValueError("You did not pass the same number of " \
+                          + "Decs as Hour Angles to de2hVector")
+
      cdef np.ndarray azout = np.zeros(length,dtype=np.float64)
      cdef np.ndarray elout = np.zeros(length,dtype=np.float64)
      cdef double az

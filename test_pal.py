@@ -1009,6 +1009,14 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(a1,a2,12)
             self.assertAlmostEqual(e1,e2,12)
 
+        # test that an exception is raised if inputs are not
+        # of the same length
+        with self.assertRaises(ValueError) as context:
+            results = pal.de2hVector(haIn[:10], decIn, phi)
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of " \
+                         + "Decs as Hour Angles to de2hVector")
+
 
     def test_dh2eVector(self):
         """
