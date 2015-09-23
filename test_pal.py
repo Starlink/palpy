@@ -236,6 +236,13 @@ class TestPAL(unittest.TestCase) :
             self.assertAlmostEqual(d1,d2,12)
             self.assertAlmostEqual(r1,r2,12)
 
+        with self.assertRaises(ValueError) as context:
+            results = pal.aopqkVector(raIn[:6], decIn, obsrms)
+        self.assertEqual(context.exception.message,
+                         "You did not pass the same number of Decs as RAs " \
+                         + "to aopqkVector")
+
+
     def test_aop(self):
         dap = -0.1234
         date = 51000.1

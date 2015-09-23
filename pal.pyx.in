@@ -298,13 +298,27 @@ def aopqk(double rap, double dap, np.ndarray[double, ndim=1] aoprms not None):
 
     return (aob,zob,hob,dob,rob)
 
-def aopqkVector(np.ndarray rap, np.ndarray dap, np.ndarray[double, ndim=1] aoprms not None):
+def aopqkVector(np.ndarray[double, ndim=1] rap not None,
+                np.ndarray[double, ndim=1] dap not None,
+                np.ndarray[double, ndim=1] aoprms not None):
     """
-    This is just aopqk, except that it accepts a vector of inputs and
-    returns a vector of outputs.
+    (aob, zob, hob, dob, rob) = aopqk( rap, dap, aoprms )
+
+    where rap, dap and all outputs are numpy arrays
+
+    @palAopqk@
+
+    Raises
+    ------
+    ValueError if input arrays are not of the same length
     """
     cdef int i
     cdef int length=len(rap)
+
+    if len(dap)!=length:
+         raise ValueError("You did not pass the same number of Decs " \
+                          + "as RAs to aopqkVector")
+
     cdef np.ndarray aobout = np.zeros(length,dtype=np.float64)
     cdef np.ndarray zobout = np.zeros(length,dtype=np.float64)
     cdef np.ndarray hobout = np.zeros(length,dtype=np.float64)
