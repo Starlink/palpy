@@ -97,41 +97,49 @@ for cfile in pal_c:
 # And the version of the C PAL library
 (verstring, major, minor, patch) = palvers.read_pal_version()
 
-# Generate cpal.pxd
-paldoc_re = re.compile(r"@(pal.*)@")
-outfh = codecs.open("pal.pyx", "w", "utf8")
-with codecs.open('pal.pyx.in', 'r', 'utf8') as file:
-    for line in file.readlines():
-        match_paldoc = paldoc_re.search(line)
-        if match_paldoc is not None:
-            lines = []
-            funcname = match_paldoc.group(1)
-            palpyname = funcname[3:].lower()
-            if funcname in palprologs:
-                info = palprologs[funcname]
-                lines.append(info['purpose'])
-                lines += ("Arguments", "---------", info['arguments'])
-                if "returned value" in info:
-                    lines += ("", "Returned Value", "--------------",
-                              info['returned value'])
-                if "notes" in info:
-                    lines += ("", "Notes", "-----",
-                              info['notes'])
-                line = "\n".join(lines)
-            else:
-                continue
-        elif line.count("@"):
-            if line.count("@VERSTRING@"):
-                line = line.replace("@VERSTRING@", '"'+verstring+'"')
-            if line.count("@MAJOR_VERSION"):
-                line = line.replace("@MAJOR_VERSION@", str(major))
-            if line.count("@MINOR_VERSION@"):
-                line = line.replace("@MINOR_VERSION@", str(minor))
-            if line.count("@PATCH_VERSION@"):
-                line = line.replace("@PATCH_VERSION@", str(patch))
-        outfh.write(line)
+# Generate pal.pyx if required
+infile = "pal.pyx.in"
+outfile = "pal.pyx"
+create_outfile = True
+if os.path.exists(outfile) and \
+        os.path.getmtime(infile) < os.path.getmtime(outfile):
+    create_outfile = False
 
-outfh.close()
+if create_outfile:
+    paldoc_re = re.compile(r"@(pal.*)@")
+    outfh = codecs.open(outfile, "w", "utf8")
+    with codecs.open(infile, 'r', 'utf8') as file:
+        for line in file.readlines():
+            match_paldoc = paldoc_re.search(line)
+            if match_paldoc is not None:
+                lines = []
+                funcname = match_paldoc.group(1)
+                palpyname = funcname[3:].lower()
+                if funcname in palprologs:
+                    info = palprologs[funcname]
+                    lines.append(info['purpose'])
+                    lines += ("Arguments", "---------", info['arguments'])
+                    if "returned value" in info:
+                        lines += ("", "Returned Value", "--------------",
+                                  info['returned value'])
+                    if "notes" in info:
+                        lines += ("", "Notes", "-----",
+                                  info['notes'])
+                    line = "\n".join(lines)
+                else:
+                    continue
+            elif line.count("@"):
+                if line.count("@VERSTRING@"):
+                    line = line.replace("@VERSTRING@", '"'+verstring+'"')
+                if line.count("@MAJOR_VERSION"):
+                    line = line.replace("@MAJOR_VERSION@", str(major))
+                if line.count("@MINOR_VERSION@"):
+                    line = line.replace("@MINOR_VERSION@", str(minor))
+                if line.count("@PATCH_VERSION@"):
+                    line = line.replace("@PATCH_VERSION@", str(patch))
+            outfh.write(line)
+
+    outfh.close()
 
 # Description
 with open('README.rst') as file:
