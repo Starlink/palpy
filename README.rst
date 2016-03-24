@@ -4,6 +4,9 @@ PALpy - Python positional astronomy library
 .. image:: https://zenodo.org/badge/12517/Starlink/palpy.svg
    :target: https://zenodo.org/badge/latestdoi/12517/Starlink/palpy
 
+.. image:: https://travis-ci.org/Starlink/palpy.svg
+    :target: https://travis-ci.org/Starlink/palpy
+
 PALpy is a python interface to the PAL positional astronomy library
 (<https://github.com/Starlink/pal>). All source code is included with
 the distribution via git submodules.
