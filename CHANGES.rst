@@ -1,3 +1,9 @@
+1.8.0
+-----
+
+- Upgrade PAL to v0.9.4
+- Upgrade ERFA to v1.3.0
+
 1.7.0
 -----
 
