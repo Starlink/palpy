@@ -1622,6 +1622,46 @@ class TestPAL(unittest.TestCase):
         amprms = pal.mappa(2010.0, 55927)
         np.testing.assert_array_almost_equal(amprms, expected, decimal=12)
 
+    def test_mapqk(self):
+        """
+        Test mapqk by taking the geocentric apparent positions of Arcturus
+        as downloaded from aa.usno.mil/data/docs/geocentric.php and trying
+        to calculate it from Arcturus' mean position, proper motion, parallax,
+        and radial velocity.
+
+        ra_0 and dec_0 are the mean position; ra_app and dec_app are the
+        geocentric apparent position.
+
+        The data below represents the position of Arcturus on
+        JD (UT) 2457000.375 as reported by
+        http://aa.usno.navy.mil/data/docs/geocentric.php
+        """
+
+        ra_0, i = pal.dafin("14 15 39.67207 ", 1)
+        ra_0 *= 15.0
+        dec_0, i = pal.dafin("19 10 56.673", 1)
+
+        pm_ra = -1.0939*pal.DAS2R
+        pm_ra /= np.cos(dec_0)
+        pm_dec = -2.00006*pal.DAS2R
+        v_rad = -5.19
+        px = 0.08883*pal.DAS2R
+
+        # time is the TDB MJD calculated from a JD of 2457000.375 with astropy.time
+        amprms = pal.mappa(2000.0, 56999.87537249177)
+
+        ra_test, dec_test = pal.mapqk(ra_0, dec_0, pm_ra, pm_dec, px, v_rad, amprms)
+
+        ra_app, i = pal.dafin("14 16 19.59", 1)
+        ra_app *= 15.0
+        dec_app, i = pal.dafin("19 6 19.56", 1)
+
+        # find the angular distance from the known mean position
+        # to the calculated mean postion
+        dd = pal.dsep(ra_test, dec_test, ra_app, dec_app)
+        dd *= pal.DR2AS
+        self.assertAlmostEqual(dd, 0.0, 0)
+
     def test_mapqkz(self):
         """
         Run inputs through mapqk with zero proper motion, parallax
