@@ -1623,14 +1623,17 @@ class TestPAL(unittest.TestCase):
         np.testing.assert_array_almost_equal(amprms, expected, decimal=12)
 
     def test_mapqkz(self):
+        """
+        Run inputs through mapqk with zero proper motion, parallax
+        and radial velocity.  Then run the same inputs through mapqkz.
+        Verify that the results are the same.
+        """
         amprms = pal.mappa(2010, 55927)
+        (ra_c, da_c) = pal.mapqk(1.234, -0.567, 0.0, 0.0, 0.0, 0.0, amprms)
         (ra, da) = pal.mapqkz(1.234, -0.567, amprms)
-        self.assertAlmostEqual(ra, 1.2344879748414849807, 12)
-        self.assertAlmostEqual(da, -0.56697099554368701746, 12)
 
-        (ra, da) = pal.mapqk(1.234, -0.567, 0., 0., 0., 0., amprms)
-        self.assertAlmostEqual(ra, 1.2344879748414849807, 7)
-        self.assertAlmostEqual(da, -0.56697099554368701746, 7)
+        self.assertAlmostEqual(ra, ra_c, 12)
+        self.assertAlmostEqual(da, da_c, 12)
 
     def test_mapqkzVector(self):
         amprms = pal.mappa(2010, 55927)
