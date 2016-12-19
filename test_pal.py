@@ -140,14 +140,14 @@ class TestPAL(unittest.TestCase):
         self.assertAlmostEqual(rm, 2.344472180027961, 6)
         self.assertAlmostEqual(dm, -1.233573099847705, 7)
         (rm, dm) = pal.amp(1.234, -0.567, 55927., 2010.)
-        self.assertAlmostEqual(rm, 1.2335120411026936349, 12)
-        self.assertAlmostEqual(dm, -0.56702908706930343907, 12)
+        self.assertAlmostEqual(rm, 1.233512033578303857, 12)
+        self.assertAlmostEqual(dm, -0.56702909748530827549, 12)
 
     def test_ampqk(self):
         amprms = pal.mappa(2010.0, 55927.0)
         (rm, dm) = pal.ampqk(1.234, -0.567, amprms)
-        self.assertAlmostEqual(rm, 1.2335120411026936349, 11)
-        self.assertAlmostEqual(dm, -0.56702908706930343907, 11)
+        self.assertAlmostEqual(rm, 1.233512033578303857, 11)
+        self.assertAlmostEqual(dm, -0.56702909748530827549, 11)
 
     def test_ampqkVector(self):
         """
