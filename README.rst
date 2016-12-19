@@ -76,7 +76,7 @@ as need arises.
 Author
 ------
 
-Copyright (C) 2012, 2014, 2015
+Copyright (C) 2012, 2014-2016
 Tim Jenness (tim.jenness@gmail.com).
 All Rights Reserved.
 
