@@ -160,11 +160,11 @@ setup(
         sources=sources,
         include_dirs=['cextern/erfa/src', 'cextern/pal', numpy.get_include()],
         language="c"
-        )],
+    )],
     requires=[
         'numpy',
         'Cython'
-        ],
+    ],
     classifiers=[
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
@@ -175,5 +175,5 @@ setup(
         'Programming Language :: C',
         'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: Scientific/Engineering :: Astronomy'
-        ]
+    ]
 )
