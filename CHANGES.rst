@@ -1,3 +1,10 @@
+1.8.0
+-----
+
+- Upgrade PAL to v0.9.4
+- Upgrade ERFA to v1.3.0
+- Update cython code with single character sign returned values.
+
 1.7.0
 -----
 
