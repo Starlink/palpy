@@ -503,9 +503,9 @@ class TestPAL(unittest.TestCase):
         """
         np.random.seed(143)
         nSamples = 200
-        iy = np.random.random_integers(1000, 10000, nSamples)
-        im = np.random.random_integers(1, 11, nSamples)
-        iday = np.random.random_integers(1, 20, nSamples)
+        iy = np.random.randint(1000, 10001, nSamples)
+        im = np.random.randint(1, 12, nSamples)
+        iday = np.random.randint(1, 21, nSamples)
 
         testMjd = pal.caldjVector(iy, im, iday)
 
@@ -551,8 +551,8 @@ class TestPAL(unittest.TestCase):
         """
         np.random.seed(123)
         nSamples = 100
-        deg = np.random.random_integers(0, 359, nSamples)
-        imin = np.random.random_integers(0, 59, nSamples)
+        deg = np.random.randint(0, 360, nSamples)
+        imin = np.random.randint(0, 60, nSamples)
         asec = np.random.random_sample(nSamples)*60.0
 
         radianTest = pal.daf2rVector(deg, imin, asec)
@@ -726,8 +726,8 @@ class TestPAL(unittest.TestCase):
         """
         np.random.seed(131)
         nSamples = 100
-        iHour = np.random.random_integers(0, 23, nSamples)
-        iMin = np.random.random_integers(0, 59, nSamples)
+        iHour = np.random.randint(0, 24, nSamples)
+        iMin = np.random.randint(0, 60, nSamples)
         sec = np.random.random_sample(nSamples)*60.0
 
         testDays = pal.dtf2dVector(iHour, iMin, sec)
@@ -769,8 +769,8 @@ class TestPAL(unittest.TestCase):
         """
         np.random.seed(131)
         nSamples = 100
-        iHour = np.random.random_integers(0, 23, nSamples)
-        iMin = np.random.random_integers(0, 59, nSamples)
+        iHour = np.random.randint(0, 24, nSamples)
+        iMin = np.random.randint(0, 60, nSamples)
         sec = np.random.random_sample(nSamples)*60.0
 
         testRad = pal.dtf2rVector(iHour, iMin, sec)
@@ -1550,7 +1550,7 @@ class TestPAL(unittest.TestCase):
 
     def test_gmstaVector(self):
         np.random.seed(32)
-        dateIn = 53000 + np.random.random_integers(0, 1000, 20)
+        dateIn = 53000 + np.random.randint(0, 1001, 20)
         utIn = np.random.sample(20)
         gmControl = np.zeros(20, dtype=np.float64)
         for i, d in enumerate(zip(dateIn, utIn)):
