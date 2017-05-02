@@ -35,6 +35,8 @@ DR2H = cpal.PAL__DR2H
 DR2S = cpal.PAL__DR2S
 DS2R = cpal.PAL__DS2R
 
+__version__ = @PALPY_VERSION@
+
 def palvers():
     """
     versiondict = palvers()
