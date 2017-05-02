@@ -1,3 +1,10 @@
+1.8.1
+-----
+
+- Add palpy version to imported code (as __version__).
+- Note that the 1.8.0 release was shipped to PyPI with
+  v0.9.3 of PAL. This release does include v0.9.7.
+
 1.8.0
 -----
 

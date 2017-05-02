@@ -11,6 +11,8 @@ from Cython.Distutils import build_ext
 from support import sst2pydoc as sst
 from support import palvers
 
+palpy_version = "1.8.1"
+
 erfa_c = (
     "a2af.c", "a2tf.c", "ab.c", "af2a.c", "anp.c", "anpm.c",
     "apcg.c", "apcg13.c", "apci.c", "apci13.c", "apco.c",
@@ -137,6 +139,8 @@ if create_outfile:
                     line = line.replace("@MINOR_VERSION@", str(minor))
                 if line.count("@PATCH_VERSION@"):
                     line = line.replace("@PATCH_VERSION@", str(patch))
+                if line.count("@PALPY_VERSION@"):
+                    line = line.replace("@PALPY_VERSION@", '"'+palpy_version+'"')
             outfh.write(line)
 
     outfh.close()
@@ -147,7 +151,7 @@ with open('README.rst') as file:
 
 setup(
     name="palpy",
-    version="1.8.0",
+    version=palpy_version,
     author="Tim Jenness",
     author_email="tim.jenness@gmail.com",
     license="GPL",
