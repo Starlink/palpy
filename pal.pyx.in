@@ -780,10 +780,10 @@ def dd2tfVector( int ndp, np.ndarray[double, ndim=1] days not None):
     cdef int length = len(days)
 
     cdef np.ndarray sign_out = np.empty(length, dtype = (unicode, 1))
-    cdef np.ndarray ih_out = np.empty(length, dtype = np.int)
-    cdef np.ndarray im_out = np.empty(length, dtype = np.int)
-    cdef np.ndarray is_out = np.empty(length, dtype = np.int)
-    cdef np.ndarray frac_out = np.empty(length, dtype = np.int)
+    cdef np.ndarray ih_out = np.empty(length, dtype = np.int64)
+    cdef np.ndarray im_out = np.empty(length, dtype = np.int64)
+    cdef np.ndarray is_out = np.empty(length, dtype = np.int64)
+    cdef np.ndarray frac_out = np.empty(length, dtype = np.int64)
 
     cdef char csign = ' '
     cdef int ihmsf[4]
@@ -962,10 +962,10 @@ def djcalVector(int ndp, np.ndarray[double, ndim=1] djm not None):
      """
 
      cdef int length = len(djm)
-     cdef np.ndarray iy_out = np.empty(length, dtype=np.int)
-     cdef np.ndarray im_out = np.empty(length, dtype=np.int)
-     cdef np.ndarray id_out = np.empty(length, dtype=np.int)
-     cdef np.ndarray frac_out = np.empty(length, dtype=np.int)
+     cdef np.ndarray iy_out = np.empty(length, dtype=np.int64)
+     cdef np.ndarray im_out = np.empty(length, dtype=np.int64)
+     cdef np.ndarray id_out = np.empty(length, dtype=np.int64)
+     cdef np.ndarray frac_out = np.empty(length, dtype=np.int64)
      cdef int output[4]
      cdef int flag
 
@@ -1240,7 +1240,7 @@ def dpavVector( np.ndarray[double, ndim=2] v1_in not None,
 
     cdef double cv1[3]
     cdef double cv2[3]
-    cdef np.ndarray pa_out = np.ndarray(nPts, dtype=np.float)
+    cdef np.ndarray pa_out = np.ndarray(nPts, dtype=np.float64)
 
     if nDim2 == 1:
         for j in range(3):
@@ -1377,7 +1377,7 @@ def dranrmVector(np.ndarray[double, ndim=1] angle not None):
     @palDranrm@
     """
     cdef int length=len(angle)
-    cdef np.ndarray angle_out = np.empty(length, dtype=np.float)
+    cdef np.ndarray angle_out = np.empty(length, dtype=np.float64)
     for ii in range(length):
         angle_out[ii] = cpal.palDranrm(angle[ii])
     return angle_out
@@ -2463,8 +2463,8 @@ def galsupVector(np.ndarray[double, ndim=1] dl not None,
                          + "Galactic longitudes as Galactic latitudes " \
                          + "into galsupVector")
 
-    cdef np.ndarray dsl_out = np.empty(length, dtype=np.float)
-    cdef np.ndarray dsb_out = np.empty(length, dtype=np.float)
+    cdef np.ndarray dsl_out = np.empty(length, dtype=np.float64)
+    cdef np.ndarray dsb_out = np.empty(length, dtype=np.float64)
     cdef double dsl
     cdef double dsb
 
@@ -2581,7 +2581,7 @@ def gmstaVector(np.ndarray date, np.ndarray ut1):
          raise ValueError("The arrays you passed into gmstaVector " \
                           + "are of different lengths")
 
-     cdef np.ndarray gmout = np.zeros(length, dtype=np.float)
+     cdef np.ndarray gmout = np.zeros(length, dtype=np.float64)
      cdef int i
      for i in range(length):
           gmout[i] = cpal.palGmsta(date[i], ut1[i])
@@ -3466,7 +3466,7 @@ def refroVector( np.ndarray[ double, ndim=1] zobs not None, double hm, double td
     """
     cdef int length = len(zobs)
     cdef double ref
-    cdef np.ndarray refVector = np.zeros([length], dtype=np.float64)
+    cdef np.ndarray refVector = np.zeros([length], dtype=np.float64 )
     for i in range(length):
         cpal.palRefro(zobs[i], hm, tdk, pmb, rh, wl, phi, tlr, eps, &ref)
         refVector[i] = ref
@@ -3480,7 +3480,7 @@ def refv( np.ndarray[ double, ndim=1] vu not None, double refa, double refb):
     """
     cdef double cvr[3]
     cdef double cvu[3]
-    cdef np.ndarray vr = np.zeros( [3], dtype=np.float64)
+    cdef np.ndarray vr = np.zeros( [3], dtype=np.float64 )
     for i in range(3):
         cvu[i] = vu[i]
     cpal.palRefv( cvu, refa, refb, cvr )
@@ -3500,7 +3500,7 @@ def refvVector(np.ndarray[double, ndim=2] vu not None, double refa, double refb)
     """
     cdef double cvr[3]
     cdef double cvu[3]
-    cdef np.ndarray vr = np.zeros( [vu.shape[0], vu.shape[1]], dtype=np.float64)
+    cdef np.ndarray vr = np.zeros( [vu.shape[0], vu.shape[1]], dtype=np.float64 )
 
     for row in range(vu.shape[0]):
         for i in range(3):

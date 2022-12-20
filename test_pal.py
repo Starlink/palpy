@@ -1178,8 +1178,8 @@ class TestPal(unittest.TestCase):
 
         # fk4 mura
         sgn = np.array([1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
-        hr_in = np.zeros(9, dtype=np.int)
-        min_in = np.zeros(9, dtype=np.int)
+        hr_in = np.zeros(9, dtype=np.int64)
+        min_in = np.zeros(9, dtype=np.int64)
         sec_in = np.array([27.141, 27.827, 3.105, 49.042,
                            35.227, 18.107, 11.702, 33.873, 0.411])
 
@@ -1216,8 +1216,8 @@ class TestPal(unittest.TestCase):
 
         # fk5 mura
         sgn = np.array([1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
-        hr_in = np.zeros(9, dtype=np.int)
-        min_in = np.zeros(9, dtype=np.int)
+        hr_in = np.zeros(9, dtype=np.int64)
+        min_in = np.zeros(9, dtype=np.int64)
         sec_in = np.array([26.8649, 27.7694, 3.1310, 49.5060,
                            35.3528, 21.7272, 8.4469, 33.7156,
                            0.4273])
