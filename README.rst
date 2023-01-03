@@ -68,7 +68,7 @@ Please consider citing this if you use PAL or palpy in your
 research.
 
 Further Work
-----------
+------------
 
 Not all the SLALIB routines are available from PAL. More can be added
 as need arises.
