@@ -1795,12 +1795,14 @@ class TestPal(unittest.TestCase):
         self.assertAlmostEqual(mmt["lat"], 0.5530735081550342238, 10)
         self.assertAlmostEqual(mmt["height"], 2608, 10)
 
-        self.assertEqual(len(obsdata), 85)
+        self.assertEqual(len(obsdata), 87)
 
     def test_pa(self):
         self.assertAlmostEqual(pal.pa(-1.567, 1.5123, 0.987),
                                -1.486288540423851, 12)
-        self.assertAlmostEqual(pal.pa(0, 0.789, 0.789), 0, 12)
+        # On some platforms this can return PI rather than 0.0
+        # because of numerical errors in a subtraction.
+        self.assertAlmostEqual(pal.dranrm(pal.pa(0, 0.789, 0.789)), 0, 12)
 
     def test_pa_vector(self):
         np.random.seed(32)
