@@ -11,7 +11,7 @@ from Cython.Distutils import build_ext
 from support import sst2pydoc as sst
 from support import palvers
 
-palpy_version = "1.8.1"
+palpy_version = "1.8.2"
 
 erfa_c = (
     "a2af.c", "a2tf.c", "ab.c", "af2a.c", "anp.c", "anpm.c",
