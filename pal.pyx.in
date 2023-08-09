@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#cython: language_level=3
+
 cimport cpal
 
 from libc.stdlib cimport malloc, free
@@ -758,7 +760,7 @@ def dd2tf( int ndp, double days ):
 
      @palDd2tf@
      """
-     cdef char csign = ' '
+     cdef char csign = b' '
      cdef int ihmsf[4]
      cpal.palDd2tf( ndp, days, &csign, ihmsf )
      sign = chr(csign)
@@ -785,7 +787,7 @@ def dd2tfVector( int ndp, np.ndarray[double, ndim=1] days not None):
     cdef np.ndarray is_out = np.empty(length, dtype = np.int64)
     cdef np.ndarray frac_out = np.empty(length, dtype = np.int64)
 
-    cdef char csign = ' '
+    cdef char csign = b' '
     cdef int ihmsf[4]
     for row in range(length):
         cpal.palDd2tf( ndp, days[row], &csign, ihmsf)
@@ -1265,7 +1267,7 @@ def dr2af( int ndp, double angle ):
      (sign, id, im, is, frac) = dr2af( ndp, angle )
      @palDr2af@
      """
-     cdef char csign = ' '
+     cdef char csign = b' '
      cdef int idmsf[4]
      cpal.palDr2af( ndp, angle, &csign, idmsf )
      sign = chr(csign)
@@ -1286,7 +1288,7 @@ def dr2afVector( int ndp, np.ndarray[double, ndim=1] angle not None):
     cdef np.ndarray im_out = np.ndarray(length, dtype=int)
     cdef np.ndarray isec_out = np.ndarray(length, dtype=int)
     cdef np.ndarray frac_out = np.ndarray(length, dtype=int)
-    cdef char csign = ' '
+    cdef char csign = b' '
     cdef int idmsf[4]
 
     for ii in range(length):
@@ -1304,7 +1306,7 @@ def dr2tf( int ndp, double angle ):
      (sign, ih, im, is, frac) = dr2tf( ndp, angle )
      @palDr2tf@
      """
-     cdef char csign = ' '
+     cdef char csign = b' '
      cdef int ihmsf[4]
      cpal.palDr2tf( ndp, angle, &csign, ihmsf )
      sign = chr(csign)
@@ -1325,7 +1327,7 @@ def dr2tfVector( int ndp, np.ndarray[double, ndim=1] angle not None):
     cdef np.ndarray im_out = np.ndarray(length, dtype=int)
     cdef np.ndarray isec_out = np.ndarray(length, dtype=int)
     cdef np.ndarray frac_out = np.ndarray(length, dtype=int)
-    cdef char csign = ' '
+    cdef char csign = b' '
     cdef int idmsf[4]
 
     for ii in range(length):
