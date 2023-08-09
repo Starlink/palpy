@@ -3,9 +3,8 @@ import os
 import numpy
 import re
 import codecs
-from distutils.core import setup
-from distutils.extension import Extension
-from Cython.Distutils import build_ext
+from setuptools import Extension, setup
+from Cython.Build import cythonize
 
 # Local code
 from support import sst2pydoc as sst
@@ -90,7 +89,7 @@ pal_c = (
 )
 
 # Build up source file list
-sources = ["cpal.pxd", "pal.pyx"]
+sources = ["pal.pyx"]
 
 # Sort out path to the C files
 for cfile in erfa_c:
@@ -157,6 +156,11 @@ if create_outfile:
 with open('README.rst') as file:
     long_description = file.read()
 
+extensions = [Extension("palpy", sources,
+                        include_dirs=['cextern/erfa/src',
+                                      'cextern/pal',
+                                      numpy.get_include()])]
+
 setup(
     name="palpy",
     version=palpy_version,
@@ -166,13 +170,7 @@ setup(
     url='https://github.com/Starlink/palpy',
     description="PAL -- A Positional Astronomy Library",
     long_description=long_description,
-    cmdclass={'build_ext': build_ext},
-    ext_modules=[Extension(
-        name="palpy",
-        sources=sources,
-        include_dirs=['cextern/erfa/src', 'cextern/pal', numpy.get_include()],
-        language="c"
-    )],
+    ext_modules=cythonize(extensions),
     requires=[
         'numpy',
         'Cython'
