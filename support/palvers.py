@@ -55,6 +55,7 @@ def read_pal_version():
     (major, minor, patch) = verstring.split(".")
     return (verstring, major, minor, patch)
 
+
 if __name__ == "__main__":
     v, maj, min, p = read_pal_version()
     print(v, maj, min, p)

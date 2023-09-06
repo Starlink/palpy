@@ -71,7 +71,7 @@ def read_prologs(filename):
                     # Flush current heading
                     prolog[heading] = content
                     content = ""
-                name = prolog['name'].strip()
+                name = prolog["name"].strip()
                 results[name] = prolog
                 prolog = None
                 continue
@@ -104,8 +104,9 @@ def read_prologs(filename):
                 continue
 
             if counter:
-                raise ValueError("Error parsing SST prologue line "+str(counter)+":'" + line + "'")
+                raise ValueError("Error parsing SST prologue line " + str(counter) + ":'" + line + "'")
     return results
+
 
 if __name__ == "__main__":
     results = read_prologs("cextern/pal/palAddet.c")

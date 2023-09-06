@@ -1,2 +1,10 @@
 [build-system]
 requires = ["oldest-supported-numpy", "cython", "setuptools"]
+
+[tool.black]
+line-length = 110
+target-version = ["py37"]
+
+[tool.isort]
+profile = "black"
+line_length = 110
