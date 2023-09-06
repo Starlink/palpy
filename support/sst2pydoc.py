@@ -50,60 +50,61 @@ def read_prologs(filename):
     content = ""
     counter = 0
 
-    for line in open(filename):
-        line = line.strip()
+    with open(filename) as fh:
+        for line in fh:
+            line = line.strip()
 
-        # Start of a completely new prolog so reset everything
-        if line.startswith("*+"):
-            if counter != 0:
-                raise ValueError("Started prologue without closing previous prologue")
-            prolog = {}
-            heading = ""
-            content = ""
-            counter = counter + 1
-            continue
-
-        # End of a prolog. Must store the current dict
-        if line.startswith("*-"):
-            counter = 0
-            if len(heading):
-                # Flush current heading
-                prolog[heading] = content
+            # Start of a completely new prolog so reset everything
+            if line.startswith("*+"):
+                if counter != 0:
+                    raise ValueError("Started prologue without closing previous prologue")
+                prolog = {}
+                heading = ""
                 content = ""
-            name = prolog['name'].strip()
-            results[name] = prolog
-            prolog = None
-            continue
+                counter = counter + 1
+                continue
 
-        # If we are not in a prologue then nothing further is needed
-        if counter == 0:
-            continue
+            # End of a prolog. Must store the current dict
+            if line.startswith("*-"):
+                counter = 0
+                if len(heading):
+                    # Flush current heading
+                    prolog[heading] = content
+                    content = ""
+                name = prolog['name'].strip()
+                results[name] = prolog
+                prolog = None
+                continue
 
-        counter = counter + 1
+            # If we are not in a prologue then nothing further is needed
+            if counter == 0:
+                continue
 
-        # Completely blank lines are ignored
-        if len(line) == 0:
-            continue
+            counter = counter + 1
 
-        # Look for a new section heading
-        match_head = heading_re.search(line)
-        if match_head is not None:
-            if len(heading):
-                # Flush previous heading
-                prolog[heading] = content
-            heading = match_head.group(1).lower()
-            content = ""
-            continue
+            # Completely blank lines are ignored
+            if len(line) == 0:
+                continue
 
-        if line.startswith("*     "):
-            content = content + line[6:] + "\n"
-            continue
-        elif line == "*":
-            content = content + "\n"
-            continue
+            # Look for a new section heading
+            match_head = heading_re.search(line)
+            if match_head is not None:
+                if len(heading):
+                    # Flush previous heading
+                    prolog[heading] = content
+                heading = match_head.group(1).lower()
+                content = ""
+                continue
 
-        if counter:
-            raise ValueError("Error parsing SST prologue line "+str(counter)+":'" + line + "'")
+            if line.startswith("*     "):
+                content = content + line[6:] + "\n"
+                continue
+            elif line == "*":
+                content = content + "\n"
+                continue
+
+            if counter:
+                raise ValueError("Error parsing SST prologue line "+str(counter)+":'" + line + "'")
     return results
 
 if __name__ == "__main__":

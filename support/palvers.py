@@ -44,13 +44,14 @@ def read_pal_version():
     """
     verfile = os.path.join("cextern", "pal", "configure.ac")
     verstring = "-1.-1.-1"
-    for line in open(verfile):
-        if line.startswith("AC_INIT"):
-            # Version will be in string [nn.mm.pp]
-            match = re.search(r"\[(\d+\.\d+\.\d+)\]", line)
-            if match:
-                verstring = match.group(1)
-            break
+    with open(verfile) as fh:
+        for line in fh:
+            if line.startswith("AC_INIT"):
+                # Version will be in string [nn.mm.pp]
+                match = re.search(r"\[(\d+\.\d+\.\d+)\]", line)
+                if match:
+                    verstring = match.group(1)
+                break
     (major, minor, patch) = verstring.split(".")
     return (verstring, major, minor, patch)
 
