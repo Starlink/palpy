@@ -1,2 +1,2 @@
 [build-system]
-requires = ["numpy", "cython", "setuptools"]
+requires = ["oldest-supported-numpy", "cython", "setuptools"]
