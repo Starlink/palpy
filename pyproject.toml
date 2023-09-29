@@ -22,7 +22,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: C",
     "Programming Language :: Python :: Implementation :: CPython",
-    "Topic :: Scientific/Engineering :: Astronom",
+    "Topic :: Scientific/Engineering :: Astronomy",
 ]
 keywords = [
     "Starlink",
