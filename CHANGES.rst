@@ -2,6 +2,7 @@
 -----
 
 - Fix build problem with cython 3.
+- No longer validate with Python 3.7.
 
 1.8.2
 -----
