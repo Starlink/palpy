@@ -5,12 +5,18 @@ import re
 import codecs
 from setuptools import Extension, setup
 from Cython.Build import cythonize
+from setuptools_scm import get_version
 
 # Local code
 from support import sst2pydoc as sst
 from support import palvers
 
-palpy_version = "1.8.3"
+# The version is needed so we can copy the version into the
+# palpy binary (there are no python support packages with __init__.py).
+# If this is part of a source distribution setuptools_scm will fallback
+# to using PKG-INFO.
+palpy_version = get_version(".")
+
 
 erfa_c = (
     "a2af.c", "a2tf.c", "ab.c", "ae2hd.c", "af2a.c", "anp.c",
@@ -162,27 +168,5 @@ extensions = [Extension("palpy", sources,
                                       numpy.get_include()])]
 
 setup(
-    name="palpy",
-    version=palpy_version,
-    author="Tim Jenness",
-    author_email="tim.jenness@gmail.com",
-    license="GPL",
-    url='https://github.com/Starlink/palpy',
-    description="PAL -- A Positional Astronomy Library",
-    long_description=long_description,
     ext_modules=cythonize(extensions),
-    requires=[
-        'numpy',
-        'Cython'
-    ],
-    classifiers=[
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
-        'Programming Language :: Cython',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: C',
-        'Programming Language :: Python :: Implementation :: CPython',
-        'Topic :: Scientific/Engineering :: Astronomy'
-    ]
 )
