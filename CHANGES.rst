@@ -1,3 +1,8 @@
+1.8.3
+-----
+
+- Fix build problem with cython 3.
+
 1.8.2
 -----
 - Replace np.float with np.float64 in remaining places, and np.int with np.int64. This allows compatibility with numpy versions >=1.24.0.

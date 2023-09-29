@@ -10,7 +10,7 @@ from Cython.Build import cythonize
 from support import sst2pydoc as sst
 from support import palvers
 
-palpy_version = "1.8.2"
+palpy_version = "1.8.3"
 
 erfa_c = (
     "a2af.c", "a2tf.c", "ab.c", "ae2hd.c", "af2a.c", "anp.c",
