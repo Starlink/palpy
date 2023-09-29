@@ -20,6 +20,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -52,6 +53,10 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          # Full git history.
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -94,6 +99,9 @@ jobs:
       #     platforms: arm64
 
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
