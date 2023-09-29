@@ -33,10 +33,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install wheel
 
-      - name: Install required packages
-        run: |
-          pip install cython numpy
-
       - name: Install pytest packages
         run: pip install pytest
 
