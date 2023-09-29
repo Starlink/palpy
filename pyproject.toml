@@ -1,10 +1,50 @@
 [build-system]
-requires = ["oldest-supported-numpy", "cython", "setuptools"]
+requires = [
+    "oldest-supported-numpy",
+    "cython",
+    "setuptools",
+    "setuptools-scm>=8.0"
+]
+
+[project]
+name = "palpy"
+description = "PAL -- A Positional Astronomy Library"
+license = {text = "GPLv2 License"}
+readme = "README.rst"
+authors = [
+    {name="Tim Jenness", email="tim.jenness@gmail.com"},
+]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Programming Language :: Cython",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Scientific/Engineering :: Astronom",
+]
+keywords = [
+    "Starlink",
+]
+dependencies = [
+    "numpy",
+]
+dynamic = ["version"]
+
+[project.urls]
+"Homepage" = "https://github.com/Starlink/palpy"
 
 [tool.black]
 line-length = 110
-target-version = ["py37"]
+target-version = ["py38"]
 
 [tool.isort]
 profile = "black"
 line_length = 110
+
+[tool.setuptools_scm]
+
+[tool.setuptools]
+# Stop setuptools complaining about the cextern directory.
+py-modules = ["palpy"]

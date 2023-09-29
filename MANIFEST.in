@@ -1,3 +1,5 @@
 include README.rst CHANGES.rst COPYING test_*.py pal.pyx.in
 recursive-include cextern *.c *.h *.ac
 recursive-include support *.py
+prune .github
+exclude .git* pal.c pal.pyx
