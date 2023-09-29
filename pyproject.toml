@@ -37,7 +37,7 @@ dynamic = ["version"]
 
 [tool.black]
 line-length = 110
-target-version = ["py37"]
+target-version = ["py38"]
 
 [tool.isort]
 profile = "black"
