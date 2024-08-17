@@ -46,7 +46,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest test_pal.py
+          pytest -Wd test_pal.py
 
   pypi_sdist_build:
     runs-on: ubuntu-latest
