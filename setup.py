@@ -1,14 +1,14 @@
-import os
-import numpy
-import re
 import codecs
-from setuptools import Extension, setup
+import os
+import re
+
+import numpy
 from Cython.Build import cythonize
+from setuptools import Extension, setup
 from setuptools_scm import get_version
 
-# Local code
-from support import sst2pydoc as sst
 from support import palvers
+from support import sst2pydoc as sst
 
 # The version is needed so we can copy the version into the
 # palpy binary (there are no python support packages with __init__.py).
@@ -424,7 +424,7 @@ with open("README.rst") as file:
     long_description = file.read()
 
 extensions = [
-    Extension("palpy", sources, include_dirs=["cextern/erfa/src", "cextern/pal", numpy.get_include()])
+    Extension("palpy", sources, include_dirs=["cextern/erfa/src", "cextern/pal", numpy.get_include()]),
 ]
 
 setup(
