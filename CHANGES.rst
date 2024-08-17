@@ -1,3 +1,9 @@
+1.8.4
+-----
+
+- Fix build problems with numpy 2.
+- Test with python 3.12 and 3.13.
+
 1.8.3
 -----
 
