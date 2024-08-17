@@ -28,6 +28,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
           cache-dependency-path: "setup.cfg"
+          allow-prereleases: true
 
       - name: Update pip/wheel infrastructure
         run: |
