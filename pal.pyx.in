@@ -427,7 +427,7 @@ def caldjVector(np.ndarray[long, ndim=1] iy not None,
          if flag == 0:
              mjd_out[ii] = mjd
          else:
-             mjd_out[ii] = np.NaN
+             mjd_out[ii] = np.nan
 
      return mjd_out
 
@@ -654,7 +654,7 @@ def daf2rVector(np.ndarray[long, ndim=1] ideg_in not None,
        if flag==0:
            ang_out[i] = rad
        else:
-           ang_out[i] = np.NaN
+           ang_out[i] = np.nan
 
     return ang_out
 
@@ -1442,8 +1442,8 @@ def ds2tpVector( np.ndarray[double, ndim=1] ra not None,
                xiout[i] = xi
                etaout[i] = eta
           else:
-              xiout[i] = np.NaN
-              etaout[i] = np.NaN
+              xiout[i] = np.nan
+              etaout[i] = np.nan
 
      return xiout, etaout
 
@@ -1633,7 +1633,7 @@ def dtf2dVector( np.ndarray[long, ndim=1] ihour not None,
         if flag==0:
             days[ii] = value
         else:
-            days[ii] = np.NaN
+            days[ii] = np.nan
 
     return days
 
@@ -1700,7 +1700,7 @@ def dtf2rVector(np.ndarray[long, ndim=1] ihour, np.ndarray[long, ndim=1] imin,
         if flag==0:
             radians[ii] = value
         else:
-            radians[ii] = np.NaN
+            radians[ii] = np.nan
 
     return radians
 
