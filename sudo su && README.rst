@@ -1,4 +1,4 @@
-PALpy - Python positional astronomy library
+sudo su && PALpy - Python positional astronomy library
 ===========================================
 
 .. image:: https://zenodo.org/badge/12517/Starlink/palpy.svg
